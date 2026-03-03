@@ -1,0 +1,191 @@
+@import "tailwindcss";
+
+/* Theme xanh nõn chuối vui tươi cute */
+:root {
+  /* Màu xanh nõn chuối chính */
+  --banana-green-50: #f0fdf4;
+  --banana-green-100: #dcfce7;
+  --banana-green-200: #bbf7d0;
+  --banana-green-300: #86efac;
+  --banana-green-400: #4ade80;
+  --banana-green-500: #22c55e;
+  --banana-green-600: #16a34a;
+  --banana-green-700: #15803d;
+  --banana-green-800: #166534;
+  --banana-green-900: #14532d;
+
+  /* Màu accent cute */
+  --cute-pink: #fce7f3;
+  --cute-pink-400: #f472b6;
+  --cute-yellow: #fef3c7;
+  --cute-yellow-400: #fbbf24;
+  --cute-purple: #f3e8ff;
+  --cute-purple-400: #a855f7;
+  --cute-orange: #fed7aa;
+  --cute-orange-400: #fb923c;
+
+  /* Gradient backgrounds */
+  --gradient-banana: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+  --gradient-cute: linear-gradient(135deg, #fce7f3 0%, #f3e8ff 50%, #dcfce7 100%);
+  --gradient-sunshine: linear-gradient(135deg, #fef3c7 0%, #dcfce7 100%);
+}
+
+/* Utility classes cho theme */
+.bg-banana-gradient {
+  background: var(--gradient-banana);
+}
+
+.bg-cute-gradient {
+  background: var(--gradient-cute);
+}
+
+.bg-sunshine-gradient {
+  background: var(--gradient-sunshine);
+}
+
+.text-banana-green {
+  color: var(--banana-green-600);
+}
+
+.text-banana-green-light {
+  color: var(--banana-green-400);
+}
+
+.text-banana-green-dark {
+  color: var(--banana-green-800);
+}
+
+.border-banana-green {
+  border-color: var(--banana-green-400);
+}
+
+.shadow-cute {
+  box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1), 0 2px 4px -1px rgba(34, 197, 94, 0.06);
+}
+
+.shadow-cute-lg {
+  box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.1), 0 4px 6px -2px rgba(34, 197, 94, 0.05);
+}
+
+/* Button styles cute */
+.btn-banana {
+  @apply px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105;
+  background: var(--gradient-banana);
+  color: var(--banana-green-800);
+  border: 2px solid var(--banana-green-300);
+}
+
+.btn-banana:hover {
+  background: var(--gradient-sunshine);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.25);
+}
+
+.btn-cute-pink {
+  @apply px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105;
+  background: var(--cute-pink);
+  color: var(--banana-green-700);
+  border: 2px solid var(--cute-pink-400);
+}
+
+.btn-cute-pink:hover {
+  background: var(--cute-pink-400);
+  color: white;
+}
+
+/* Card styles */
+.card-cute {
+  @apply rounded-3xl p-6 transition-all duration-300 hover:transform hover:scale-102;
+  background: var(--gradient-banana);
+  border: 2px solid var(--banana-green-200);
+}
+
+.card-cute:hover {
+  box-shadow: 0 20px 25px -5px rgba(34, 197, 94, 0.1), 0 10px 10px -5px rgba(34, 197, 94, 0.04);
+}
+
+/* Input styles */
+.input-cute {
+  @apply px-4 py-3 rounded-2xl border-2 transition-all duration-300 focus:outline-none;
+  border-color: var(--banana-green-200);
+  background: var(--banana-green-50);
+}
+
+.input-cute:focus {
+  border-color: var(--banana-green-400);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+}
+
+/* Animation keyframes */
+@keyframes bounce-cute {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes wiggle {
+  0%, 7% {
+    transform: rotateZ(0);
+  }
+  15% {
+    transform: rotateZ(-15deg);
+  }
+  20% {
+    transform: rotateZ(10deg);
+  }
+  25% {
+    transform: rotateZ(-10deg);
+  }
+  30% {
+    transform: rotateZ(6deg);
+  }
+  35% {
+    transform: rotateZ(-4deg);
+  }
+  40%, 100% {
+    transform: rotateZ(0);
+  }
+}
+
+/* Animation classes */
+.animate-bounce-cute {
+  animation: bounce-cute 1s infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 1s ease-in-out;
+}
+
+.hover-wiggle:hover {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+/* Utility cho rounded corners cute */
+.rounded-cute {
+  border-radius: 20px;
+}
+
+.rounded-cute-lg {
+  border-radius: 30px;
+}
+
+/* Text styles */
+.text-shadow-cute {
+  text-shadow: 2px 2px 4px rgba(34, 197, 94, 0.1);
+}
+
+/* Backdrop blur cho glass effect */
+.glass-banana {
+  background: rgba(220, 252, 231, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
