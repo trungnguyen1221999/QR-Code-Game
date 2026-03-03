@@ -1,8 +1,29 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@300;400;700&family=Nunito:wght@300;400;500;600;700&display=swap');
 
 @custom-variant dark (&:is(.dark *));
+
+/* Global font styles */
+* {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+}
+
+.font-cute-heading {
+  font-family: 'Comic Neue', cursive;
+}
+
+.font-cute-text {
+  font-family: 'Comic Neue', cursive;
+  font-weight: 400;
+}
 
 /* Theme xanh nõn chuối vui tươi cute */
 :root {
