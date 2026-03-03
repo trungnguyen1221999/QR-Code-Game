@@ -1,0 +1,94 @@
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Info, Phone, Trophy, User, LogOut } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+
+const Header = ({ isLoggedIn, user, onLogout }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    onLogout();
+    toast.success('Logged out successfully!');
+    navigate('/auth/login');
+  };
+
+  const navItems = [
+    { path: '/', label: 'Play', icon: Home },
+    { path: '/about', label: 'About', icon: Info },
+    { path: '/contact', label: 'Contact', icon: Phone },
+    { path: '/ranking', label: 'Ranking', icon: Trophy }
+  ];
+
+  return (
+    <header className="bg-banana-gradient shadow-cute border-b-2 border-banana-green">
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2 hover-wiggle">
+            <div className="w-10 h-10 bg-cute-gradient rounded-cute flex items-center justify-center">
+              <span className="text-2xl">🎯</span>
+            </div>
+            <h1 className="text-2xl font-bold text-banana-green-dark">QR Game</h1>
+          </Link>
+
+          {/* Navigation */}
+          <nav className="hidden md:flex space-x-6">
+            {navItems.map(({ path, label, icon: Icon }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-cute transition-all duration-300 hover:bg-cute-pink ${
+                  location.pathname === path 
+                    ? 'bg-cute-pink text-banana-green-dark font-semibold' 
+                    : 'text-banana-green hover:text-banana-green-dark'
+                }`}
+              >
+                <Icon size={18} />
+                <span>{label}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* User Actions */}
+          <div className="flex items-center space-x-4">
+            {isLoggedIn ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-banana-green-dark">
+                  <User size={20} />
+                  <span className="font-semibold">{user?.name || 'User'}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="btn-cute-pink flex items-center space-x-2"
+                >
+                  <LogOut size={18} />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <Link to="/auth/login" className="btn-banana">
+                  Login
+                </Link>
+                <Link to="/auth/signup" className="btn-cute-pink">
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button className="text-banana-green-dark">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
