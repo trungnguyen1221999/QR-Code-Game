@@ -50,7 +50,7 @@ const Login = ({ onLogin }) => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="h-screen max-h-screen flex items-center justify-center p-4"
       style={{
         backgroundImage: "url('/background.png')",
         backgroundSize: "cover",

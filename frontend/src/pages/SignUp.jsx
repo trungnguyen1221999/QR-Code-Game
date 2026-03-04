@@ -51,7 +51,7 @@ const SignUp = ({ onLogin }) => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-4"
+      className="h-screen max-h-screen flex items-center justify-center p-4"
       style={{
         backgroundImage: "url('/background.png')",
         backgroundSize: "cover",
@@ -70,7 +70,7 @@ const SignUp = ({ onLogin }) => {
             <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-0">
               {/* Header */}
               <div className="text-center mb-6 sm:mb-8">
-                <img src="/signup.png" alt="Sign Up" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
+                <img src="/signup.gif" alt="Sign Up" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
                 <h1 className="text-2xl sm:text-3xl font-bold text-banana-green-dark text-shadow-cute">
                   Come to Play
                 </h1>
