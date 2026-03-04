@@ -69,7 +69,7 @@ const Login = ({ onLogin }) => {
             <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-0">
               {/* Header */}
               <div className="text-center mb-6 sm:mb-8">
-                <img src="/login.png" alt="Login" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
+                <img src="/login.gif" alt="Login" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
                 <h1 className="text-2xl sm:text-3xl font-bold text-banana-green-dark text-shadow-cute">
                   Let's Play Together
                 </h1>
