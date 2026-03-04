@@ -15,6 +15,7 @@ import Contact from './pages/Contact';
 import Ranking from './pages/Ranking';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import AdminLogin from './pages/AdminLogin';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -51,6 +52,9 @@ function App() {
             <Route path="login" element={<Login onLogin={handleLogin} />} />
             <Route path="signup" element={<SignUp onLogin={handleLogin} />} />
           </Route>
+
+          {/* Admin Login - standalone route */}
+          <Route path="/admin-login" element={<AdminLogin onLogin={handleLogin} />} />
 
           {/* Redirect /login and /signup to auth routes */}
           <Route path="/login" element={<Navigate to="/auth/login" replace />} />
