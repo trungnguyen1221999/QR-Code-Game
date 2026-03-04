@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { Upload, Camera, Check, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { predefinedAvatars } from '@/data/avatarData';
 
 const ChooseAvatar = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -14,15 +15,6 @@ const ChooseAvatar = ({ onLogin }) => {
   const [uploadedAvatar, setUploadedAvatar] = useState(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Predefined avatars (using avatar files from public/avatar/)
-  const predefinedAvatars = [
-    '/avatar/avatar1.png',
-    '/avatar/avatar2.png', 
-    '/avatar/avatar3.png',
-    '/avatar/avatar4.png',
-    // You can add more avatar files here
-  ];
 
   // Handle file upload
   const handleFileUpload = (event) => {
@@ -90,7 +82,7 @@ const ChooseAvatar = ({ onLogin }) => {
       // Create updated user object
       const updatedUser = {
         ...user,
-        avatar: avatar
+        avatar: avatar.path || avatar // Handle both object and string avatars
       };
       
       // Login with updated user data
@@ -164,9 +156,6 @@ const ChooseAvatar = ({ onLogin }) => {
           <CardContent className="p-6">
             {/* Header */}
             <div className="text-center mb-8">
-              <div className="animate-bounce-cute mb-4">
-                <span className="text-6xl">🎭</span>
-              </div>
               <h1 className="text-3xl font-bold text-banana-green-dark text-shadow-cute mb-2">
                 Choose Your Avatar
               </h1>
@@ -177,7 +166,12 @@ const ChooseAvatar = ({ onLogin }) => {
 
             {/* Current Selection Preview */}
             <div className="text-center mb-8">
-              <div className="w-24 h-24 mx-auto mb-4 bg-cute-gradient rounded-full flex items-center justify-center text-4xl border-4 border-banana-green-300 overflow-hidden">
+              <div 
+                className="w-24 h-24 mx-auto mb-4 bg-cute-gradient rounded-full flex items-center justify-center text-4xl border-4 overflow-hidden"
+                style={{
+                  borderColor: selectedAvatar?.borderColor || '#22c55e' // Default green or avatar color
+                }}
+              >
                 {uploadedAvatarUrl ? (
                   <img 
                     src={uploadedAvatarUrl} 
@@ -186,7 +180,7 @@ const ChooseAvatar = ({ onLogin }) => {
                   />
                 ) : selectedAvatar ? (
                   <img 
-                    src={selectedAvatar} 
+                    src={selectedAvatar.path || selectedAvatar} 
                     alt="Selected avatar"
                     className="w-full h-full object-cover"
                   />
@@ -206,33 +200,70 @@ const ChooseAvatar = ({ onLogin }) => {
                 Choose from Gallery
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {predefinedAvatars.map((avatar, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleAvatarSelect(avatar)}
-                    className={`relative w-20 h-20 rounded-full transition-all duration-300 hover:scale-110 hover-wiggle overflow-hidden ${
-                      selectedAvatar === avatar 
-                        ? 'bg-banana-green-300 border-4 border-banana-green-600 shadow-cute-lg scale-110' 
-                        : 'bg-cute-pink hover:bg-cute-pink-400 border-2 border-transparent hover:border-banana-green-300'
-                    }`}
-                  >
-                    <img 
-                      src={avatar} 
-                      alt="Avatar option" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to a default emoji if image fails to load
-                        e.target.style.display = 'none';
-                        e.target.parentNode.innerHTML = '👤';
+                {predefinedAvatars.map((avatar) => (
+                  <div key={avatar.id} className="text-center relative">
+                    <button
+                      onClick={() => handleAvatarSelect(avatar)}
+                      className={`relative w-20 h-20 rounded-full transition-all duration-300 hover:scale-110 hover-wiggle overflow-hidden mb-2 ${
+                        selectedAvatar?.id === avatar.id 
+                          ? 'border-4 shadow-cute-lg scale-110' 
+                          : 'border-2 border-transparent hover:border-banana-green-300'
+                      }`}
+                      style={{
+                        borderColor: selectedAvatar?.id === avatar.id ? avatar.borderColor : 'transparent',
+                        backgroundColor: selectedAvatar?.id === avatar.id ? avatar.bgColor : '#f9a8d4'
                       }}
-                    />
+                    >
+                      <img 
+                        src={avatar.path} 
+                        alt={avatar.name} 
+                        className="w-full h-full object-cover rounded-full"
+                        onError={(e) => {
+                          // Fallback to a default emoji if image fails to load
+                          e.target.style.display = 'none';
+                          e.target.parentNode.innerHTML = '👤';
+                        }}
+                      />
+                      
+                      {selectedAvatar?.id === avatar.id && (
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center border-2" style={{ borderColor: avatar.borderColor }}>
+                          <Check size={12} style={{ color: avatar.color }} />
+                        </div>
+                      )}
+                    </button>
                     
-                    {selectedAvatar === avatar && (
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-white rounded-full flex items-center justify-center border-2 border-banana-green-600">
-                        <Check size={12} className="text-banana-green-600" />
+                    {/* Speech bubble for selected avatar */}
+                    {selectedAvatar?.id === avatar.id && selectedAvatar.catchphrase && (
+                      <div 
+                        className="absolute -top-4 transform -translate-x-1/2 z-10"
+                        style={{
+                          left: avatar.id % 2 === 1 ? '75%' : '25%' // Odd: right, Even: left
+                        }}
+                      >
+                        <div 
+                          className="bg-white px-3 py-2 rounded-xl shadow-lg relative border-2 min-w-max"
+                          style={{ 
+                            borderColor: selectedAvatar.color,
+                            backgroundColor: selectedAvatar.bgColor 
+                          }}
+                        >
+                          <p className="text-xs font-bold text-center" style={{ color: selectedAvatar.color }}>
+                            {selectedAvatar.catchphrase}
+                          </p>
+                          {/* Speech bubble arrow pointing down */}
+                          <div 
+                            className="absolute top-full w-0 h-0"
+                            style={{
+                              left: avatar.id % 2 === 1 ? '25%' : '75%', // Opposite of bubble position
+                              borderLeft: '6px solid transparent',
+                              borderRight: '6px solid transparent',
+                              borderTop: `6px solid ${selectedAvatar.color}`
+                            }}
+                          ></div>
+                        </div>
                       </div>
                     )}
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
