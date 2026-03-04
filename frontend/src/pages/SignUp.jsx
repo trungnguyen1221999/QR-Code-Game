@@ -50,9 +50,22 @@ const SignUp = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-cute-gradient flex items-center justify-center p-4">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        backgroundImage: "url('/background.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat"
+      }}
+    >
       <div className="w-full max-w-md">
-        <Card className="card-cute glass-banana overflow-hidden">
+        <Card className="overflow-hidden" style={{ 
+          background: "rgba(255, 255, 255, 0.6)", 
+          backdropFilter: "blur(10px)", 
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+        }}>
           <CardContent className="p-0">
             <form onSubmit={handleSubmit(onSubmit)} className="p-6">
               {/* Header */}
