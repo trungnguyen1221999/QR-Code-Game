@@ -53,13 +53,13 @@ const SignUp = ({ onLogin }) => {
     <div 
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        backgroundImage: "url('/background.jpg')",
+        backgroundImage: "url('/background.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       }}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm sm:max-w-md px-2 sm:px-0">
         <Card className="overflow-hidden" style={{ 
           background: "rgba(255, 255, 255, 0.6)", 
           backdropFilter: "blur(10px)", 
@@ -67,19 +67,19 @@ const SignUp = ({ onLogin }) => {
           boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
         }}>
           <CardContent className="p-0">
-            <form onSubmit={handleSubmit(onSubmit)} className="p-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-0">
               {/* Header */}
-              <div className="text-center mb-8">
-                <img src="/signup.png" alt="Sign Up" className="mx-auto mb-4" />
-                <h1 className="text-3xl font-bold text-banana-green-dark text-shadow-cute">
+              <div className="text-center mb-6 sm:mb-8">
+                <img src="/signup.png" alt="Sign Up" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
+                <h1 className="text-2xl sm:text-3xl font-bold text-banana-green-dark text-shadow-cute">
                   Come to Play
                 </h1>
-                <p className="text-banana-green mt-2">
+                <p className="text-banana-green mt-2 text-sm sm:text-base">
                   Create an account to start your journey
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Name Field */}
                 <Field>
                   <FieldLabel htmlFor="name" className="text-sm font-semibold text-banana-green-dark">
@@ -171,8 +171,8 @@ const SignUp = ({ onLogin }) => {
               </div>
 
               {/* Links */}
-              <div className="text-center mt-6 space-y-3">
-                <FieldDescription className="text-banana-green text-sm">
+              <div className="text-center mt-4 sm:mt-6 space-y-2 sm:space-y-3">
+                <FieldDescription className="text-banana-green text-xs sm:text-sm">
                   Already have an account?{' '}
                   <Link 
                     to="/login" 
@@ -183,7 +183,7 @@ const SignUp = ({ onLogin }) => {
                 </FieldDescription>
                 <Link 
                   to="/" 
-                  className="text-banana-green-400 text-sm hover:text-banana-green-600 transition-colors block"
+                  className="text-banana-green-400 text-xs sm:text-sm hover:text-banana-green-600 transition-colors block"
                 >
                   ← Back to home
                 </Link>
