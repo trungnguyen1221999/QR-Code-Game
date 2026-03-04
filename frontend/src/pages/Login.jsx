@@ -1,22 +1,19 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { User, Lock, Eye, EyeOff } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 
 const loginSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters')
+  username: z.string().min(3, 'Username must be at least 3 characters')
 });
 
 const Login = ({ onLogin }) => {
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   
   const {
@@ -29,22 +26,25 @@ const Login = ({ onLogin }) => {
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Check if user exists by username (simple login without password)
+      const response = await fetch(`http://localhost:5000/api/users?username=${data.username}`);
       
-      // Mock successful login
-      const userData = {
-        id: 1,
-        name: 'Player',
-        username: data.username,
-        avatar: '🎮'
-      };
+      if (!response.ok) {
+        throw new Error('User not found');
+      }
+
+      const users = await response.json();
+      const user = users.find(u => u.username === data.username);
       
-      onLogin(userData);
-      toast.success('Login successful!');
+      if (!user) {
+        throw new Error('User not found. Please sign up first.');
+      }
+      
+      onLogin(user);
+      toast.success('Welcome back!');
       navigate('/');
     } catch (error) {
-      toast.error('Login failed!');
+      toast.error(error.message || 'Login failed!');
     }
   };
 
@@ -100,35 +100,6 @@ const Login = ({ onLogin }) => {
                   )}
                 </Field>
 
-                {/* Password Field */}
-                <Field>
-                  <FieldLabel htmlFor="password" className="text-sm font-semibold text-banana-green-dark">
-                    Password
-                  </FieldLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-banana-green-400 pointer-events-none" size={18} />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      {...register('password')}
-                      className={`input-cute w-full pr-12 ${errors.password ? 'border-red-400' : ''}`}
-                      placeholder="Enter password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-banana-green-400 hover:text-banana-green-600 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <FieldDescription className="text-red-500 text-sm">
-                      {errors.password.message}
-                    </FieldDescription>
-                  )}
-                </Field>
-
                 {/* Submit Button */}
                 <Button
                   type="submit"
@@ -138,10 +109,10 @@ const Login = ({ onLogin }) => {
                   {isSubmitting ? (
                     <div className="flex items-center justify-center space-x-2">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-banana-green-700"></div>
-                      <span>Signing in...</span>
+                      <span>Joining game...</span>
                     </div>
                   ) : (
-                    'Sign In'
+                    'Join Game'
                   )}
                 </Button>
               </div>

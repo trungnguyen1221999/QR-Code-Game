@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
@@ -13,11 +13,9 @@ import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 const signUpSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 const SignUp = ({ onLogin }) => {
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   
   const {
@@ -30,22 +28,51 @@ const SignUp = ({ onLogin }) => {
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Temporary: Mock user creation without API call
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading
       
-      // Mock successful registration
-      const userData = {
-        id: 1,
-        name: data.name,
+      // Create mock user object
+      const mockUser = {
+        _id: 'temp_' + Date.now(),
         username: data.username,
-        avatar: '🆕'
+        name: data.name,
+        avatar: '',
+        money: 0,
+        items: [],
+        numberOfKey: 0,
+        finalScore: 0
       };
       
-      onLogin(userData);
-      toast.success('Registration successful!');
-      navigate('/');
+      // Redirect to choose avatar page with mock user
+      toast.success('Registration successful! Now choose your avatar.');
+      navigate('/auth/choose-avatar', { state: { user: mockUser } });
+
+      /* TODO: Replace with real API call when backend is ready
+      const response = await fetch('http://localhost:5000/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: data.username,
+          name: data.name,
+          avatar: ''
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      const result = await response.json();
+      
+      // Redirect to choose avatar page instead of auto login
+      toast.success('Registration successful! Now choose your avatar.');
+      navigate('/auth/choose-avatar', { state: { user: result.user } });
+      */
     } catch (error) {
-      toast.error('Registration failed!');
+      toast.error(error.message || 'Registration failed!');
     }
   };
 
@@ -124,35 +151,6 @@ const SignUp = ({ onLogin }) => {
                   )}
                 </Field>
 
-                {/* Password Field */}
-                <Field>
-                  <FieldLabel htmlFor="password" className="text-sm font-semibold text-banana-green-dark">
-                    Password
-                  </FieldLabel>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-banana-green-400 pointer-events-none" size={18} />
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      {...register('password')}
-                      className={`input-cute w-full pr-12 ${errors.password ? 'border-red-400' : ''}`}
-                      placeholder="Create password (min 6 characters)"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-banana-green-400 hover:text-banana-green-600 transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <FieldDescription className="text-red-500 text-sm">
-                      {errors.password.message}
-                    </FieldDescription>
-                  )}
-                </Field>
-
                 {/* Submit Button */}
                 <Button
                   type="submit"
@@ -165,7 +163,7 @@ const SignUp = ({ onLogin }) => {
                       <span>Creating account...</span>
                     </div>
                   ) : (
-                    'Sign Up'
+                    'Join Game'
                   )}
                 </Button>
               </div>
