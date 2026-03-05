@@ -5,7 +5,7 @@ import CameraPopup from '../popup/cameraPopup';
 import Heading from '@/components/ui/Heading';
 import { useState } from 'react';
 
-const QRScanner = () => {
+const QRScanner = ({ onQRScanSuccess }) => {
   const [isScanning, setIsScanning] = useState(false);
 
   return (
@@ -23,7 +23,12 @@ const QRScanner = () => {
           </div>
         </CardContent>
       </Card>
-      {isScanning && (<CameraPopup setIsScanning={setIsScanning} />)}
+      {isScanning && (
+        <CameraPopup 
+          setIsScanning={setIsScanning} 
+          onQRScanSuccess={onQRScanSuccess}
+        />
+      )}
     </>
   );
 };

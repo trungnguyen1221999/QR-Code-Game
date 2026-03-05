@@ -4,14 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import Overlayer from './Overlayer';
 import Heading from '@/components/ui/Heading';
+import MiniGame from './minigames/MiniGame';
 import QrScanner from 'qr-scanner';
 import toast from 'react-hot-toast';
 
-const CameraPopup = ({ setIsScanning, isOpen = true }) => {
+const CameraPopup = ({ setIsScanning, onQRScanSuccess, isOpen = true }) => {
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
-  const [isScanning, setIsScanningState] = useState(false);
+  const [isScanningState, setIsScanningState] = useState(false);
   const [hasCamera, setHasCamera] = useState(true);
+  const [showMiniGame, setShowMiniGame] = useState(false);
 
   useEffect(() => {
     if (isOpen && videoRef.current) {
@@ -67,20 +69,39 @@ const CameraPopup = ({ setIsScanning, isOpen = true }) => {
     }
   };
 
-  const handleQRResult = (data) => {
-    // Process QR code data here
-    console.log('Processing QR data:', data);
+  const handleFakeScan = () => {
+    // Fake QR scan success
+    toast.success('QR Code detected! Starting mini game...', {
+      duration: 2000,
+      position: 'top-center',
+    });
     
-    // Close scanner after successful scan
+    // Show mini game after short delay
     setTimeout(() => {
-      setIsScanning(false);
-    }, 2000);
+      setShowMiniGame(true);
+    }, 1000);
+  };
+
+  const handleMiniGameClose = () => {
+    setShowMiniGame(false);
+    setIsScanning(false); // Close entire camera popup
   };
 
   const handleClose = () => {
     stopScanner();
+    setShowMiniGame(false);
     setIsScanning(false);
   };
+
+  // Show MiniGame if triggered
+  if (showMiniGame) {
+    return (
+      <MiniGame 
+        isOpen={showMiniGame}
+        onClose={handleMiniGameClose}
+      />
+    );
+  }
   return (
     <Overlayer isOpen={isOpen} onClose={handleClose}>
       <Card variant="glass" className="w-full max-w-md">
@@ -133,11 +154,10 @@ const CameraPopup = ({ setIsScanning, isOpen = true }) => {
             <Button 
               variant="banana"
               className="flex-1"
-              onClick={isScanning ? stopScanner : startScanner}
-              disabled={!hasCamera}
+              onClick={handleFakeScan}
             >
               <Camera size={18} className="mr-2" />
-              {isScanning ? 'Stop Scanning' : 'Start Scanning'}
+              Scan QR Code (Fake)
             </Button>
             <Button 
               variant="outline"

@@ -4,11 +4,13 @@ import CheckpointBar from '../components/game/CheckpointBar';
 import RealTimeRanking from '../components/game/RealTimeRanking';
 import QRScanner from '../components/game/QRScanner';
 import Score from '../components/game/Score';
+import MiniGame from '../components/popup/minigames/MiniGame';
 
 const PlayPage = () => {
   const [gameData, setGameData] = useState({
     currentCheckpoint: 1,
-    isScanning: false
+    isScanning: false,
+    showMiniGame: false
   });
 
   // User data for ranking
@@ -18,6 +20,23 @@ const PlayPage = () => {
     avatar: 'avatar1.png',
     checkpoint: gameData.currentCheckpoint,
     score: gameData.currentCheckpoint * 100
+  };
+
+  // Handle QR scan success
+  const handleQRScanSuccess = (qrData) => {
+    console.log('QR Scanned:', qrData);
+    
+    // Close scanner and show mini game
+    setGameData(prev => ({
+      ...prev, 
+      isScanning: false,
+      showMiniGame: true
+    }));
+    
+    toast.success('QR Code detected! Starting mini game...', {
+      duration: 2000,
+      position: 'top-center',
+    });
   };
 
 
@@ -33,7 +52,6 @@ const PlayPage = () => {
         className="min-h-screen bg-no-repeat md:bg-repeat bg-cover bg-center" 
         style={{
           backgroundImage: `url(${import.meta.env.BASE_URL}playbg.png), url(./playbg.png), url(/playbg.png)`,
-          backgroundColor: '#2d1b69'
         }}
       >
       <div className="relative min-h-screen">
@@ -44,8 +62,7 @@ const PlayPage = () => {
               currentCheckpoint={gameData.currentCheckpoint}
             />
             {/* QR Scanner */}
-            <QRScanner />
-
+            <QRScanner onQRScanSuccess={handleQRScanSuccess} />
             {/* Live Rankings - Mobile Optimized */}
             <RealTimeRanking 
               currentUser={currentUser}
@@ -56,6 +73,14 @@ const PlayPage = () => {
         </div>
       </div>
     </div>
+
+      {/* Mini Game Popup */}
+      {gameData.showMiniGame && (
+        <MiniGame 
+          isOpen={gameData.showMiniGame}
+          onClose={() => setGameData(prev => ({...prev, showMiniGame: false}))}
+        />
+      )}
     </>
   );
 };
