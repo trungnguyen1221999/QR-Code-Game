@@ -5,6 +5,8 @@ import RealTimeRanking from '../components/game/RealTimeRanking';
 import QRScanner from '../components/game/QRScanner';
 import Score from '../components/game/Score';
 import MiniGame from '../components/popup/minigames/MiniGame';
+import SneakGame from '../components/popup/minigames/SneakGame';
+import FinalPopupShop from '../components/popup/shop/FinalPopupShop';
 
 const PlayPage = ({ mobileNavOpen }) => {
   const [gameData, setGameData] = useState({
@@ -13,6 +15,10 @@ const PlayPage = ({ mobileNavOpen }) => {
     showMiniGame: false
   });
   const [showScore, setShowScore] = useState(true);
+  const [showSneak, setShowSneak] = useState(false);
+  const [showFinalShop, setShowFinalShop] = useState(false);
+  const [sneakLength, setSneakLength] = useState(10);
+  const [sneakSpeed, setSneakSpeed] = useState(120);
 
   useEffect(() => {
     if (mobileNavOpen) {
@@ -28,7 +34,7 @@ const PlayPage = ({ mobileNavOpen }) => {
   const currentUser = {
     id: 1,
     name: 'Bạn',
-    avatar: 'avatar1.png',
+    avatar: '/avatar/avatar1.png',
     checkpoint: gameData.currentCheckpoint,
     score: gameData.currentCheckpoint * 100
   };
@@ -49,7 +55,6 @@ const PlayPage = ({ mobileNavOpen }) => {
       position: 'top-center',
     });
   };
-
 
   return (
     <>
@@ -92,6 +97,38 @@ const PlayPage = ({ mobileNavOpen }) => {
         <MiniGame 
           isOpen={gameData.showMiniGame}
           onClose={() => setGameData(prev => ({...prev, showMiniGame: false}))}
+        />
+      )}
+      {/* Button to test FinalPopupShop */}
+      <button
+        className="fixed bottom-6 right-6 z-[10040] bg-cute-pink text-white px-4 py-2 rounded-full shadow-lg hover:bg-pink-600 transition"
+        onClick={() => setShowFinalShop(true)}
+      >
+        Test Sneak Game
+      </button>
+      {showFinalShop && (
+        <FinalPopupShop
+          isOpen={showFinalShop}
+          onClose={() => {
+            setShowFinalShop(false);
+            setShowSneak(true);
+          }}
+          onPurchase={item => {
+            // Optionally handle purchase event
+          }}
+          // Pass a callback to get the latest length and speed
+          getStats={(length, speed) => {
+            setSneakLength(length);
+            setSneakSpeed(speed);
+          }}
+        />
+      )}
+      {showSneak && (
+        <SneakGame
+          avatar={currentUser.avatar}
+          onClose={() => setShowSneak(false)}
+          length={sneakLength}
+          speed={sneakSpeed}
         />
       )}
     </>
