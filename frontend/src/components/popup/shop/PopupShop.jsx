@@ -73,9 +73,9 @@ const PopupShop = ({ isOpen = true, onClose}) => {
         {/* Capybara Shopkeeper */}
           <div className="text-center">
             <img 
-              src="/capy.gif" 
+              src="/shop/seller.gif" 
               alt="Capybara shopkeeper" 
-              className="w-16 h-16 object-cover rounded-lg mx-auto mb-2" 
+              className="w-32 object-cover rounded-lg mx-auto mb-2" 
             />
             <p className="text-sm text-gray-600 font-cute-text">
               {selectedItem 
