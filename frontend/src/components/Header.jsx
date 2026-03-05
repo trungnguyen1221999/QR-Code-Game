@@ -1,8 +1,12 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Info, Phone, Trophy, User, LogOut } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 
-const Header = ({ isLoggedIn, user, onLogout }) => {
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Home, Info, Phone, Trophy, User, LogOut, Menu, X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { useState } from 'react';
+import { Button } from './ui/button';
+// import Overlayer from './popup/Overlayer';
+
+const Header = ({ isLoggedIn, user, onLogout, mobileNavOpen, setMobileNavOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -12,23 +16,34 @@ const Header = ({ isLoggedIn, user, onLogout }) => {
     navigate('/auth/login');
   };
 
-  const navItems = [
+  // mobileNavOpen and setMobileNavOpen are now controlled by App
+  // const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  let navItems = [
     { path: '/', label: 'Play', icon: Home },
     { path: '/about', label: 'About', icon: Info },
     { path: '/contact', label: 'Contact', icon: Phone },
     { path: '/ranking', label: 'Ranking', icon: Trophy }
   ];
+  if (isLoggedIn) {
+    navItems = [
+      ...navItems,
+      { path: '/logout', label: 'Logout', icon: LogOut, isLogout: true }
+    ];
+  }
 
   return (
     <header 
-      className="shadow-cute border-b-2 border-white border-opacity-30" 
+      className="shadow-cute border-b-2 border-white border-opacity-30"
       style={{
         backgroundImage: "url(/header.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
-        backdropFilter: "blur(10px)", 
-        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+        backdropFilter: "blur(10px)",
+        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+        zIndex: 9999,
+        position: 'relative'
       }}
     >
       <div className="container mx-auto px-4 py-4">
@@ -43,20 +58,32 @@ const Header = ({ isLoggedIn, user, onLogout }) => {
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-6">
-            {navItems.map(({ path, label, icon: Icon }) => (
-              <Link
-                key={path}
-                to={path}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-cute transition-all duration-300 hover:bg-cute-pink ${
-                  location.pathname === path 
-                    ? 'bg-cute-pink text-black font-black text-lg' 
-                    : 'text-black font-bold text-lg hover:text-gray-800'
-                }`}
-                style={{ fontFamily: "'Comic Neue', cursive" }}
-              >
-                <Icon size={18} />
-                <span>{label}</span>
-              </Link>
+            {navItems.map(({ path, label, icon: Icon, isLogout }) => (
+              isLogout ? (
+                <button
+                  key="logout-desktop"
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-cute transition-all duration-300 hover:bg-cute-pink text-black font-bold text-lg"
+                  style={{ fontFamily: "'Comic Neue', cursive" }}
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </button>
+              ) : (
+                <Link
+                  key={path}
+                  to={path}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-cute transition-all duration-300 hover:bg-cute-pink ${
+                    location.pathname === path 
+                      ? 'bg-cute-pink text-black font-black text-lg' 
+                      : 'text-black font-bold text-lg hover:text-gray-800'
+                  }`}
+                  style={{ fontFamily: "'Comic Neue', cursive" }}
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </Link>
+              )
             ))}
           </nav>
 
@@ -68,13 +95,6 @@ const Header = ({ isLoggedIn, user, onLogout }) => {
                   <User size={20} />
                   <span className="font-black">{user?.name || 'User'}</span>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="btn-cute-pink flex items-center space-x-2"
-                >
-                  <LogOut size={18} />
-                  <span>Logout</span>
-                </button>
               </div>
             ) : (
               <div className="flex items-center space-x-3">
@@ -88,12 +108,14 @@ const Header = ({ isLoggedIn, user, onLogout }) => {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button className="text-black font-bold">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+          {/* Mobile hamburger and nav overlay */}
+          <div className="md:hidden flex items-center">
+            <button
+              className="text-black font-bold p-2 focus:outline-none"
+              onClick={() => setMobileNavOpen((open) => !open)}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileNavOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
           </div>
         </div>

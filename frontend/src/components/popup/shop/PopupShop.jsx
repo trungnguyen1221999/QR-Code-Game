@@ -140,6 +140,16 @@ const PopupShop = ({ isOpen = true, onClose}) => {
               </div>
             </div>
           )}
+          {/* Continue Button */}
+          <div className="mt-2 flex justify-center">
+            <Button 
+              variant="banana" 
+              onClick={handleClose}
+              className="w-40 text-lg font-cute-text"
+            >
+              Continue
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </Overlayer>

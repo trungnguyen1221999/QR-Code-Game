@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
+import { Home, Info, Phone, Trophy, LogOut, X } from 'lucide-react';
 
 // Layers
-import PublicLayer from './layers/PublicLayer';
 import UserLayer from './layers/UserLayer';
 import LoginLayer from './layers/LoginLayer';
+import Overlayer from './components/popup/Overlayer';
 
 // Pages
 import Play from './pages/Play';
@@ -17,12 +18,24 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import AdminLogin from './pages/AdminLogin';
 import ChooseAvatar from './pages/ChooseAvatar';
+import Header from './components/Header';
+import { Button } from './components/ui/button';
 
 function App() {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const audioRef = useRef(null);
+
+  // Nav items for mobile nav panel
+  const navItems = [
+    { path: '/', label: 'Play', icon: Home },
+    { path: '/about', label: 'About', icon: Info },
+    { path: '/contact', label: 'Contact', icon: Phone },
+    { path: '/ranking', label: 'Ranking', icon: Trophy },
+    ...(isLoggedIn ? [{ path: '/logout', label: 'Logout', icon: LogOut, isLogout: true }] : [])
+  ];
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -95,6 +108,42 @@ function App() {
   return (
     <Router>
       <div className="App">
+        {/* Global Overlayer for mobile nav */}
+        <Overlayer isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} closeOnOverlayClick={true}>
+          <div className="w-2/3 max-w-xs bg-white shadow-lg h-full p-6 flex flex-col gap-6 animate-slide-in-right z-10010 fixed right-0 top-0" style={{background: 'white', backgroundColor: 'white', opacity: 1}}>
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setMobileNavOpen(false)} aria-label="Close menu">
+                <X size={28} />
+              </Button>
+            </div>
+            <nav className="flex flex-col gap-4">
+              {navItems.map(({ path, label, icon: Icon, isLogout }) => (
+                isLogout ? (
+                  <button
+                    key="logout"
+                    onClick={() => { setMobileNavOpen(false); handleLogout(); }}
+                    className="flex items-center gap-3 px-4 py-3 rounded-cute text-lg font-bold text-black hover:bg-cute-pink/60 transition"
+                    style={{ fontFamily: "'Comic Neue', cursive" }}
+                  >
+                    <Icon size={22} />
+                    <span>{label}</span>
+                  </button>
+                ) : (
+                  <Link
+                    key={path}
+                    to={path}
+                    onClick={() => setMobileNavOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-cute text-lg font-bold ${window.location.pathname === path ? 'bg-cute-pink/80 text-black' : 'text-black hover:bg-cute-pink/40'} transition`}
+                    style={{ fontFamily: "'Comic Neue', cursive" }}
+                  >
+                    <Icon size={22} />
+                    <span>{label}</span>
+                  </Link>
+                )
+              ))}
+            </nav>
+          </div>
+        </Overlayer>
         {/* Background Music */}
         <audio
           ref={audioRef}
@@ -119,6 +168,13 @@ function App() {
           )}
         </button>
 
+        <Header
+          isLoggedIn={isLoggedIn}
+          user={user}
+          onLogout={handleLogout}
+          mobileNavOpen={mobileNavOpen}
+          setMobileNavOpen={setMobileNavOpen}
+        />
         <Routes>
           {/* Login Layer - for authentication pages */}
           <Route path="/auth" element={<LoginLayer onLogin={handleLogin} />}>
