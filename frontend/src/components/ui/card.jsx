@@ -1,17 +1,25 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
 function Card({
   className,
+  variant = "glass", // default, glass
   ...props
 }) {
+  const baseStyles = "flex flex-col gap-6 rounded-xl text-card-foreground";
+  
+  const variantStyles = {
+    default: "border bg-card py-6 shadow-sm",
+    glass: "card-glass"
+  };
+
   return (
     <div
       data-slot="card"
       className={cn(
-        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm",
-        className
+        baseStyles,
+        variantStyles[variant] || variantStyles.default,
+        className, 
       )}
       {...props} />
   );
@@ -73,9 +81,23 @@ function CardAction({
 
 function CardContent({
   className,
+  variant = "default", // default, glass
   ...props
 }) {
-  return (<div data-slot="card-content" className={cn("px-6", className)} {...props} />);
+  const variantStyles = {
+    default: "px-6",
+    glass: "card-glass-content"
+  };
+
+  return (
+    <div
+      data-slot="card-content"
+      className={cn(
+        variantStyles[variant] || variantStyles.default,
+        className
+      )}
+      {...props} />
+  );
 }
 
 function CardFooter({

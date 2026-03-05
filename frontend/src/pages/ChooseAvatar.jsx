@@ -318,7 +318,8 @@ const ChooseAvatar = ({ onLogin }) => {
                 <Button
                   onClick={handleSubmit}
                   disabled={isSubmitting || (!selectedAvatar && !uploadedAvatar)}
-                  className="btn-banana min-w-32"
+                  variant="banana"
+                  className="min-w-32"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center space-x-2">

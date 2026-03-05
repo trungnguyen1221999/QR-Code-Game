@@ -104,7 +104,8 @@ const Login = ({ onLogin }) => {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="btn-banana w-full text-lg"
+                  variant="banana"
+                  className="w-full text-lg"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center space-x-2">

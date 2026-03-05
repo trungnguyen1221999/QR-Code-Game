@@ -2,6 +2,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import CheckpointBar from '../components/game/CheckpointBar';
 import RealTimeRanking from '../components/game/RealTimeRanking';
+import QRScanner from '../components/game/QRScanner';
 
 const PlayPage = () => {
   const [gameData, setGameData] = useState({
@@ -34,6 +35,8 @@ const PlayPage = () => {
             <CheckpointBar
               currentCheckpoint={gameData.currentCheckpoint}
             />
+            {/* QR Scanner */}
+            <QRScanner />
 
             {/* Live Rankings - Mobile Optimized */}
             <RealTimeRanking 

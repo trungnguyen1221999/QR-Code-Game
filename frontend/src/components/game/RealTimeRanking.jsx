@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Crown, Trophy, Medal } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import Heading from "@/components/ui/Heading";
 
 const RealTimeRanking = ({ currentUser }) => {
   const [rankings, setRankings] = useState([]);
@@ -92,40 +93,24 @@ const RealTimeRanking = ({ currentUser }) => {
 
   if (isLoading) {
     return (
-      <Card className="p-0" style={{ 
-        background: "rgba(255, 255, 255, 0.6)", 
-        backdropFilter: "blur(10px)", 
-        border: "none",
-        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
-      }}>
-        <CardContent className="p-0">
-          <div className="w-full bg-transparent rounded-2xl p-6">
-            <div className="text-center text-gray-500">Loading rankings...</div>
-          </div>
+      <Card variant="glass">
+        <CardContent variant="glass">
+          <div className="text-center text-gray-500">Loading rankings...</div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="p-0" style={{ 
-      background: "rgba(255, 255, 255, 0.6)", 
-      backdropFilter: "blur(10px)", 
-      border: "none",
-      boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
-    }}>
-      <CardContent className="p-0">
-        <div className="w-full bg-transparent rounded-2xl p-6">
-          {/* Header */}
-          <div className="flex items-center justify-center mb-6">
-            <h3 className="text-xl font-bold text-banana-green-dark flex items-center space-x-2">
-              <Trophy size={24} />
-              <span>Live Rankings</span>
-            </h3>
-          </div>
+    <Card variant="glass" style={{backgroundColor: 'rgba(234, 178, 8, 0.493)'}}>
+      <CardContent variant="glass">
+        {/* Header */}
+        <Heading icon={Trophy} align="center">
+          Live Rankings
+        </Heading>
 
-      {/* Rankings List */}
-      <div className="space-y-3">
+        {/* Rankings List */}
+        <div className="space-y-3">
         {rankings.map((player, index) => {
           const rank = index + 1;
           const progressPercentage = getProgressPercentage(player.checkpoint, player.totalCheckpoints);
@@ -185,8 +170,7 @@ const RealTimeRanking = ({ currentUser }) => {
             </div>
           );
         })}
-      </div>
-      </div>
+        </div>
       </CardContent>
     </Card>
   );

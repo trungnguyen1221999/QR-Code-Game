@@ -12,12 +12,12 @@
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Comic Neue', cursive;
+  font-family: 'Comic Neue', cursive !important;
   font-weight: 700;
 }
 
 .font-cute-heading {
-  font-family: 'Comic Neue', cursive;
+  font-family: 'Comic Neue', cursive !important;
 }
 
 .font-cute-text {
@@ -140,7 +140,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-cute-pink {
   @apply px-6 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105;
   background: var(--cute-pink);
-  color: var(--banana-green-700);
+  color: black;
   border: 2px solid var(--cute-pink-400);
 }
 
@@ -335,6 +335,19 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(220, 252, 231, 0.8);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+/* Glassmorphism card variants */
+.card-glass {
+  @apply rounded-2xl p-0 border-none;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.card-glass-content {
+  @apply p-6 bg-transparent rounded-2xl;
 }
 
 @theme inline {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Target } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
+import Heading from "@/components/ui/Heading";
 
 const CheckpointBar = ({ currentCheckpoint = 0 }) => {
   const [progress, setProgress] = useState(0);
@@ -13,20 +14,13 @@ const CheckpointBar = ({ currentCheckpoint = 0 }) => {
   }, [currentCheckpoint]);
 
   return (
-    <Card className="p-0" style={{ 
-      background: "rgba(255, 255, 255, 0.6)", 
-      backdropFilter: "blur(10px)", 
-      border: "none",
-      boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
-    }}>
-      <CardContent className="p-0">
-        <div className="w-full bg-transparent rounded-2xl p-6">
+    <Card style={{backgroundColor: 'rgba(255, 12, 4, 0.582)'}}>
+      <CardContent variant="glass">
           {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-banana-green-dark flex items-center space-x-2">
-              <Target size={24} />
-              <span>Your Journey</span>
-            </h3>
+          <div className="flex items-center justify-between">
+            <Heading icon={Target} align="left">
+              Your Journey
+            </Heading>
             <div className="text-sm text-banana-green">
               {currentCheckpoint} / {maxCheckpoints}
             </div>
@@ -41,7 +35,7 @@ const CheckpointBar = ({ currentCheckpoint = 0 }) => {
               ></div>
             </div>
           </div>
-        </div>
+       
       </CardContent>
     </Card>
   );

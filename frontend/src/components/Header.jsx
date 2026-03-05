@@ -78,11 +78,11 @@ const Header = ({ isLoggedIn, user, onLogout }) => {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link to="/auth/login" className="btn-banana">
-                  Login
+                <Link to="/auth/login">
+                  <Button variant="banana">Login</Button>
                 </Link>
-                <Link to="/auth/signup" className="btn-cute-pink">
-                  Sign Up
+                <Link to="/auth/signup">
+                  <Button variant="cute-pink">Sign Up</Button>
                 </Link>
               </div>
             )}

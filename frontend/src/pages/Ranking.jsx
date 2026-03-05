@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Trophy, Medal, Crown, Star, Users, Calendar } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Ranking = () => {
   const [activeTab, setActiveTab] = useState('weekly');
@@ -218,10 +219,10 @@ const Ranking = () => {
               <div className="text-banana-green">Points</div>
             </div>
           </div>
-          <button className="btn-banana mt-4 inline-flex items-center space-x-2">
+          <Button variant="banana" className="mt-4 inline-flex items-center space-x-2">
             <span>Play to Rank Up</span>
             <Trophy size={20} />
-          </button>
+          </Button>
         </div>
       </div>
     </div>
