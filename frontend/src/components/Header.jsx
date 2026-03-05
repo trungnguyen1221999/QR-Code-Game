@@ -1,6 +1,6 @@
 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Info, Phone, Trophy, User, LogOut, Menu, X } from 'lucide-react';
+import { Home, Info, Phone, Trophy, User, LogOut, Menu } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import { Button } from './ui/button';
@@ -115,7 +115,7 @@ const Header = ({ isLoggedIn, user, onLogout, mobileNavOpen, setMobileNavOpen })
               onClick={() => setMobileNavOpen((open) => !open)}
               aria-label="Toggle navigation menu"
             >
-              {mobileNavOpen ? <X size={28} /> : <Menu size={28} />}
+               <Menu size={28} />
             </button>
           </div>
         </div>

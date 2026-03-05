@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import CheckpointBar from '../components/game/CheckpointBar';
 import RealTimeRanking from '../components/game/RealTimeRanking';
@@ -6,12 +6,23 @@ import QRScanner from '../components/game/QRScanner';
 import Score from '../components/game/Score';
 import MiniGame from '../components/popup/minigames/MiniGame';
 
-const PlayPage = () => {
+const PlayPage = ({ mobileNavOpen }) => {
   const [gameData, setGameData] = useState({
     currentCheckpoint: 1,
     isScanning: false,
     showMiniGame: false
   });
+  const [showScore, setShowScore] = useState(true);
+
+  useEffect(() => {
+    if (mobileNavOpen) {
+      setShowScore(false);
+    } else {
+      // Delay showing score for 1s after menu closes
+      const timer = setTimeout(() => setShowScore(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [mobileNavOpen]);
 
   // User data for ranking
   const currentUser = {
@@ -43,10 +54,12 @@ const PlayPage = () => {
   return (
     <>
       {/* Score component - Fixed position, highest z-index */}
-      <Score 
-        score={currentUser.score} 
-        stars={Math.floor(gameData.currentCheckpoint / 2)} 
-      />
+      {showScore && (
+        <Score 
+          score={currentUser.score} 
+          stars={Math.floor(gameData.currentCheckpoint / 2)} 
+        />
+      )}
       
       <div 
         className="min-h-screen bg-no-repeat md:bg-repeat bg-cover bg-center" 
