@@ -87,17 +87,19 @@ const SignUp = ({ onLogin }) => {
       }}
     >
       <div className="w-full max-w-sm sm:max-w-md px-2 sm:px-0">
-        <Card className="overflow-hidden" style={{ 
+        <Card style={{ 
           background: "rgba(255, 255, 255, 0.6)", 
           backdropFilter: "blur(10px)", 
           border: "1px solid rgba(255, 255, 255, 0.3)",
-          boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+          boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+          paddingTop: "10px",
+          paddingBottom: "10px"
         }}>
           <CardContent className="p-0">
             <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-0">
               {/* Header */}
               <div className="text-center mb-6 sm:mb-8">
-                <img src="/signup.gif" alt="Sign Up" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
+                <img src="/signup.gif" alt="Sign Up" className="mx-auto mb-3 sm:mb-4 h-30 sm:h-auto" />
                 <h1 className="text-2xl sm:text-3xl font-bold text-banana-green-dark text-shadow-cute">
                   Come to Play
                 </h1>

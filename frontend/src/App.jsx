@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import './App.css';
@@ -21,6 +21,8 @@ import ChooseAvatar from './pages/ChooseAvatar';
 function App() {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef(null);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -33,6 +35,52 @@ function App() {
     setIsLoggedIn(false);
     localStorage.removeItem('user');
   };
+
+  // Music control functions
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isMusicPlaying) {
+        audioRef.current.pause();
+        setIsMusicPlaying(false);
+      } else {
+        audioRef.current.play();
+        setIsMusicPlaying(true);
+      }
+    }
+  };
+
+  // Initialize audio and user data
+  useEffect(() => {
+    // Check if user is logged in from localStorage
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
+      setIsLoggedIn(true);
+    }
+
+    // Initialize background music
+    if (audioRef.current) {
+      audioRef.current.volume = 0.3; // Set volume to 30%
+      audioRef.current.loop = true; // Loop the music
+      
+      // Auto-play after user interaction
+      const playMusic = () => {
+        if (audioRef.current && !isMusicPlaying) {
+          audioRef.current.play()
+            .then(() => setIsMusicPlaying(true))
+            .catch(err => console.log('Audio play failed:', err));
+        }
+      };
+
+      // Add click listener for auto-play
+      document.addEventListener('click', playMusic, { once: true });
+      
+      return () => {
+        document.removeEventListener('click', playMusic);
+      };
+    }
+  }, []);
 
   // Check if user is logged in from localStorage on app start
   useState(() => {
@@ -47,6 +95,30 @@ function App() {
   return (
     <Router>
       <div className="App">
+        {/* Background Music */}
+        <audio
+          ref={audioRef}
+          src="/backgroundmusic.mp3"
+          preload="auto"
+        />
+        
+        {/* Music Control Button */}
+        <button
+          onClick={toggleMusic}
+          className="fixed top-4 left-4 z-[9999] bg-white/90 hover:bg-white backdrop-blur-md rounded-full p-3 shadow-lg transition-all duration-200"
+          title={isMusicPlaying ? "Pause Music" : "Play Music"}
+        >
+          {isMusicPlaying ? (
+            <svg className="w-6 h-6 text-banana-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-banana-green-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
+
         <Routes>
           {/* Login Layer - for authentication pages */}
           <Route path="/auth" element={<LoginLayer onLogin={handleLogin} />}>

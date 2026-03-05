@@ -63,13 +63,15 @@ const Login = ({ onLogin }) => {
           background: "rgba(255, 255, 255, 0.6)", 
           backdropFilter: "blur(10px)", 
           border: "1px solid rgba(255, 255, 255, 0.3)",
-          boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+          boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+          paddingTop: "10px",
+          paddingBottom: "10px"
         }}>
           <CardContent className="p-0">
             <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-0">
               {/* Header */}
               <div className="text-center mb-6 sm:mb-8">
-                <img src="/login.gif" alt="Login" className="mx-auto mb-3 sm:mb-4 h-12 sm:h-auto" />
+                <img src="/login.gif" alt="Login" className="mx-auto mb-3 sm:mb-4 h-25 sm:h-auto" />
                 <h1 className="text-2xl sm:text-3xl font-bold text-banana-green-dark text-shadow-cute">
                   Let's Play Together
                 </h1>
