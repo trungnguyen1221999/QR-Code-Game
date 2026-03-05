@@ -167,7 +167,7 @@ const ChooseAvatar = ({ onLogin }) => {
             {/* Current Selection Preview */}
             <div className="text-center mb-8">
               <div 
-                className="w-24 h-24 mx-auto mb-4 bg-cute-gradient rounded-full flex items-center justify-center text-4xl border-4 overflow-hidden"
+                className="w-35 h-35 mx-auto mb-4 bg-cute-gradient rounded-full flex items-center justify-center text-4xl border-4 overflow-hidden"
                 style={{
                   borderColor: selectedAvatar?.borderColor || '#22c55e' // Default green or avatar color
                 }}
