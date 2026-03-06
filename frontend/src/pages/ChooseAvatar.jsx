@@ -68,13 +68,14 @@ const ChooseAvatar = ({ onLogin }) => {
         if (updatedUser.role === 'host') {
           navigate('/');
         } else {
-          updatedUser.isInWaitingRoom = true;
-          saveUserToLocal(updatedUser);
-          await userApi.joinWaitingRoom(updatedUser._id);
+          // Join waiting room, lấy user mới từ backend để đồng bộ localStorage
+          const joinRes = await userApi.joinWaitingRoom(updatedUser._id);
+          const joinedUser = joinRes.data.user || joinRes.data;
+          saveUserToLocal(joinedUser);
           // Heartbeat ping every 30 seconds
           if (window.heartbeatInterval) clearInterval(window.heartbeatInterval);
           window.heartbeatInterval = setInterval(() => {
-            userApi.heartbeat(updatedUser._id).catch(() => {});
+            userApi.heartbeat(joinedUser._id).catch(() => {});
           }, 30000);
           navigate('/waiting-room');
         }
@@ -85,17 +86,6 @@ const ChooseAvatar = ({ onLogin }) => {
     }
   };
 
-
-  // Skip avatar selection
-  const handleSkip = async () => {
-    try {
-      onLogin(user);
-      toast.success('Welcome to QR Game!');
-      navigate('/');
-    } catch (error) {
-      toast.error('Something went wrong');
-    }
-  };
 
   if (!user) {
     // If no user data, redirect to signup
