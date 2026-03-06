@@ -5,6 +5,8 @@ import { User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import userApi from '../api/userApi';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,54 +28,25 @@ const SignUp = ({ onLogin }) => {
     resolver: zodResolver(signUpSchema)
   });
 
-  const onSubmit = async (data) => {
-    try {
-      // Temporary: Mock user creation without API call
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate loading
-      
-      // Create mock user object
-      const mockUser = {
-        _id: 'temp_' + Date.now(),
-        username: data.username,
-        name: data.name,
-        avatar: '',
-        money: 0,
-        items: [],
-        numberOfKey: 0,
-        finalScore: 0
-      };
-      
-      // Redirect to choose avatar page with mock user
+
+  const mutation = useMutation({
+    mutationFn: (data) => userApi.create({
+      username: data.username,
+      name: data.name,
+      avatar: ''
+    }),
+    onSuccess: (response) => {
+      const user = response.data.user || response.data;
       toast.success('Registration successful! Now choose your avatar.');
-      navigate('/auth/choose-avatar', { state: { user: mockUser } });
-
-      /* TODO: Replace with real API call when backend is ready
-      const response = await fetch('http://localhost:5000/api/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: data.username,
-          name: data.name,
-          avatar: ''
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
-
-      const result = await response.json();
-      
-      // Redirect to choose avatar page instead of auto login
-      toast.success('Registration successful! Now choose your avatar.');
-      navigate('/auth/choose-avatar', { state: { user: result.user } });
-      */
-    } catch (error) {
-      toast.error(error.message || 'Registration failed!');
+      navigate('/auth/choose-avatar', { state: { user } });
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || error.message || 'Registration failed!');
     }
+  });
+
+  const onSubmit = (data) => {
+    mutation.mutate(data);
   };
 
   return (
@@ -156,11 +129,11 @@ const SignUp = ({ onLogin }) => {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={mutation.isLoading}
                   variant="cute-pink"
                   className="w-full text-lg"
                 >
-                  {isSubmitting ? (
+                  {mutation.isLoading ? (
                     <div className="flex items-center justify-center space-x-2">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                       <span>Creating account...</span>

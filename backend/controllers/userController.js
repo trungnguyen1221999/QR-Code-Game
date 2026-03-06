@@ -1,4 +1,29 @@
+// Upload avatar for user
+export const uploadUserAvatar = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!req.avatarUrl) {
+      return res.status(400).json({ message: 'No avatar uploaded' });
+    }
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { avatar: req.avatarUrl },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json({
+      message: 'Avatar uploaded successfully',
+      avatarUrl: req.avatarUrl,
+      user
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 import User from '../models/User.js';
+import cloudinary from '../config/cloudinary.js';
 import { validationResult } from 'express-validator';
 
 // Get all users

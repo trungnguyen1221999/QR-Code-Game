@@ -8,8 +8,11 @@ import {
   deleteUser,
   getLeaderboard,
   addItemToUser,
-  removeItemFromUser
+  removeItemFromUser,
+  uploadUserAvatar
 } from '../controllers/userController.js';
+
+import uploadAvatar from '../middleware/uploadAvatar.js';
 
 const router = express.Router();
 
@@ -32,6 +35,10 @@ router.get('/:id', getUserById);
 router.post('/', createUserValidation, createUser);
 router.put('/:id', updateUser);
 router.delete('/:id', deleteUser);
+
+// Upload avatar for user
+router.post('/:id/avatar', uploadAvatar, uploadUserAvatar);
+
 router.post('/:id/items/:itemId', addItemToUser);
 router.delete('/:id/items/:itemId', removeItemFromUser);
 
