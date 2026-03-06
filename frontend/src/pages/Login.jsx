@@ -65,13 +65,14 @@ const Login = ({ onLogin }) => {
       if (user.role === 'host') {
         navigate('/');
       } else {
-        user.isInWaitingRoom = true;
-        saveUserToLocal(user);
-        await userApi.joinWaitingRoom(user._id);
+        // Join waiting room, lấy user mới từ backend để đồng bộ localStorage
+        const joinRes = await userApi.joinWaitingRoom(user._id);
+        const joinedUser = joinRes.data.user || joinRes.data;
+        saveUserToLocal(joinedUser);
         // Heartbeat ping every 30 seconds
         if (window.heartbeatInterval) clearInterval(window.heartbeatInterval);
         window.heartbeatInterval = setInterval(() => {
-          userApi.heartbeat(user._id).catch(() => {});
+          userApi.heartbeat(joinedUser._id).catch(() => {});
         }, 30000);
         navigate('/waiting-room');
       }
