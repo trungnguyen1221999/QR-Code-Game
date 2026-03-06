@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import { getHostFromLocal, removeHostFromLocal } from '../lib/localHost';
 import { predefinedAvatars } from '@/data/avatarData';
 import hostApi from '../api/hostApi';
+import userApi from '../api/userApi';
 import { saveHostToLocal } from '../lib/localHost';
 import { useRefetch } from '../context/RefetchContext';
 
@@ -19,7 +20,18 @@ const HostDashboard = () => {
   const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState('');
   const [isSubmittingAvatar, setIsSubmittingAvatar] = useState(false);
+  const [onlineUserCount, setOnlineUserCount] = useState(0);
   const { needRefetch, setNeedRefetch } = useRefetch();
+  // Fetch online user count
+  const fetchOnlineUserCount = async () => {
+    try {
+      const res = await userApi.getOnlineUserCount();
+      setOnlineUserCount(res.data.onlineUserCount || 0);
+    } catch (error) {
+      setOnlineUserCount(0);
+    }
+  };
+
 
   useEffect(() => {
     if (!host) {
@@ -50,7 +62,11 @@ const HostDashboard = () => {
   useEffect(() => {
     if (!host) return;
     fetchPlayers();
-    const interval = setInterval(fetchPlayers, 5000);
+    fetchOnlineUserCount();
+    const interval = setInterval(() => {
+      fetchPlayers();
+      fetchOnlineUserCount();
+    }, 5000);
     return () => clearInterval(interval);
   }, [host]);
 
@@ -96,6 +112,7 @@ const HostDashboard = () => {
       const updatedHost = res.data.host || res.data;
       saveHostToLocal(updatedHost);
       setHost(updatedHost);
+      window.dispatchEvent(new Event('hostUpdated'));
       toast.success('Avatar saved!');
     } catch (error) {
       toast.error('Failed to save avatar');
@@ -149,6 +166,9 @@ const HostDashboard = () => {
                     {host.name}
                   </h1>
                   <p className="text-gray-600 text-sm">@{host.username}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-green-700 font-semibold text-xs flex items-center"><Users size={14} className="mr-1" />Online: {onlineUserCount}</span>
+                  </div>
                 </div>
               </div>
               <Button variant="outline" className="text-red-500 border-red-300 hover:bg-red-50" onClick={handleLogout}>

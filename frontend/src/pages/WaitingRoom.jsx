@@ -7,15 +7,21 @@ import userApi from '../api/userApi';
 const WaitingRoom = ({ user }) => {
   const navigate = useNavigate();
 
-  // Join waiting room on mount, leave on unmount
+  // Join waiting room on mount, leave on unmount, and heartbeat ping
   useEffect(() => {
+    let heartbeatInterval;
     if (user?._id) {
       userApi.joinWaitingRoom(user._id).catch(() => {});
+      // Heartbeat ping every 30 seconds
+      heartbeatInterval = setInterval(() => {
+        userApi.heartbeat(user._id).catch(() => {});
+      }, 30000);
     }
     return () => {
       if (user?._id) {
         userApi.leaveWaitingRoom(user._id).catch(() => {});
       }
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
     };
   }, [user]);
 

@@ -13,13 +13,19 @@ import {
   loginUser,
   logoutUser,
   joinWaitingRoom,
-  leaveWaitingRoom
+  leaveWaitingRoom,
+  heartbeat,
+  getOnlineUserCount
 } from '../controllers/userController.js';
-
-
 import uploadAvatar from '../middleware/uploadAvatar.js';
 
 const router = express.Router();
+
+// Heartbeat endpoint
+router.post('/:id/heartbeat', heartbeat);
+
+// Online user count endpoint
+router.get('/online/count', getOnlineUserCount);
 
 // Validation middleware
 const createUserValidation = [

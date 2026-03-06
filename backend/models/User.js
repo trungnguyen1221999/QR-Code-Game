@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema({
   isInWaitingRoom: {
     type: Boolean,
     default: false
+  },
+  lastPing: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

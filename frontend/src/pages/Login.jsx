@@ -25,6 +25,7 @@ const Login = ({ onLogin }) => {
 
   useEffect(() => {
     const localUser = getUserFromLocal();
+    let heartbeatInterval;
     if (localUser) {
       onLogin(localUser);
       if (localUser.role === 'host') {
@@ -33,9 +34,16 @@ const Login = ({ onLogin }) => {
         localUser.isInWaitingRoom = true;
         saveUserToLocal(localUser);
         userApi.joinWaitingRoom(localUser._id).catch(() => {});
+        // Heartbeat ping every 30 seconds
+        heartbeatInterval = setInterval(() => {
+          userApi.heartbeat(localUser._id).catch(() => {});
+        }, 30000);
         navigate('/waiting-room');
       }
     }
+    return () => {
+      if (heartbeatInterval) clearInterval(heartbeatInterval);
+    };
   }, []); // Only run once on mount
 
   const {
@@ -60,6 +68,11 @@ const Login = ({ onLogin }) => {
         user.isInWaitingRoom = true;
         saveUserToLocal(user);
         await userApi.joinWaitingRoom(user._id);
+        // Heartbeat ping every 30 seconds
+        if (window.heartbeatInterval) clearInterval(window.heartbeatInterval);
+        window.heartbeatInterval = setInterval(() => {
+          userApi.heartbeat(user._id).catch(() => {});
+        }, 30000);
         navigate('/waiting-room');
       }
     },

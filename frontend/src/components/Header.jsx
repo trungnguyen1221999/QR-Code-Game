@@ -14,10 +14,16 @@ const Header = ({ isLoggedIn, user, onLogout, mobileNavOpen, setMobileNavOpen })
   const navigate = useNavigate();
   const [host, setHost] = useState(getHostFromLocal());
 
-  // Re-check host from localStorage when route changes
+  // Re-check host from localStorage when route changes or host updates
   useEffect(() => {
     setHost(getHostFromLocal());
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleHostUpdated = () => setHost(getHostFromLocal());
+    window.addEventListener('hostUpdated', handleHostUpdated);
+    return () => window.removeEventListener('hostUpdated', handleHostUpdated);
+  }, []);
 
   const isHost = !!host;
   const isUser = isLoggedIn && user;

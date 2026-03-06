@@ -1,3 +1,32 @@
+// Heartbeat: update lastPing for a user
+export const heartbeat = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { lastPing: new Date() },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ message: 'Heartbeat received', lastPing: user.lastPing });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get online user count (users with recent lastPing)
+export const getOnlineUserCount = async (req, res) => {
+  try {
+    const THRESHOLD_MINUTES = 1; // consider online if pinged within last 1 minute
+    const threshold = new Date(Date.now() - THRESHOLD_MINUTES * 60 * 1000);
+    const count = await User.countDocuments({ lastPing: { $gte: threshold } });
+    res.status(200).json({ onlineUserCount: count });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 // Login user
 export const loginUser = async (req, res) => {
   try {

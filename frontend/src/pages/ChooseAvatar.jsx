@@ -71,6 +71,11 @@ const ChooseAvatar = ({ onLogin }) => {
           updatedUser.isInWaitingRoom = true;
           saveUserToLocal(updatedUser);
           await userApi.joinWaitingRoom(updatedUser._id);
+          // Heartbeat ping every 30 seconds
+          if (window.heartbeatInterval) clearInterval(window.heartbeatInterval);
+          window.heartbeatInterval = setInterval(() => {
+            userApi.heartbeat(updatedUser._id).catch(() => {});
+          }, 30000);
           navigate('/waiting-room');
         }
     } catch (error) {
