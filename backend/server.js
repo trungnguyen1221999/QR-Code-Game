@@ -6,6 +6,7 @@ import itemRoutes from './routes/itemRoutes.js';
 import shopRoutes from './routes/shopRoutes.js';
 import checkpointRoutes from './routes/checkpointRoutes.js';
 import minigameRoutes from './routes/minigameRoutes.js';
+import hostRoutes from './routes/hostRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use('/api/items', itemRoutes);
 app.use('/api/shops', shopRoutes);
 app.use('/api/checkpoints', checkpointRoutes);
 app.use('/api/minigames', minigameRoutes);
+app.use('/api/hosts', hostRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

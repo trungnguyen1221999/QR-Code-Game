@@ -18,6 +18,11 @@ const userApi = {
       },
     });
   },
+
+  login: (username) => axios.post('/users/login', { username }),
+  logout: () => axios.post('/users/logout'),
+  joinWaitingRoom: (id) => axios.put(`/users/${id}/join-waiting-room`),
+  leaveWaitingRoom: (id) => axios.put(`/users/${id}/leave-waiting-room`),
 };
 
 export default userApi;

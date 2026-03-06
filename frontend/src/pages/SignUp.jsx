@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import userApi from '../api/userApi';
+import { saveUserToLocal } from '../lib/localUser';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,8 +38,13 @@ const SignUp = ({ onLogin }) => {
     }),
     onSuccess: (response) => {
       const user = response.data.user || response.data;
+      saveUserToLocal(user);
       toast.success('Registration successful! Now choose your avatar.');
-      navigate('/auth/choose-avatar', { state: { user } });
+      if (user.role === 'host') {
+        navigate('/');
+      } else {
+        navigate('/auth/choose-avatar', { state: { user } });
+      }
     },
     onError: (error) => {
       toast.error(error?.response?.data?.message || error.message || 'Registration failed!');

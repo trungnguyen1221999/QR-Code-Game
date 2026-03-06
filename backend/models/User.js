@@ -35,9 +35,19 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+
   finalScore: {
     type: Number,
     default: 0
+  },
+  approve: {
+    type: String,
+    enum: ['yes', 'no', 'pending'],
+    default: 'pending'
+  },
+  isInWaitingRoom: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

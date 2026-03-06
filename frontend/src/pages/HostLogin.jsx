@@ -9,51 +9,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
+import hostApi from '../api/hostApi';
+import { saveHostToLocal, removeHostFromLocal } from '../lib/localHost';
 
-const adminLoginSchema = z.object({
+const hostLoginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
-  password: z.string().min(1, 'Password is required')
+  password: z.string().min(1, 'Password is required'),
 });
 
-const AdminLogin = ({ onLogin }) => {
+const HostLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting }
   } = useForm({
-    resolver: zodResolver(adminLoginSchema),
+    resolver: zodResolver(hostLoginSchema),
     defaultValues: {
-      username: 'admin',
-      password: 'admin'
+      username: '',
+      password: '',
     }
   });
 
   const onSubmit = async (data) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Check admin credentials
-      if (data.username === 'admin' && data.password === 'admin') {
-        const userData = {
-          id: 'admin',
-          name: 'Administrator',
-          username: data.username,
-          avatar: '👑',
-          role: 'admin'
-        };
-        
-        onLogin(userData);
-        toast.success('Admin login successful!');
-        navigate('/admin'); // Navigate to admin dashboard
-      } else {
-        toast.error('Invalid admin credentials!');
-      }
+      const response = await hostApi.login(data.username, data.password);
+      const host = response.data.host || response.data;
+      saveHostToLocal(host);
+      toast.success('Host login successful!');
+      navigate('/host-dashboard');
     } catch (error) {
-      toast.error('Admin login failed!');
+      toast.error(error?.response?.data?.message || error.message || 'Host login failed!');
     }
   };
 
@@ -78,12 +66,12 @@ const AdminLogin = ({ onLogin }) => {
             <form onSubmit={handleSubmit(onSubmit)} className="p-6">
               {/* Header */}
               <div className="text-center mb-8">
-                <img src="/admin.png" alt="Admin" className="mx-auto mb-4" />
-                <h1 className="text-3xl font-bold text-red-700 text-shadow-cute">
-                  Admin Access
+                <img src="/admin.png" alt="Host" className="mx-auto mb-4" />
+                <h1 className="text-3xl font-bold text-green-700 text-shadow-cute">
+                  Host Access
                 </h1>
                 <p className="text-gray-700 mt-2">
-                  Restricted area - Administrators only
+                  Restricted area - Hosts only
                 </p>
               </div>
 
@@ -91,7 +79,7 @@ const AdminLogin = ({ onLogin }) => {
                 {/* Username Field */}
                 <Field>
                   <FieldLabel htmlFor="username" className="text-sm font-semibold text-gray-700">
-                    Admin Username
+                    Host Username
                   </FieldLabel>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" size={18} />
@@ -100,7 +88,7 @@ const AdminLogin = ({ onLogin }) => {
                       type="text"
                       {...register('username')}
                       className={`input-cute w-full ${errors.username ? 'border-red-400' : ''}`}
-                      placeholder="Enter admin username"
+                      placeholder="Enter host username"
                     />
                   </div>
                   {errors.username && (
@@ -113,7 +101,7 @@ const AdminLogin = ({ onLogin }) => {
                 {/* Password Field */}
                 <Field>
                   <FieldLabel htmlFor="password" className="text-sm font-semibold text-gray-700">
-                    Admin Password
+                    Host Password
                   </FieldLabel>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none" size={18} />
@@ -122,7 +110,7 @@ const AdminLogin = ({ onLogin }) => {
                       type={showPassword ? "text" : "password"}
                       {...register('password')}
                       className={`input-cute w-full pr-12 ${errors.password ? 'border-red-400' : ''}`}
-                      placeholder="Enter admin password"
+                      placeholder="Enter host password"
                     />
                     <button
                       type="button"
@@ -143,7 +131,7 @@ const AdminLogin = ({ onLogin }) => {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-red-600 hover:bg-red-700 text-white w-full text-lg py-3 rounded-lg font-semibold"
+                  className="bg-green-600 hover:bg-green-700 text-white w-full text-lg py-3 rounded-lg font-semibold"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center space-x-2">
@@ -153,28 +141,22 @@ const AdminLogin = ({ onLogin }) => {
                   ) : (
                     <>
                       <Shield className="mr-2" size={18} />
-                      Admin Sign In
+                      Host Sign In
                     </>
                   )}
                 </Button>
               </div>
 
               {/* Links */}
-              <div className="text-center mt-6 space-y-3">
-                <FieldDescription className="text-gray-600 text-sm">
-                  Default credentials: admin / admin
-                </FieldDescription>
+              <div className="text-center mt-2 space-y-3">
+                <Link to="/host-signup">
+                  <Button variant="banana" className="w-full mb-2">+ Host Sign Up</Button>
+                </Link>
                 <Link 
                   to="/login" 
                   className="text-blue-600 text-sm hover:text-blue-800 transition-colors block"
                 >
                   ← Back to user login
-                </Link>
-                <Link 
-                  to="/" 
-                  className="text-gray-500 text-sm hover:text-gray-700 transition-colors block"
-                >
-                  ← Back to home
                 </Link>
               </div>
             </form>
@@ -185,4 +167,4 @@ const AdminLogin = ({ onLogin }) => {
   );
 };
 
-export default AdminLogin;
+export default HostLogin;

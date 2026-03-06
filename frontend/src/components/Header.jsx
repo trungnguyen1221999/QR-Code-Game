@@ -1,19 +1,66 @@
-
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Info, Phone, Trophy, User, LogOut, Menu } from 'lucide-react';
+import { Home, Info, Phone, Trophy, User, LogOut, Menu, Crown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-// import Overlayer from './popup/Overlayer';
+import { useMutation } from '@tanstack/react-query';
+import userApi from '../api/userApi';
+import hostApi from '../api/hostApi';
+import { removeUserFromLocal } from '../lib/localUser';
+import { getHostFromLocal, removeHostFromLocal } from '../lib/localHost';
 
 const Header = ({ isLoggedIn, user, onLogout, mobileNavOpen, setMobileNavOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [host, setHost] = useState(getHostFromLocal());
+
+  // Re-check host from localStorage when route changes
+  useEffect(() => {
+    setHost(getHostFromLocal());
+  }, [location.pathname]);
+
+  const isHost = !!host;
+  const isUser = isLoggedIn && user;
+
+  // Determine who to display
+  const displayAvatar = isHost ? host.avatar : user?.avatar;
+  const displayName = isHost ? host.name : user?.name;
+
+  const userLogoutMutation = useMutation({
+    mutationFn: () => userApi.logout(),
+    onSuccess: () => {
+      removeUserFromLocal();
+      onLogout();
+      toast.success('Logged out successfully!');
+      navigate('/auth/login');
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || error.message || 'Logout failed!');
+    }
+  });
+
+  const hostLogoutMutation = useMutation({
+    mutationFn: () => hostApi.logout(),
+    onSuccess: () => {
+      removeHostFromLocal();
+      setHost(null);
+      toast.success('Host logged out!');
+      navigate('/host-login');
+    },
+    onError: () => {
+      // still logout locally
+      removeHostFromLocal();
+      setHost(null);
+      navigate('/host-login');
+    }
+  });
 
   const handleLogout = () => {
-    onLogout();
-    toast.success('Logged out successfully!');
-    navigate('/auth/login');
+    if (isHost) {
+      hostLogoutMutation.mutate();
+    } else {
+      userLogoutMutation.mutate();
+    }
   };
 
   // mobileNavOpen and setMobileNavOpen are now controlled by App
@@ -25,7 +72,7 @@ const Header = ({ isLoggedIn, user, onLogout, mobileNavOpen, setMobileNavOpen })
     { path: '/contact', label: 'Contact', icon: Phone },
     { path: '/ranking', label: 'Ranking', icon: Trophy }
   ];
-  if (isLoggedIn) {
+  if (isUser || isHost) {
     navItems = [
       ...navItems,
       { path: '/logout', label: 'Logout', icon: LogOut, isLogout: true }
@@ -87,23 +134,54 @@ const Header = ({ isLoggedIn, user, onLogout, mobileNavOpen, setMobileNavOpen })
             ))}
           </nav>
 
-          {/* User Actions */}
+          {/* User/Host Actions */}
           <div className="flex items-center space-x-4">
-            {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-black font-black text-lg" style={{ fontFamily: "'Comic Neue', cursive", textShadow: "1px 1px 2px rgba(0,0,0,0.1)" }}>
-                  <User size={20} />
-                  <span className="font-black">{user?.name || 'User'}</span>
+            {(isHost || isUser) ? (
+              <div className="flex items-center space-x-3">
+                {displayAvatar ? (
+                  <img
+                    src={displayAvatar}
+                    alt="avatar"
+                    className={`w-10 h-10 rounded-full border-2 object-cover ${
+                      isHost ? 'border-green-500' : 'border-banana-green-400'
+                    }`}
+                  />
+                ) : isHost ? (
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center border-2 border-green-500">
+                    <Crown size={20} className="text-green-600" />
+                  </div>
+                ) : (
+                  <User size={32} className="text-banana-green-400" />
+                )}
+                <div className="flex flex-col">
+                  <span className="font-black text-lg leading-tight" style={{ fontFamily: "'Comic Neue', cursive", textShadow: "1px 1px 2px rgba(0,0,0,0.1)" }}>
+                    {displayName}
+                  </span>
+                  {isHost && (
+                    <span className="text-[10px] font-bold text-green-600 bg-green-100 px-1.5 rounded-full w-fit">HOST</span>
+                  )}
                 </div>
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link to="/auth/login">
-                  <Button variant="banana">Login</Button>
-                </Link>
-                <Link to="/auth/signup">
-                  <Button variant="cute-pink">Sign Up</Button>
-                </Link>
+                {location.pathname === '/auth/login' ? (
+                  <Link to="/auth/signup">
+                    <Button variant="cute-pink">Sign Up</Button>
+                  </Link>
+                ) : location.pathname === '/auth/signup' ? (
+                  <Link to="/auth/login">
+                    <Button variant="banana">Login</Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/auth/login">
+                      <Button variant="banana">Login</Button>
+                    </Link>
+                    <Link to="/auth/signup">
+                      <Button variant="cute-pink">Sign Up</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>

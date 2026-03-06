@@ -120,6 +120,17 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.1), 0 2px 4px -1px rgba(34, 197, 94, 0.06);
 }
 
+/* Animated loading dots for WaitingRoom */
+@keyframes pulseLoading {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.animate-pulse-loading {
+  animation: pulseLoading 1s infinite;
+}
+
 .shadow-cute-lg {
   box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.1), 0 4px 6px -2px rgba(34, 197, 94, 0.05);
 }

@@ -3,11 +3,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { getUserFromLocal } from '../lib/localUser';
 import { toast } from 'react-hot-toast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
+import { useMutation } from '@tanstack/react-query';
+import userApi from '../api/userApi';
+import { saveUserToLocal } from '../lib/localUser';
+
+
 
 const loginSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters')
@@ -15,7 +22,22 @@ const loginSchema = z.object({
 
 const Login = ({ onLogin }) => {
   const navigate = useNavigate();
-  
+
+  useEffect(() => {
+    const localUser = getUserFromLocal();
+    if (localUser) {
+      onLogin(localUser);
+      if (localUser.role === 'host') {
+        navigate('/');
+      } else {
+        localUser.isInWaitingRoom = true;
+        saveUserToLocal(localUser);
+        userApi.joinWaitingRoom(localUser._id).catch(() => {});
+        navigate('/waiting-room');
+      }
+    }
+  }, []); // Only run once on mount
+
   const {
     register,
     handleSubmit,
@@ -24,28 +46,30 @@ const Login = ({ onLogin }) => {
     resolver: zodResolver(loginSchema)
   });
 
-  const onSubmit = async (data) => {
-    try {
-      // Check if user exists by username (simple login without password)
-      const response = await fetch(`http://localhost:5000/api/users?username=${data.username}`);
-      
-      if (!response.ok) {
-        throw new Error('User not found');
-      }
 
-      const users = await response.json();
-      const user = users.find(u => u.username === data.username);
-      
-      if (!user) {
-        throw new Error('User not found. Please sign up first.');
-      }
-      
+  const mutation = useMutation({
+    mutationFn: ({ username }) => userApi.login(username),
+    onSuccess: async (response) => {
+      const user = response.data.user || response.data;
+      saveUserToLocal(user);
       onLogin(user);
       toast.success('Welcome back!');
-      navigate('/');
-    } catch (error) {
-      toast.error(error.message || 'Login failed!');
+      if (user.role === 'host') {
+        navigate('/');
+      } else {
+        user.isInWaitingRoom = true;
+        saveUserToLocal(user);
+        await userApi.joinWaitingRoom(user._id);
+        navigate('/waiting-room');
+      }
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message || error.message || 'Login failed!');
     }
+  });
+
+  const onSubmit = (data) => {
+    mutation.mutate({ username: data.username });
   };
 
   return (
@@ -105,11 +129,11 @@ const Login = ({ onLogin }) => {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={mutation.isLoading}
                   variant="banana"
                   className="w-full text-lg"
                 >
-                  {isSubmitting ? (
+                  {mutation.isLoading ? (
                     <div className="flex items-center justify-center space-x-2">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-banana-green-700"></div>
                       <span>Joining game...</span>
@@ -133,10 +157,10 @@ const Login = ({ onLogin }) => {
                 </FieldDescription>
                 <FieldDescription className="text-red-600 text-xs sm:text-sm">
                   <Link 
-                    to="/admin-login" 
+                    to="/host-login" 
                     className="text-red-600 font-semibold hover:text-red-800 transition-colors"
                   >
-                    🔐 Are you admin?
+                    🔐 Are you host?
                   </Link>
                 </FieldDescription>
                 <Link 

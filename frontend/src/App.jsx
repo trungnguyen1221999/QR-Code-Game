@@ -1,23 +1,27 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ToastApp from './components/ToastApp';
 import MusicControlButton from './components/MusicControlButton';
 import { Home, Info, Phone, Trophy, LogOut } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { saveUserToLocal, removeUserFromLocal, getUserFromLocal } from './lib/localUser';
 import './App.css';
 import Overlayer from './components/popup/Overlayer';
 import Header from './components/Header';
 import LoginLayer from './layers/LoginLayer';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
-import ChooseAvatar from './pages/ChooseAvatar';
-import AdminLogin from './pages/AdminLogin';
+import HostLogin from './pages/HostLogin';
+import WaitingRoom from './pages/WaitingRoom';
 import UserLayer from './layers/UserLayer';
 import Play from './pages/Play';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Ranking from './pages/Ranking';
 import MobileNavPanel from './components/MobileNavPanel';
+import HostSignUp from './pages/HostSignUp';
+import ChooseAvatar from './pages/ChooseAvatar';
+import HostDashboard from './pages/HostDashboard';
+import { RefetchProvider } from './context/RefetchContext';
 
 function App() {
 
@@ -41,13 +45,13 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     setIsLoggedIn(true);
-    localStorage.setItem('user', JSON.stringify(userData));
+    saveUserToLocal(userData);
   };
 
   const handleLogout = () => {
     setUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem('user');
+    removeUserFromLocal();
   };
 
   // Music control functions
@@ -66,10 +70,9 @@ function App() {
   // Initialize audio and user data
   useEffect(() => {
     // Check if user is logged in from localStorage
-    const savedUser = localStorage.getItem('user');
+    const savedUser = getUserFromLocal();
     if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
+      setUser(savedUser);
       setIsLoggedIn(true);
     }
 
@@ -113,6 +116,7 @@ function App() {
   }, [mobileNavOpen]);
 
   return (
+    <RefetchProvider>
     <Router>
       <div className="App">
         {/* Global Overlayer for mobile nav */}
@@ -152,8 +156,13 @@ function App() {
             <Route path="choose-avatar" element={<ChooseAvatar onLogin={handleLogin} />} />
           </Route>
 
-          {/* Admin Login - standalone route */}
-          <Route path="/admin-login" element={<AdminLogin onLogin={handleLogin} />} />
+          {/* Host Login - standalone route */}
+          <Route path="/host-login" element={<HostLogin />} />
+          <Route path="/host-signup" element={<HostSignUp />} />
+          <Route path="/host-dashboard" element={<HostDashboard />} />
+
+          {/* Waiting Room for non-host users */}
+          <Route path="/waiting-room" element={<WaitingRoom user={user} />} />
 
           {/* Redirect /login and /signup to auth routes */}
           <Route path="/login" element={<Navigate to="/auth/login" replace />} />
@@ -180,6 +189,7 @@ function App() {
         <ToastApp />
       </div>
     </Router>
+    </RefetchProvider>
   );
 }
 

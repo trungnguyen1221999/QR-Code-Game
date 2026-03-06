@@ -9,8 +9,13 @@ import {
   getLeaderboard,
   addItemToUser,
   removeItemFromUser,
-  uploadUserAvatar
+  uploadUserAvatar,
+  loginUser,
+  logoutUser,
+  joinWaitingRoom,
+  leaveWaitingRoom
 } from '../controllers/userController.js';
+
 
 import uploadAvatar from '../middleware/uploadAvatar.js';
 
@@ -41,5 +46,11 @@ router.post('/:id/avatar', uploadAvatar, uploadUserAvatar);
 
 router.post('/:id/items/:itemId', addItemToUser);
 router.delete('/:id/items/:itemId', removeItemFromUser);
-
+// Waiting room
+router.put('/:id/join-waiting-room', joinWaitingRoom);
+router.put('/:id/leave-waiting-room', leaveWaitingRoom);
+// Login user
+router.post('/login', loginUser);
+// Logout user
+router.post('/logout', logoutUser);
 export default router;

@@ -1,6 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
+import { toast } from 'react-hot-toast';
+import { getHostFromLocal, removeHostFromLocal } from '../lib/localHost';
+import hostApi from '../api/hostApi';
 
 export default function MobileNavPanel({
   navItems,
@@ -9,6 +12,24 @@ export default function MobileNavPanel({
   isOpen,
   isClosing
 }) {
+  const navigate = useNavigate();
+
+  const handleSmartLogout = async () => {
+    const host = getHostFromLocal();
+    if (host) {
+      // Host logout
+      try {
+        await hostApi.logout();
+      } catch (e) { /* still logout locally */ }
+      removeHostFromLocal();
+      toast.success('Host logged out!');
+      navigate('/host-login');
+    } else {
+      // User logout via App's onLogout
+      onLogout();
+    }
+  };
+
   // Get the first nav item and its icon
   const firstNavItem = navItems[0];
   const FirstIcon = firstNavItem?.icon;
@@ -32,7 +53,7 @@ export default function MobileNavPanel({
           firstNavItem.isLogout ? (
             <button
               key="logout"
-              onClick={() => { onClose(); onLogout(); }}
+              onClick={() => { onClose(); handleSmartLogout(); }}
               className="flex items-center gap-3 px-4 py-3 rounded-cute text-lg font-bold text-black hover:bg-cute-pink/60 transition"
               style={{ fontFamily: "'Comic Neue', cursive" }}
             >
@@ -57,7 +78,7 @@ export default function MobileNavPanel({
           isLogout ? (
             <button
               key="logout"
-              onClick={() => { onClose(); onLogout(); }}
+              onClick={() => { onClose(); handleSmartLogout(); }}
               className="flex items-center gap-3 px-4 py-3 rounded-cute text-lg font-bold text-black hover:bg-cute-pink/60 transition"
               style={{ fontFamily: "'Comic Neue', cursive" }}
             >

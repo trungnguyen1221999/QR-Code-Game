@@ -5,6 +5,8 @@ import { Upload, Camera, Check, ArrowLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { predefinedAvatars } from '@/data/avatarData';
+import userApi from '../api/userApi';
+import { saveUserToLocal } from '../lib/localUser';
 
 const ChooseAvatar = ({ onLogin }) => {
   const navigate = useNavigate();
@@ -15,7 +17,6 @@ const ChooseAvatar = ({ onLogin }) => {
   const [uploadedAvatar, setUploadedAvatar] = useState(null);
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   // Handle file upload
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -49,75 +50,36 @@ const ChooseAvatar = ({ onLogin }) => {
       toast.error('Please choose an avatar');
       return;
     }
-
     setIsSubmitting(true);
-    
     try {
-      let avatarToSave = selectedAvatar;
-      
-      // If user uploaded a file, convert to base64 for simplicity
+      let updatedUser;
       if (uploadedAvatar) {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          avatarToSave = reader.result; // base64 string
-          await updateUserAvatar(avatarToSave);
-        };
-        reader.readAsDataURL(uploadedAvatar);
-        return;
+        // Gọi API upload avatar
+        const res = await userApi.uploadAvatar(user._id, uploadedAvatar);
+        updatedUser = { ...user, avatar: res.data.avatarUrl };
+      } else if (selectedAvatar) {
+        // Gọi API update user với avatar là path của avatar có sẵn
+        const res = await userApi.update(user._id, { avatar: selectedAvatar.path });
+        updatedUser = res.data.user || res.data;
       }
-      
-      await updateUserAvatar(avatarToSave);
+        saveUserToLocal(updatedUser);
+        onLogin(updatedUser);
+        toast.success('Avatar saved successfully!');
+        if (updatedUser.role === 'host') {
+          navigate('/');
+        } else {
+          updatedUser.isInWaitingRoom = true;
+          saveUserToLocal(updatedUser);
+          await userApi.joinWaitingRoom(updatedUser._id);
+          navigate('/waiting-room');
+        }
     } catch (error) {
       toast.error('Failed to save avatar');
-      setIsSubmitting(false);
-    }
-  };
-
-  // Update user avatar in backend
-  const updateUserAvatar = async (avatar) => {
-    try {
-      // Temporary: Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Create updated user object
-      const updatedUser = {
-        ...user,
-        avatar: avatar.path || avatar // Handle both object and string avatars
-      };
-      
-      // Login with updated user data
-      onLogin(updatedUser);
-      toast.success('Avatar saved successfully!');
-      navigate('/');
-
-      /* TODO: Replace with real API call when backend is ready
-      const response = await fetch(`http://localhost:5000/api/users/${user._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          avatar: avatar
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update avatar');
-      }
-
-      const updatedUser = await response.json();
-      
-      // Login with updated user data
-      onLogin(updatedUser.user);
-      toast.success('Avatar saved successfully!');
-      navigate('/');
-      */
-    } catch (error) {
-      throw error;
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   // Skip avatar selection
   const handleSkip = async () => {
@@ -296,44 +258,32 @@ const ChooseAvatar = ({ onLogin }) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <div className="flex flex-row justify-end items-center gap-2 mt-6">
               <Button
-                onClick={handleSkip}
-                variant="ghost"
-                className="text-banana-green-600 hover:text-banana-green-800 flex items-center space-x-2"
+                onClick={() => navigate('/auth/signup')}
+                variant="outline"
+                className="border-banana-green-300 text-banana-green-700 px-6"
               >
-                <ArrowLeft size={18} />
-                <span>Skip for now</span>
+                Back to signup
               </Button>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => navigate('/auth/signup')}
-                  variant="outline"
-                  className="border-banana-green-300 text-banana-green-700"
-                >
-                  Back to signup
-                </Button>
-                
-                <Button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || (!selectedAvatar && !uploadedAvatar)}
-                  variant="banana"
-                  className="min-w-32"
-                >
-                  {isSubmitting ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-banana-green-700"></div>
-                      <span>Saving...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <Check size={18} className="mr-2" />
-                      Continue
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button
+                onClick={handleSubmit}
+                disabled={isSubmitting || (!selectedAvatar && !uploadedAvatar)}
+                variant="banana"
+                className="min-w-32 px-6"
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-banana-green-700"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Check size={18} className="mr-2" />
+                    Continue
+                  </>
+                )}
+              </Button>
             </div>
           </CardContent>
         </Card>
