@@ -23,19 +23,16 @@ export default function JoinGame({ onJoin }) {
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
+            {/* Capy mascot at top */}
+            <div className="flex justify-center">
+              <img src="/capy.gif" alt="Capybara" style={{ height: '100px', objectFit: 'contain' }} />
+            </div>
+
             <div>
               <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Join game</h2>
               <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
                 Enter the game code provided by the host
               </p>
-            </div>
-
-            {/* Avatar */}
-            <div className="flex justify-center">
-              <div className="h-16 w-16 rounded-full flex items-center justify-center border-2 text-2xl"
-                style={{ backgroundColor: '#FEF3E2', borderColor: '#F5E1C8' }}>
-                🐾
-              </div>
             </div>
 
             <Input

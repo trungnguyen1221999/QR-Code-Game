@@ -5,10 +5,10 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 
 const ALL_ITEMS = [
-  { id: 'auto',       emoji: '⚔️',  label: 'Auto slice',        desc: 'Will cut the specific number fruit',      price: 150 },
-  { id: 'slow',       emoji: '⏰',  label: 'Slow Motion',        desc: 'Slow drop speed',                         price: 150 },
-  { id: 'life',       emoji: '❤️',  label: 'Extra life',         desc: "One mistake won't count against you",     price: 200 },
-  { id: 'score',      emoji: '📊',  label: 'Score Multiplier',   desc: '1.5x score for your next game',           price: 350 },
+  { id: 'auto',  emoji: '⚔️', img: '/games/finalGame/shorter.png', label: 'Auto slice',       desc: 'Will cut the specific number fruit',      price: 150 },
+  { id: 'slow',  emoji: '⏰', img: '/games/finalGame/slower.png',  label: 'Slow Motion',       desc: 'Slow drop speed',                         price: 150 },
+  { id: 'life',  emoji: '❤️', img: null,                            label: 'Extra life',        desc: "One mistake won't count against you",     price: 200 },
+  { id: 'score', emoji: '📊', img: '/shop/luck.png',               label: 'Score Multiplier',  desc: '1.5x score for your next game',           price: 350 },
 ];
 
 export default function FinalShop() {
@@ -31,6 +31,11 @@ export default function FinalShop() {
     <PageLayout>
       <div className="pt-6 flex flex-col gap-4 pb-4">
 
+        {/* Seller GIF */}
+        <div className="flex justify-center">
+          <img src="/shop/seller.gif" alt="Shop seller" style={{ height: '80px', objectFit: 'contain' }} />
+        </div>
+
         {/* Description */}
         <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
           Use your all coins for power-ups for final game.
@@ -50,8 +55,13 @@ export default function FinalShop() {
           {items.map(item => (
             <div key={item.id}
               className="flex items-center gap-3 rounded-2xl px-4 py-3"
-              style={{ backgroundColor: 'white', border: '1px solid #E5E7EB' }}>
-              <span className="text-3xl shrink-0">{item.emoji}</span>
+              style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}>
+              <div className="shrink-0 flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
+                {item.img
+                  ? <img src={item.img} className="w-10 h-10 object-contain" alt={item.label} />
+                  : <span className="text-3xl">{item.emoji}</span>
+                }
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
                 <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{item.desc}</p>

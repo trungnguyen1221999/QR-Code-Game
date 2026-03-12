@@ -4,10 +4,10 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 
 const ALL_ITEMS = [
-  { id: 'time',       emoji: '⏱️', label: 'Time Boost',        desc: 'Add +10 seconds to your next game',       price: 50 },
-  { id: 'hint',       emoji: '💡', label: 'Hint',               desc: 'Get a helpful hint in your next game',     price: 50 },
-  { id: 'life',       emoji: '❤️', label: 'Extra life',          desc: "One mistake won't count against you",      price: 50 },
-  { id: 'multiplier', emoji: '🪙', label: 'Coin Multiplier',     desc: '1.5x coin for your next game',            price: 50 },
+  { id: 'time',       emoji: '⏱️', img: '/shop/x2time.png',   label: 'Time Boost',        desc: 'Add +10 seconds to your next game',       price: 50 },
+  { id: 'hint',       emoji: '💡', img: '/shop/hint.png',      label: 'Hint',               desc: 'Get a helpful hint in your next game',     price: 50 },
+  { id: 'life',       emoji: '❤️', img: null,                  label: 'Extra life',          desc: "One mistake won't count against you",      price: 50 },
+  { id: 'multiplier', emoji: '🪙', img: '/shop/x2money.png',   label: 'Coin Multiplier',     desc: '1.5x coin for your next game',            price: 50 },
 ];
 
 const COINS_EARNED = 30;
@@ -34,6 +34,7 @@ export default function PlayerShop() {
     <PageLayout>
       <div className="pt-4 flex flex-col gap-4 pb-4">
 
+       
         {/* Victory header */}
         <div className="flex flex-col items-center gap-1 pt-2">
           <span className="text-5xl">🏆</span>
@@ -43,8 +44,13 @@ export default function PlayerShop() {
           <p className="text-base font-bold" style={{ color: 'var(--color-primary)' }}>🪙 +{COINS_EARNED} coins</p>
         </div>
 
+         {/* Seller GIF */}
+        <div className="flex justify-center">
+          <img src="/shop/seller.gif" alt="Shop seller" style={{ height: '80px', objectFit: 'contain' }} />
+        </div>
+
         {/* Divider + desc */}
-        <div style={{ borderTop: '1px solid #E5E7EB' }} />
+        <div style={{ borderTop: '1px solid var(--color-border)' }} />
         <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
           Use your coins to buy power-ups for upcoming rounds
         </p>
@@ -62,8 +68,13 @@ export default function PlayerShop() {
           {items.map(item => (
             <div key={item.id}
               className="flex items-center gap-3 rounded-2xl px-4 py-3"
-              style={{ backgroundColor: 'white', border: '1px solid #E5E7EB' }}>
-              <span className="text-3xl shrink-0">{item.emoji}</span>
+              style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}>
+              <div className="shrink-0 flex items-center justify-center" style={{ width: '40px', height: '40px' }}>
+                {item.img
+                  ? <img src={item.img} className="w-10 h-10 object-contain" alt={item.label} />
+                  : <span className="text-3xl">{item.emoji}</span>
+                }
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
                 <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{item.desc}</p>

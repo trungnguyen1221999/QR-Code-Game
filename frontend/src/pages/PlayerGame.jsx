@@ -17,20 +17,31 @@ function formatTime(secs) {
 
 function ScanningOverlay() {
   return (
-    <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center gap-3"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6"
+      style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}>
       <style>{`
-        @keyframes scan-line { 0%{top:10%} 50%{top:85%} 100%{top:10%} }
-        .scan-line { position:absolute; left:10%; right:10%; height:2px; background:#22C55E; animation: scan-line 1.5s linear infinite; box-shadow: 0 0 8px #22C55E; }
+        @keyframes scan-line { 0%{top:5%} 50%{top:90%} 100%{top:5%} }
+        .scan-line-full { position:absolute; left:0; right:0; height:3px; background:#22C55E; animation: scan-line 1.8s linear infinite; box-shadow: 0 0 12px #22C55E, 0 0 24px #22C55E; }
+        @keyframes pulse-corner { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .corner-pulse { animation: pulse-corner 1.2s ease-in-out infinite; }
       `}</style>
-      <div className="relative w-32 h-32 border-2 border-white rounded-lg">
-        <div className="scan-line" />
-        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 rounded-tl border-green-400" />
-        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 rounded-tr border-green-400" />
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 rounded-bl border-green-400" />
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 rounded-br border-green-400" />
+
+      <p className="text-white text-lg font-bold tracking-wide">Point at QR code</p>
+
+      {/* Large viewfinder */}
+      <div className="relative rounded-2xl overflow-hidden"
+        style={{ width: '84vw', maxWidth: 340, height: '84vw', maxHeight: 340, border: '2px solid rgba(255,255,255,0.3)' }}>
+        {/* Dark corners overlay */}
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }} />
+        <div className="scan-line-full" />
+        {/* Corner accents */}
+        <div className="corner-pulse absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg" style={{ borderColor: '#22C55E' }} />
+        <div className="corner-pulse absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg" style={{ borderColor: '#22C55E' }} />
+        <div className="corner-pulse absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg" style={{ borderColor: '#22C55E' }} />
+        <div className="corner-pulse absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-lg" style={{ borderColor: '#22C55E' }} />
       </div>
-      <p className="text-white text-sm font-semibold">Scanning...</p>
+
+      <p className="text-sm font-semibold" style={{ color: '#22C55E' }}>Scanning... please wait</p>
     </div>
   );
 }
@@ -138,10 +149,11 @@ export default function PlayerGame() {
         ) : (
           <>
             {/* QR Scanner area */}
-            <div className="relative rounded-2xl flex flex-col items-center justify-center gap-3 py-10"
-              style={{ backgroundColor: '#E5E7EB' }}>
-              <Camera size={48} style={{ color: '#9CA3AF' }} />
-              <p className="text-sm font-semibold" style={{ color: '#6B7280' }}>Camera / QR scanner</p>
+            <div className="relative rounded-2xl flex flex-col items-center justify-center gap-3"
+              style={{ backgroundColor: '#E5E7EB', minHeight: 260 }}>
+              <Camera size={64} style={{ color: '#9CA3AF' }} />
+              <p className="text-base font-semibold" style={{ color: '#6B7280' }}>Camera / QR scanner</p>
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>Tap "Scan QR" to start</p>
               {scanning && <ScanningOverlay />}
             </div>
 

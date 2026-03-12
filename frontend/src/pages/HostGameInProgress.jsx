@@ -7,9 +7,9 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 
 const MOCK_PLAYERS = [
-  { id: 1, name: 'Shun',  emoji: '🐻', status: 'In game' },
-  { id: 2, name: 'Trung', emoji: '🐼', status: 'Done' },
-  { id: 3, name: 'Yan',   emoji: '🦊', status: 'Done' },
+  { id: 1, name: 'Shun',  avatar: '/avatar/avatar1.png', status: 'In game' },
+  { id: 2, name: 'Trung', avatar: '/avatar/avatar2.png', status: 'Done' },
+  { id: 3, name: 'Yan',   avatar: '/avatar/avatar3.png', status: 'Done' },
 ];
 
 const HOST_NAME = 'Elsa';
@@ -94,7 +94,7 @@ export default function HostGameInProgress() {
               <div key={p.id} className="flex items-center justify-between px-3 py-2.5"
                 style={{ backgroundColor: '#FEF9F5' }}>
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{p.emoji}</span>
+                  <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
                   <span className="font-semibold text-sm" style={{ color: 'var(--color-text)' }}>{p.name}</span>
                 </div>
                 <span className="text-xs font-semibold"

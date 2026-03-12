@@ -7,9 +7,9 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 
 const MOCK_PLAYERS = [
-  { id: 1, name: 'Shun',  emoji: '🐻' },
-  { id: 2, name: 'Trung', emoji: '🐼' },
-  { id: 3, name: 'Yan',   emoji: '🦊' },
+  { id: 1, name: 'Shun',  avatar: '/avatar/avatar1.png' },
+  { id: 2, name: 'Trung', avatar: '/avatar/avatar2.png' },
+  { id: 3, name: 'Yan',   avatar: '/avatar/avatar3.png' },
 ];
 
 const GAME_CODE = 'HYE7654';
@@ -85,7 +85,7 @@ export default function HostDashboard() {
             {MOCK_PLAYERS.map(p => (
               <div key={p.id} className="flex items-center gap-3 px-3 py-2.5"
                 style={{ backgroundColor: '#FEF9F5' }}>
-                <span className="text-2xl">{p.emoji}</span>
+                <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
                 <span className="font-semibold text-sm" style={{ color: 'var(--color-primary)' }}>
                   {p.name}
                 </span>

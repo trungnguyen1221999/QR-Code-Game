@@ -21,6 +21,11 @@ export default function HostSignUp() {
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
+            {/* Signup GIF */}
+            <div className="flex justify-center">
+              <img src="/signup.gif" alt="Sign Up" style={{ height: '120px', objectFit: 'contain' }} />
+            </div>
+
             <div className="flex items-center gap-2">
               <User size={20} style={{ color: 'var(--color-primary)' }} />
               <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Sign Up</h2>

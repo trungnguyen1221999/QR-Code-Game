@@ -5,10 +5,10 @@ import { Info } from 'lucide-react';
 const TOTAL_SECONDS = 10 * 60; // 10 min
 
 const MOCK_PLAYERS = [
-  { rank: 1, name: 'Shun',  emoji: '🐻', score: 2000 },
-  { rank: 2, name: 'Trung', emoji: '🐼', score: 1800 },
-  { rank: 3, name: 'Yan',   emoji: '🦊', score: 1750 },
-  { rank: 4, name: 'Helen', emoji: '🐺', score: 1510 },
+  { rank: 1, name: 'Shun',  avatar: '/avatar/avatar1.png', score: 2000 },
+  { rank: 2, name: 'Trung', avatar: '/avatar/avatar2.png', score: 1800 },
+  { rank: 3, name: 'Yan',   avatar: '/avatar/avatar3.png', score: 1750 },
+  { rank: 4, name: 'Helen', avatar: '/avatar/avatar4.png', score: 1510 },
 ];
 
 const STAR_COLORS = { 1: '#FBBF24', 2: '#6366F1', 3: '#EF4444' };
@@ -36,7 +36,7 @@ export default function LiveLeaderboard() {
   }, [timeLeft]);
 
   return (
-    <div className="min-h-screen flex justify-center" style={{ backgroundColor: '#F5E1C8' }}>
+    <div className="min-h-screen flex justify-center" style={{ backgroundColor: 'var(--color-bg)' }}>
       <div className="w-full max-w-sm flex flex-col px-5 pt-8 pb-12 gap-5">
 
         {/* Header */}
@@ -80,7 +80,7 @@ export default function LiveLeaderboard() {
                 <div className="w-10 flex items-center justify-center">
                   <RankBadge rank={p.rank} />
                 </div>
-                <span className="text-lg">{p.emoji}</span>
+                <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
                 <span className="flex-1 text-sm font-semibold text-white">{p.name}</span>
                 <span className="text-sm font-bold text-white">{p.score}</span>
               </div>

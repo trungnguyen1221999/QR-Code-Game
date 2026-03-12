@@ -4,39 +4,22 @@ import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
-function Logo() {
-  return (
-    <img
-      src="/logo.png"
-      alt="Mystery X"
-      className="h-16 w-16 object-contain"
-      onError={e => {
-        // fallback nếu chưa có ảnh
-        e.target.replaceWith(Object.assign(document.createElement('div'), {
-          className: 'h-16 w-16 rounded-full flex items-center justify-center text-3xl',
-          style: 'background:#F5E1C8',
-          innerHTML: '🐻'
-        }));
-      }}
-    />
-  );
-}
-
 export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
     <PageLayout>
-      {/* Header */}
-      <div className="flex items-center gap-3 pt-10 pb-8">
-        <Logo />
-        <h1 className="text-4xl font-bold" style={{ color: 'var(--color-primary)' }}>Mystery X</h1>
+      {/* Mascot + Title */}
+      <div className="flex flex-col items-center gap-2 pt-2 pb-6">
+        <img src="/capy.gif" alt="Capybara mascot" style={{ height: '100px', objectFit: 'contain' }} />
+        <h1 className="text-4xl font-bold" style={{ color: 'var(--color-primary)' }}>Capy Quest</h1>
+        <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>Find QR codes. Play games. Win!</p>
       </div>
 
       <div className="flex flex-col gap-5">
 
         {/* Host game */}
-        <Card>
+        <Card style={{ border: '2px solid var(--color-border)' }}>
           <div className="flex items-center gap-3 mb-3">
             <User size={22} style={{ color: 'var(--color-primary)' }} />
             <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>Host game</h2>
@@ -48,7 +31,7 @@ export default function LandingPage() {
         </Card>
 
         {/* Join game */}
-        <Card>
+        <Card style={{ border: '2px solid var(--color-border)' }}>
           <div className="flex items-center gap-3 mb-3">
             <Gamepad2 size={22} style={{ color: 'var(--color-primary)' }} />
             <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>Join game</h2>
@@ -60,7 +43,7 @@ export default function LandingPage() {
         </Card>
 
         {/* How to play */}
-        <Card>
+        <Card style={{ border: '2px solid var(--color-border)' }}>
           <div className="flex items-center gap-3 mb-5">
             <LayoutGrid size={22} style={{ color: 'var(--color-primary)' }} />
             <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>How to play?</h2>

@@ -18,6 +18,7 @@ import FinalShop from './pages/FinalShop';
 import FinalChallenge from './pages/FinalChallenge';
 import LiveLeaderboard from './pages/LiveLeaderboard';
 import Champion from './pages/Champion';
+import BackgroundMusic from './components/BackgroundMusic';
 
 function App() {
   const [player, setPlayer] = useState(null);
@@ -44,6 +45,7 @@ function App() {
         <Route path="/champion" element={<Champion />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <BackgroundMusic />
       <Toaster position="top-center" />
     </Router>
   );

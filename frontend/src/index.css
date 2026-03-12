@@ -1,23 +1,25 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Comic+Neue:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap');
 
 /* ─── Theme colors ─────────────────────────────────────────── */
 :root {
-  --color-bg:        #F5E1C8;
-  --color-primary:   #C07020;
-  --color-green:     #22C55E;
-  --color-red:       #DC2626;
-  --color-orange:    #F97316;
-  --color-blue:      #3B82F6;
+  --color-bg:           #FFF8F0;
+  --color-primary:      #E8730A;
+  --color-primary-dark: #C05A00;
+  --color-green:        #22C55E;
+  --color-red:          #EF4444;
+  --color-orange:       #F97316;
+  --color-blue:         #3B82F6;
+  --color-yellow:       #FCD34D;
 
-  --color-card-bg:   #FFFFFF;
-  --color-text:      #1F2937;
-  --color-subtext:   #6B7280;
-  --color-border:    #E5E7EB;
-  --color-info-bg:   #FEF3E2;
+  --color-card-bg:      #FFFFFF;
+  --color-text:         #2D1B00;
+  --color-subtext:      #92632A;
+  --color-border:       #FFE0B2;
+  --color-info-bg:      #FFF3E0;
 }
 
-/* ─── Base overrides – phải nằm trong @layer base để không override utilities ── */
+/* ─── Base overrides ─────────────────────────────────────────── */
 @layer base {
   * {
     font-family: 'Nunito', sans-serif;
@@ -25,7 +27,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Comic Neue', cursive;
+    font-family: 'Baloo 2', cursive;
     font-weight: 700;
   }
 }

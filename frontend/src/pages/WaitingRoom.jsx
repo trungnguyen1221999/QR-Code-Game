@@ -7,38 +7,12 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 
 const MOCK_PLAYERS = [
-  { id: 1, name: 'Shun',  emoji: '🐻' },
-  { id: 2, name: 'Trung', emoji: '🐼' },
-  { id: 3, name: 'Yan',   emoji: '🦊' },
-  { id: 4, name: 'Helen', emoji: '🐺' },
-  { id: 5, name: 'Stev',  emoji: '🐯' },
+  { id: 1, name: 'Shun',  avatar: '/avatar/avatar1.png' },
+  { id: 2, name: 'Trung', avatar: '/avatar/avatar2.png' },
+  { id: 3, name: 'Yan',   avatar: '/avatar/avatar3.png' },
+  { id: 4, name: 'Helen', avatar: '/avatar/avatar4.png' },
+  { id: 5, name: 'Stev',  avatar: '/avatar/avatar1.png' },
 ];
-
-const DOT_COLORS = ['#F97316','#FB923C','#FCD34D','#EF4444','#F97316','#FB923C','#FCD34D','#EF4444','#F97316','#FB923C'];
-
-function Spinner() {
-  return (
-    <div className="flex justify-center my-5">
-      <style>{`@keyframes spin-ring { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }`}</style>
-      <div className="relative h-14 w-14" style={{ animation: 'spin-ring 1.2s linear infinite' }}>
-        {DOT_COLORS.map((color, i) => {
-          const rad = (i / DOT_COLORS.length) * 2 * Math.PI;
-          const x = 50 + 38 * Math.sin(rad);
-          const y = 50 - 38 * Math.cos(rad);
-          return (
-            <div key={i} className="absolute rounded-full" style={{
-              width: 6, height: 6,
-              left: `${x}%`, top: `${y}%`,
-              transform: 'translate(-50%,-50%)',
-              backgroundColor: color,
-              opacity: 0.2 + (i / DOT_COLORS.length) * 0.8,
-            }} />
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 export default function WaitingRoom() {
   const navigate = useNavigate();
@@ -63,15 +37,18 @@ export default function WaitingRoom() {
             Waiting the host to start the game
           </p>
 
-          <Spinner />
+          {/* Waiting GIF replacing the Spinner */}
+          <div className="flex justify-center my-5">
+            <img src="/waiting.gif" alt="Waiting..." style={{ height: '80px', objectFit: 'contain' }} />
+          </div>
 
           <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>Players</h3>
           <div className="flex flex-wrap gap-4 mb-4">
             {MOCK_PLAYERS.map(p => (
               <div key={p.id} className="flex flex-col items-center gap-1">
-                <div className="h-14 w-14 rounded-full flex items-center justify-center border-2 text-2xl"
-                  style={{ backgroundColor: '#FEF3E2', borderColor: '#F5E1C8' }}>
-                  {p.emoji}
+                <div className="h-14 w-14 rounded-full overflow-hidden border-2"
+                  style={{ backgroundColor: '#FEF3E2', borderColor: 'var(--color-border)' }}>
+                  <img src={p.avatar} alt={p.name} className="w-full h-full rounded-full object-cover" />
                 </div>
                 <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
                   {p.name}

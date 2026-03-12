@@ -4,14 +4,14 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 
 const MOCK_PLAYERS = [
-  { rank: 1, name: 'Shun',    emoji: '🐻', score: 2000 },
-  { rank: 2, name: 'Trung',   emoji: '🐼', score: 1800 },
-  { rank: 3, name: 'Yan',     emoji: '🦊', score: 1750 },
-  { rank: 4, name: 'Helen',   emoji: '🐺', score: 1510 },
-  { rank: 5, name: 'Stev',    emoji: '🐯', score: 1510 },
-  { rank: 6, name: 'Micheal', emoji: '🦁', score: 1501 },
-  { rank: 7, name: 'Mar',     emoji: '🐨', score: 0    },
-  { rank: 8, name: 'Kaung',   emoji: '🐸', score: 0    },
+  { rank: 1, name: 'Shun',    avatar: '/avatar/avatar1.png', score: 2000 },
+  { rank: 2, name: 'Trung',   avatar: '/avatar/avatar2.png', score: 1800 },
+  { rank: 3, name: 'Yan',     avatar: '/avatar/avatar3.png', score: 1750 },
+  { rank: 4, name: 'Helen',   avatar: '/avatar/avatar4.png', score: 1510 },
+  { rank: 5, name: 'Stev',    avatar: '/avatar/avatar1.png', score: 1510 },
+  { rank: 6, name: 'Micheal', avatar: '/avatar/avatar2.png', score: 1501 },
+  { rank: 7, name: 'Mar',     avatar: '/avatar/avatar3.png', score: 0    },
+  { rank: 8, name: 'Kaung',   avatar: '/avatar/avatar4.png', score: 0    },
 ];
 
 const STAR_COLORS = {
@@ -74,7 +74,7 @@ export default function Leaderboard() {
                     <RankCell rank={p.rank} />
                   </div>
                   <div className="flex-1 flex items-center gap-2">
-                    <span className="text-xl">{p.emoji}</span>
+                    <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
                     <span className="text-sm font-semibold"
                       style={{ color: isZero ? 'var(--color-text)' : 'white' }}>
                       {p.name}
