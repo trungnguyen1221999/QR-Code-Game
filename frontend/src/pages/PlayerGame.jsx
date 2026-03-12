@@ -1,0 +1,236 @@
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { QrCode, Camera, Trophy, X, LogOut, ScanLine } from 'lucide-react';
+import PageLayout from '../components/ui/PageLayout';
+import Button from '../components/ui/Button';
+import Popup from '../components/ui/Popup';
+
+const TOTAL_SECONDS = 30 * 60;
+const TOTAL_CHECKPOINTS = 6;
+
+function formatTime(secs) {
+  const h = Math.floor(secs / 3600).toString().padStart(2, '0');
+  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const s = (secs % 60).toString().padStart(2, '0');
+  return `${h}:${m}:${s}`;
+}
+
+function ScanningOverlay() {
+  return (
+    <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center gap-3"
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+      <style>{`
+        @keyframes scan-line { 0%{top:10%} 50%{top:85%} 100%{top:10%} }
+        .scan-line { position:absolute; left:10%; right:10%; height:2px; background:#22C55E; animation: scan-line 1.5s linear infinite; box-shadow: 0 0 8px #22C55E; }
+      `}</style>
+      <div className="relative w-32 h-32 border-2 border-white rounded-lg">
+        <div className="scan-line" />
+        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 rounded-tl border-green-400" />
+        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 rounded-tr border-green-400" />
+        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 rounded-bl border-green-400" />
+        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 rounded-br border-green-400" />
+      </div>
+      <p className="text-white text-sm font-semibold">Scanning...</p>
+    </div>
+  );
+}
+
+export default function PlayerGame() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
+  const [showExitPopup, setShowExitPopup] = useState(false);
+  const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
+  const [scanning, setScanning] = useState(false);
+
+  // Track completed checkpoints; accept update from challenge page
+  const [completed, setCompleted] = useState(2);
+  const [current, setCurrent] = useState(3);
+  const [life, setLife] = useState(4);
+  const [coins, setCoins] = useState(200);
+
+  // Apply result coming back from challenge page
+  useEffect(() => {
+    const state = location.state;
+    if (!state) return;
+    if (state.justCompleted) {
+      setCompleted(v => Math.min(v + 1, TOTAL_CHECKPOINTS));
+      setCurrent(v => Math.min(v + 1, TOTAL_CHECKPOINTS + 1));
+      setCoins(v => v + 50);
+    }
+    if (state.wrongAnswer) {
+      setLife(v => Math.max(v - 1, 0));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (timeLeft <= 0) { navigate('/game-over'); return; }
+    const t = setInterval(() => setTimeLeft(v => v - 1), 1000);
+    return () => clearInterval(t);
+  }, [timeLeft]);
+
+  const progress = completed / TOTAL_CHECKPOINTS;
+
+  const handleScan = () => {
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      navigate('/challenge', { state: { checkpoint: current } });
+    }, 3000);
+  };
+
+  return (
+    <PageLayout>
+      <div className="pt-6 flex flex-col gap-4 pb-4">
+
+        {/* Header */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <QrCode size={22} style={{ color: 'var(--color-primary)' }} />
+            <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>QR checkpoint</h2>
+          </div>
+          <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
+            Scan QR code to unlock the next challenge
+          </p>
+        </div>
+
+        {/* Progress */}
+        <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Your progress</span>
+            <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+              {completed}/{TOTAL_CHECKPOINTS} completed
+            </span>
+          </div>
+          <div className="w-full rounded-full h-3" style={{ backgroundColor: '#E5E7EB' }}>
+            <div
+              className="h-3 rounded-full transition-all"
+              style={{ width: `${progress * 100}%`, backgroundColor: 'var(--color-primary)' }}
+            />
+          </div>
+          {completed < TOTAL_CHECKPOINTS && (
+            <p className="text-xs mt-2" style={{ color: 'var(--color-subtext)' }}>
+              Current checkpoint: <span className="font-bold" style={{ color: 'var(--color-text)' }}>{current}</span>
+            </p>
+          )}
+        </div>
+
+        {completed >= TOTAL_CHECKPOINTS ? (
+          <>
+            {/* Final game banner */}
+            <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
+              You have completed {TOTAL_CHECKPOINTS} checkpoints. Ready to make the final challenge.
+            </p>
+            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-end"
+              style={{ backgroundColor: '#1a1a2e', minHeight: 160 }}>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-6xl">🎮</span>
+              </div>
+              <button
+                onClick={() => navigate('/final-shop', { state: { coins } })}
+                className="relative z-10 w-full py-4 text-white font-bold text-base cursor-pointer"
+                style={{ backgroundColor: 'var(--color-primary)' }}>
+                ▶ Play final game
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* QR Scanner area */}
+            <div className="relative rounded-2xl flex flex-col items-center justify-center gap-3 py-10"
+              style={{ backgroundColor: '#E5E7EB' }}>
+              <Camera size={48} style={{ color: '#9CA3AF' }} />
+              <p className="text-sm font-semibold" style={{ color: '#6B7280' }}>Camera / QR scanner</p>
+              {scanning && <ScanningOverlay />}
+            </div>
+
+            {/* Scan button */}
+            <Button variant="green" onClick={handleScan} disabled={scanning}>
+              <ScanLine size={16} /> {scanning ? 'Scanning...' : 'Scan QR'}
+            </Button>
+          </>
+        )}
+
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-xl p-3 flex flex-col items-center gap-1"
+            style={{ backgroundColor: '#EFF6FF' }}>
+            <span className="text-xs" style={{ color: '#3B82F6' }}>Time left</span>
+            <span className="text-xs font-bold" style={{ color: '#3B82F6' }}>{formatTime(timeLeft)}</span>
+          </div>
+          <div className="rounded-xl p-3 flex flex-col items-center gap-1"
+            style={{ backgroundColor: '#FEE2E2' }}>
+            <span className="text-xs" style={{ color: '#DC2626' }}>Life</span>
+            <span className="text-lg font-bold" style={{ color: '#DC2626' }}>❤️ {life}</span>
+          </div>
+          <div className="rounded-xl p-3 flex flex-col items-center gap-1"
+            style={{ backgroundColor: '#FEF9C3' }}>
+            <span className="text-xs" style={{ color: '#CA8A04' }}>Coins</span>
+            <span className="text-lg font-bold" style={{ color: '#CA8A04' }}>🪙 {coins}</span>
+          </div>
+        </div>
+
+        {/* Trophy shortcut */}
+        <button
+          onClick={() => navigate('/leaderboard')}
+          className="rounded-xl p-4 flex items-center justify-center cursor-pointer"
+          style={{ backgroundColor: 'var(--color-info-bg)' }}>
+          <Trophy size={28} style={{ color: 'var(--color-primary)' }} />
+        </button>
+
+        {/* Secondary actions */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setShowTimeUpPopup(true)}
+            className="rounded-xl py-3 text-sm font-semibold cursor-pointer"
+            style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
+            In-completed game
+          </button>
+          <button
+            onClick={() => { setCompleted(TOTAL_CHECKPOINTS); setCurrent(TOTAL_CHECKPOINTS + 1); }}
+            className="rounded-xl py-3 text-sm font-semibold cursor-pointer"
+            style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
+            All checkpoint complete
+          </button>
+        </div>
+
+        {/* Exit */}
+        <Button variant="red" onClick={() => setShowExitPopup(true)}>
+          <X size={16} /> Exit game
+        </Button>
+
+      </div>
+
+      {/* Exit confirmation popup */}
+      <Popup open={showExitPopup} onClose={() => setShowExitPopup(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-14 w-14 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#FEE2E2' }}>
+            <LogOut size={28} style={{ color: 'var(--color-red)' }} />
+          </div>
+          <h3 className="text-lg font-bold text-center" style={{ color: 'var(--color-text)' }}>
+            Are you sure to exit game?
+          </h3>
+          <div className="flex flex-col gap-2 w-full">
+            <Button variant="green" onClick={() => navigate('/')}>Confirm</Button>
+            <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
+          </div>
+        </div>
+      </Popup>
+
+      {/* Time up popup */}
+      <Popup open={showTimeUpPopup} onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-3 py-2">
+          <span className="text-5xl">⏰</span>
+          <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>Time up!</h3>
+          <p className="text-sm font-bold text-center" style={{ color: 'var(--color-red)' }}>
+            You cannot continue the checkpoint anymore.
+          </p>
+          <Button onClick={() => navigate('/game-over')}>Got it</Button>
+        </div>
+      </Popup>
+
+    </PageLayout>
+  );
+}

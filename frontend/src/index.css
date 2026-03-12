@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Comic+Neue:wght@400;700&display=swap');
+
+/* ─── Theme colors ─────────────────────────────────────────── */
+:root {
+  --color-bg:        #F5E1C8;
+  --color-primary:   #C07020;
+  --color-green:     #22C55E;
+  --color-red:       #DC2626;
+  --color-orange:    #F97316;
+  --color-blue:      #3B82F6;
+
+  --color-card-bg:   #FFFFFF;
+  --color-text:      #1F2937;
+  --color-subtext:   #6B7280;
+  --color-border:    #E5E7EB;
+  --color-info-bg:   #FEF3E2;
+}
+
+/* ─── Base overrides – phải nằm trong @layer base để không override utilities ── */
+@layer base {
+  * {
+    font-family: 'Nunito', sans-serif;
+    box-sizing: border-box;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Comic Neue', cursive;
+    font-weight: 700;
+  }
+}

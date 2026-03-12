@@ -1,60 +1,117 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-import { Card, CardContent } from '@/components/ui/card';
-import userApi from '../api/userApi';
+import { X, LogOut } from 'lucide-react';
+import PageLayout from '../components/ui/PageLayout';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Popup from '../components/ui/Popup';
 
-const WaitingRoom = ({ user }) => {
-  const navigate = useNavigate();
+const MOCK_PLAYERS = [
+  { id: 1, name: 'Shun',  emoji: '🐻' },
+  { id: 2, name: 'Trung', emoji: '🐼' },
+  { id: 3, name: 'Yan',   emoji: '🦊' },
+  { id: 4, name: 'Helen', emoji: '🐺' },
+  { id: 5, name: 'Stev',  emoji: '🐯' },
+];
 
-  // Join waiting room on mount, leave on unmount, and heartbeat ping
-  useEffect(() => {
-    let heartbeatInterval;
-    if (user?._id) {
-      userApi.joinWaitingRoom(user._id).catch(() => {});
-      // Heartbeat ping every 30 seconds
-      heartbeatInterval = setInterval(() => {
-        userApi.heartbeat(user._id).catch(() => {});
-      }, 30000);
-    }
-    return () => {
-      if (user?._id) {
-        userApi.leaveWaitingRoom(user._id).catch(() => {});
-      }
-      if (heartbeatInterval) clearInterval(heartbeatInterval);
-    };
-  }, [user]);
+const DOT_COLORS = ['#F97316','#FB923C','#FCD34D','#EF4444','#F97316','#FB923C','#FCD34D','#EF4444','#F97316','#FB923C'];
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth/login');
-    }
-    if (user?.role === 'host') {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
+function Spinner() {
   return (
-    <div className="h-screen bg-banana-gradient flex items-center justify-center p-4">
-      <div className="w-full max-w-md p-3">
-        <Card className="overflow-hidden" style={{ background: "#fcf0e4", backdropFilter: "blur(10px)", border: "2px solid rgba(255,255,255,0.3)", boxShadow: "0 8px 32px 0 rgba(31,38,135,0.37)" }}>
-          <CardContent className="p-8 flex flex-col items-center">
-            <img src="/waiting.gif" alt="Waiting" className="w-69 mb-4" />
-            <h2 className="text-2xl font-bold text-banana-green-dark mb-2">
-              Waiting for Host Approval
-              <span className="inline-block animate-pulse-loading ml-1">...</span>
-            </h2>
-         
-            <p className="text-banana-green text-lg mb-4">Please wait while the host approves your participation.</p>
-            <div className="flex items-center space-x-2">
-              <span className="animate-spin inline-block w-8 h-8 border-4 border-black border-t-transparent rounded-full"></span>
-              <span>Waiting...</span>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="flex justify-center my-5">
+      <style>{`@keyframes spin-ring { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }`}</style>
+      <div className="relative h-14 w-14" style={{ animation: 'spin-ring 1.2s linear infinite' }}>
+        {DOT_COLORS.map((color, i) => {
+          const rad = (i / DOT_COLORS.length) * 2 * Math.PI;
+          const x = 50 + 38 * Math.sin(rad);
+          const y = 50 - 38 * Math.cos(rad);
+          return (
+            <div key={i} className="absolute rounded-full" style={{
+              width: 6, height: 6,
+              left: `${x}%`, top: `${y}%`,
+              transform: 'translate(-50%,-50%)',
+              backgroundColor: color,
+              opacity: 0.2 + (i / DOT_COLORS.length) * 0.8,
+            }} />
+          );
+        })}
       </div>
     </div>
   );
-};
+}
 
-export default WaitingRoom;
+export default function WaitingRoom() {
+  const navigate = useNavigate();
+  const [showLeavePopup, setShowLeavePopup] = useState(false);
+  const [approved, setApproved] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setApproved(true);
+      setTimeout(() => navigate('/game'), 1000);
+    }, 5000);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <PageLayout>
+      <div className="pt-6">
+        <Card>
+
+          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Waiting host ...</h2>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
+            Waiting the host to start the game
+          </p>
+
+          <Spinner />
+
+          <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>Players</h3>
+          <div className="flex flex-wrap gap-4 mb-4">
+            {MOCK_PLAYERS.map(p => (
+              <div key={p.id} className="flex flex-col items-center gap-1">
+                <div className="h-14 w-14 rounded-full flex items-center justify-center border-2 text-2xl"
+                  style={{ backgroundColor: '#FEF3E2', borderColor: '#F5E1C8' }}>
+                  {p.emoji}
+                </div>
+                <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
+                  {p.name}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {approved && (
+            <div className="flex justify-end mb-3">
+              <div className="text-xs font-semibold px-3 py-2 rounded-lg text-center leading-tight"
+                style={{ backgroundColor: '#DCFCE7', color: '#16A34A' }}>
+                Host<br />approved ✓
+              </div>
+            </div>
+          )}
+
+          <Button variant="red" onClick={() => setShowLeavePopup(true)}>
+            <X size={16} /> Leave game
+          </Button>
+
+        </Card>
+      </div>
+
+      <Popup open={showLeavePopup} onClose={() => setShowLeavePopup(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-14 w-14 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#FEE2E2' }}>
+            <LogOut size={28} style={{ color: 'var(--color-red)' }} />
+          </div>
+          <h3 className="text-lg font-bold text-center" style={{ color: 'var(--color-text)' }}>
+            Are you sure to leave the game?
+          </h3>
+          <div className="flex flex-col gap-2 w-full">
+            <Button variant="green" onClick={() => navigate('/')}>Confirm</Button>
+            <Button variant="red" onClick={() => setShowLeavePopup(false)}>Cancel</Button>
+          </div>
+        </div>
+      </Popup>
+
+    </PageLayout>
+  );
+}
