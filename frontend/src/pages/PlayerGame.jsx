@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { QrCode, Camera, Trophy, LogOut, ScanLine } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
+import IntroVideoModal from '../components/ui/IntroVideoModal';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
@@ -55,6 +56,7 @@ export default function PlayerGame() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
 
   // Track completed checkpoints; accept update from challenge page
   const [completed, setCompleted] = useState(2);
@@ -91,6 +93,11 @@ export default function PlayerGame() {
       navigate('/challenge', { state: { checkpoint: current } });
     }, 3000);
   };
+
+  // Nếu đang show intro video thì chỉ show modal, không show game
+  if (showIntro) {
+    return <IntroVideoModal open={true} onSkip={() => setShowIntro(false)} />;
+  }
 
   return (
     <PageLayout>
