@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Camera, Trophy, X, LogOut, ScanLine } from 'lucide-react';
+import { QrCode, Camera, Trophy, LogOut, ScanLine } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
@@ -49,6 +49,7 @@ function ScanningOverlay() {
 export default function PlayerGame() {
   const navigate = useNavigate();
   const location = useLocation();
+  const player = JSON.parse(localStorage.getItem('player') || 'null');
 
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
   const [showExitPopup, setShowExitPopup] = useState(false);
@@ -94,6 +95,29 @@ export default function PlayerGame() {
   return (
     <PageLayout>
       <div className="pt-6 flex flex-col gap-4 pb-4">
+
+        {/* Player greeting */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img
+              src={player?.avatar || '/avatar/avatar1.png'}
+              alt={player?.username}
+              className="rounded-full object-cover"
+              style={{ width: 52, height: 52, border: '2px solid var(--color-primary)' }}
+            />
+            <p className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
+              👋 Hello, {player?.username}!
+            </p>
+          </div>
+          <button
+            onClick={() => setShowExitPopup(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+            style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
+          >
+            <LogOut size={13} />
+            Leave
+          </button>
+        </div>
 
         {/* Header */}
         <div>
@@ -207,10 +231,6 @@ export default function PlayerGame() {
           </button>
         </div>
 
-        {/* Exit */}
-        <Button variant="red" onClick={() => setShowExitPopup(true)}>
-          <X size={16} /> Exit game
-        </Button>
 
       </div>
 

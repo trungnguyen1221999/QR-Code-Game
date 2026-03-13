@@ -30,4 +30,8 @@
     font-family: 'Baloo 2', cursive;
     font-weight: 700;
   }
+
+  button, [role="button"] {
+    cursor: pointer;
+  }
 }

@@ -7,6 +7,9 @@ import shopRoutes from './routes/shopRoutes.js';
 import checkpointRoutes from './routes/checkpointRoutes.js';
 import minigameRoutes from './routes/minigameRoutes.js';
 import hostRoutes from './routes/hostRoutes.js';
+import sessionRoutes from './routes/sessionRoutes.js';
+import playerSessionRoutes from './routes/playerSessionRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +26,9 @@ app.use('/api/shops', shopRoutes);
 app.use('/api/checkpoints', checkpointRoutes);
 app.use('/api/minigames', minigameRoutes);
 app.use('/api/hosts', hostRoutes);
+app.use('/api/sessions', sessionRoutes);
+app.use('/api/player-sessions', playerSessionRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -32,7 +38,7 @@ app.get('/', (req, res) => {
 // Connect to MongoDB and start server
 const startServer = async () => {
   await connectDB();
-  
+
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

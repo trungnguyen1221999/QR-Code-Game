@@ -1,19 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, X, Trophy } from 'lucide-react';
+import { Users, X, Trophy, Copy, Check } from 'lucide-react';
+import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
-
-const MOCK_PLAYERS = [
-  { id: 1, name: 'Shun',  avatar: '/avatar/avatar1.png', status: 'In game' },
-  { id: 2, name: 'Trung', avatar: '/avatar/avatar2.png', status: 'Done' },
-  { id: 3, name: 'Yan',   avatar: '/avatar/avatar3.png', status: 'Done' },
-];
-
-const HOST_NAME = 'Elsa';
-const TOTAL_SECONDS = 20 * 60; // 20 minutes
+import { sessionAPI } from '../utils/api';
 
 function formatTime(secs) {
   const h = Math.floor(secs / 3600).toString().padStart(2, '0');
@@ -22,21 +15,84 @@ function formatTime(secs) {
   return `${h}:${m}:${s}`;
 }
 
-export default function HostGameInProgress() {
-  const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
-  const [showEndPopup, setShowEndPopup] = useState(false);
+function statusLabel(status) {
+  if (status === 'finished') return 'Done';
+  if (status === 'eliminated') return 'Out';
+  return 'In game';
+}
 
+function statusColor(status) {
+  if (status === 'finished') return 'var(--color-green)';
+  if (status === 'eliminated') return 'var(--color-red)';
+  return 'var(--color-primary)';
+}
+
+export default function HostGameInProgress({ onLogout }) {
+  const navigate = useNavigate();
+  const host = JSON.parse(localStorage.getItem('host') || 'null');
+  const session = JSON.parse(localStorage.getItem('session') || 'null');
+
+  const [players, setPlayers] = useState([]);
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [showEndPopup, setShowEndPopup] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(session?.code ?? '').catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Poll players every 2s
   useEffect(() => {
-    if (timeLeft <= 0) {
-      navigate('/leaderboard', { state: { timeUp: true } });
+    if (!session?._id) return;
+
+    const fetchPlayers = async () => {
+      try {
+        const data = await sessionAPI.getPlayers(session._id);
+        setPlayers(Array.isArray(data) ? data : []);
+      } catch {
+        // silently ignore
+      }
+    };
+
+    fetchPlayers();
+    const interval = setInterval(fetchPlayers, 2000);
+    return () => clearInterval(interval);
+  }, [session?._id]);
+
+  // Countdown based on session.expiresAt
+  useEffect(() => {
+    const expiresAt = session?.expiresAt ? new Date(session.expiresAt) : null;
+    if (!expiresAt) {
+      // Fallback: use totalTime from session
+      setTimeLeft((session?.totalTime || 30) * 60);
       return;
     }
-    const t = setInterval(() => setTimeLeft(v => v - 1), 1000);
-    return () => clearInterval(t);
-  }, [timeLeft]);
 
-  const completedCount = MOCK_PLAYERS.filter(p => p.status === 'Done').length;
+    const tick = () => {
+      const secs = Math.max(0, Math.round((expiresAt - new Date()) / 1000));
+      setTimeLeft(secs);
+      if (secs <= 0) navigate('/leaderboard', { state: { timeUp: true } });
+    };
+
+    tick();
+    const t = setInterval(tick, 1000);
+    return () => clearInterval(t);
+  }, [session?.expiresAt]);
+
+  const completedCount = players.filter(p => p.status === 'finished').length;
+  const inGameCount = players.filter(p => p.status === 'active').length;
+
+  const handleEnd = async () => {
+    try {
+      await sessionAPI.finish(session._id);
+    } catch {
+      // ignore
+    }
+    localStorage.removeItem('session');
+    navigate('/');
+  };
 
   return (
     <PageLayout>
@@ -44,14 +100,36 @@ export default function HostGameInProgress() {
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>Game in progress...</h2>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-            style={{ backgroundColor: '#FEF3E2' }}>
-            <Users size={16} style={{ color: 'var(--color-primary)' }} />
-            <span className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
-              {MOCK_PLAYERS.length}
-            </span>
+          <div>
+            <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Logged in as Host</p>
+            <p className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
+              👋 Hello, {host?.name || host?.username}!
+            </p>
           </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: '#FEF3E2' }}>
+              <Users size={16} style={{ color: 'var(--color-primary)' }} />
+              <span className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
+                {players.length}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>Game in progress...</h2>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 font-bold text-lg tracking-widest px-3 py-1 rounded-xl"
+            style={{ backgroundColor: '#FEF3E2', color: 'var(--color-primary)' }}
+          >
+            {session?.code || '------'}
+            {copied
+              ? <Check size={16} style={{ color: 'var(--color-green)' }} />
+              : <Copy size={16} />
+            }
+          </button>
         </div>
 
         {/* Timer box */}
@@ -59,19 +137,17 @@ export default function HostGameInProgress() {
           style={{ backgroundColor: '#FEF3E2' }}>
           <p className="text-sm" style={{ color: 'var(--color-primary)' }}>Time left</p>
           <p className="text-4xl font-bold" style={{ color: 'var(--color-primary)' }}>
-            {formatTime(timeLeft)}
+            {timeLeft !== null ? formatTime(timeLeft) : '--:--:--'}
           </p>
           <div className="flex w-full justify-around mt-1">
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-primary)' }}>Completed players</p>
+              <p className="text-xs" style={{ color: 'var(--color-primary)' }}>Completed</p>
               <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{completedCount}</p>
             </div>
             <div className="w-px" style={{ backgroundColor: '#E8C99A' }} />
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-primary)' }}>Players in game</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>
-                {MOCK_PLAYERS.length - completedCount}
-              </p>
+              <p className="text-xs" style={{ color: 'var(--color-primary)' }}>In game</p>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{inGameCount}</p>
             </div>
           </div>
         </div>
@@ -82,35 +158,51 @@ export default function HostGameInProgress() {
             <div className="flex items-center gap-2">
               <Users size={16} style={{ color: 'var(--color-primary)' }} />
               <span className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
-                Players ({MOCK_PLAYERS.length})
+                Players ({players.length})
               </span>
             </div>
             <span className="text-sm" style={{ color: 'var(--color-subtext)' }}>
-              Host : <span className="font-semibold" style={{ color: 'var(--color-text)' }}>{HOST_NAME}</span>
+              Host : <span className="font-semibold" style={{ color: 'var(--color-text)' }}>
+                {host?.name || host?.username}
+              </span>
             </span>
           </div>
-          <div className="flex flex-col divide-y divide-gray-100 rounded-xl overflow-hidden border border-gray-100">
-            {MOCK_PLAYERS.map(p => (
-              <div key={p.id} className="flex items-center justify-between px-3 py-2.5"
-                style={{ backgroundColor: '#FEF9F5' }}>
-                <div className="flex items-center gap-3">
-                  <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
-                  <span className="font-semibold text-sm" style={{ color: 'var(--color-text)' }}>{p.name}</span>
+
+          {players.length === 0 ? (
+            <p className="text-sm text-center py-4" style={{ color: 'var(--color-subtext)' }}>
+              No players yet.
+            </p>
+          ) : (
+            <div className="flex flex-col divide-y divide-gray-100 rounded-xl overflow-hidden border border-gray-100">
+              {players.map(p => (
+                <div key={p._id} className="flex items-center justify-between px-3 py-2.5"
+                  style={{ backgroundColor: '#FEF9F5' }}>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={p.userId?.avatar || '/avatar/avatar1.png'}
+                      alt={p.userId?.username}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="font-semibold text-sm" style={{ color: 'var(--color-text)' }}>
+                      {p.userId?.username}
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold" style={{ color: statusColor(p.status) }}>
+                    {statusLabel(p.status)}
+                  </span>
                 </div>
-                <span className="text-xs font-semibold"
-                  style={{ color: p.status === 'Done' ? 'var(--color-green)' : 'var(--color-primary)' }}>
-                  {p.status}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* Game settings */}
         <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
           <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>Game Settings:</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• 6 QR Checkpoints to discover</p>
-          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• Total play time is 30 minutes.</p>
+          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
+            • Total play time is {session?.totalTime || 30} minutes.
+          </p>
         </div>
 
         {/* Leaderboard shortcut */}
@@ -147,7 +239,7 @@ export default function HostGameInProgress() {
             Are you sure to end game?
           </h3>
           <div className="flex flex-col gap-2 w-full">
-            <Button variant="green" onClick={() => navigate('/')}>Confirm</Button>
+            <Button variant="green" onClick={handleEnd}>Confirm</Button>
             <Button variant="red" onClick={() => setShowEndPopup(false)}>Cancel</Button>
           </div>
         </div>

@@ -18,22 +18,28 @@ import FinalShop from './pages/FinalShop';
 import FinalChallenge from './pages/FinalChallenge';
 import LiveLeaderboard from './pages/LiveLeaderboard';
 import Champion from './pages/Champion';
+import AvatarSelect from './pages/AvatarSelect';
 import BackgroundMusic from './components/BackgroundMusic';
 
 function App() {
   const [player, setPlayer] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => !!localStorage.getItem('host'));
+
+  const handleLogin = () => setIsLoggedIn(true);
+  const handleLogout = () => { localStorage.removeItem('host'); localStorage.removeItem('session'); setIsLoggedIn(false); };
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/host-login" element={<HostLogin />} />
-        <Route path="/host-signup" element={<HostSignUp />} />
-        <Route path="/host-setup" element={<HostSetup />} />
-        <Route path="/host-dashboard" element={<HostDashboard />} />
-        <Route path="/host-game" element={<HostGameInProgress />} />
+        <Route path="/" element={<LandingPage onLogout={handleLogout} />} />
+        <Route path="/host-login" element={<HostLogin onLogin={handleLogin} />} />
+        <Route path="/host-signup" element={<HostSignUp onLogin={handleLogin} />} />
+        <Route path="/host-setup" element={<HostSetup onLogout={handleLogout} />} />
+        <Route path="/host-dashboard" element={<HostDashboard onLogout={handleLogout} />} />
+        <Route path="/host-game" element={<HostGameInProgress onLogout={handleLogout} />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/join" element={<JoinGame onJoin={setPlayer} />} />
+        <Route path="/select-avatar" element={<AvatarSelect />} />
         <Route path="/waiting-room" element={<WaitingRoom player={player} />} />
         <Route path="/game" element={<PlayerGame />} />
         <Route path="/challenge" element={<PlayerChallenge />} />

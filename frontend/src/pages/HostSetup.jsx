@@ -1,26 +1,77 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gamepad2, Clock } from 'lucide-react';
+import { Gamepad2, Clock, LogOut } from 'lucide-react';
+import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { sessionAPI } from '../utils/api';
 
-export default function HostSetup() {
+export default function HostSetup({ onLogout }) {
   const navigate = useNavigate();
+  const host = JSON.parse(localStorage.getItem('host'));
   const [gameName, setGameName] = useState('');
   const [time, setTime] = useState(30);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleLogout = () => {
+    onLogout?.();
+    toast.success('Logged out');
+    navigate('/host-login');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/host-dashboard');
+    if (!gameName.trim()) {
+      toast.error('Please enter a game name');
+      return;
+    }
+    if (!host) {
+      toast.error('Not logged in');
+      navigate('/host-login');
+      return;
+    }
+    setLoading(true);
+    try {
+      const session = await sessionAPI.create({
+        hostId: host._id,
+        name: gameName.trim(),
+        totalTime: time,
+      });
+      localStorage.setItem('session', JSON.stringify(session));
+      navigate('/host-dashboard');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <PageLayout back="/host-login">
+    <PageLayout back="/">
       <div className="pt-4 pb-8">
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+
+            {/* Host greeting + logout */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Logged in as Host</p>
+                <p className="font-bold text-base" style={{ color: 'var(--color-primary)' }}>
+                  👋 Hello, {host?.name || host?.username}!
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
+              >
+                <LogOut size={13} />
+                Logout
+              </button>
+            </div>
 
             {/* Title */}
             <div>
@@ -74,7 +125,7 @@ export default function HostSetup() {
               ))}
             </div>
 
-            <Button type="submit">Create game</Button>
+            <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create game'}</Button>
 
           </form>
         </Card>

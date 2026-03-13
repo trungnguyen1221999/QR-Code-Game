@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 const checkpointSchema = new mongoose.Schema({
+  sessionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'GameSession',
+    required: true
+  },
   name: {
     type: String,
     required: true,
@@ -17,6 +22,11 @@ const checkpointSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true
+  },
+  miniGameId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Minigame',
+    default: null
   }
 }, {
   timestamps: true

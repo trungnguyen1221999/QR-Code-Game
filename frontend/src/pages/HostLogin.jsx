@@ -1,19 +1,41 @@
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { User } from 'lucide-react';
+import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import { useState } from 'react';
+import { hostAPI } from '../utils/api';
 
-export default function HostLogin() {
+export default function HostLogin({ onLogin }) {
   const navigate = useNavigate();
   const [form, setForm] = useState({ username: '', password: '' });
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  if (localStorage.getItem('host')) return <Navigate to="/host-setup" replace />;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/host-setup');
+    if (!form.username.trim() || !form.password.trim()) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await hostAPI.login({
+        username: form.username.trim(),
+        password: form.password,
+      });
+      localStorage.setItem('host', JSON.stringify(data.host));
+      onLogin?.();
+      toast.success('Login successful!');
+      navigate('/host-setup');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,7 +67,7 @@ export default function HostLogin() {
               onChange={e => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit">Login</Button>
+            <Button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</Button>
 
             <p className="text-center text-xs" style={{ color: 'var(--color-subtext)' }}>
               Create new account?{' '}

@@ -9,48 +9,21 @@ const userSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 30
   },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 50
-  },
   avatar: {
     type: String,
     default: ''
   },
-  money: {
+  // Aggregate stats across all sessions
+  totalScore: {
     type: Number,
     default: 0
   },
-  currentCheckpoint: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Checkpoint'
-  },
-  items: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Item'
-  }],
-  numberOfKey: {
+  gamesPlayed: {
     type: Number,
     default: 0
   },
-
-  finalScore: {
+  bestRank: {
     type: Number,
-    default: 0
-  },
-  approve: {
-    type: String,
-    enum: ['yes', 'no', 'pending'],
-    default: 'pending'
-  },
-  isInWaitingRoom: {
-    type: Boolean,
-    default: false
-  },
-  lastPing: {
-    type: Date,
     default: null
   }
 }, {

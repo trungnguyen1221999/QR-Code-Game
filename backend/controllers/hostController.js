@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import Host from '../models/Host.js';
 import User from '../models/User.js';
 import { validationResult } from 'express-validator';
@@ -34,9 +35,11 @@ export const createHost = async (req, res) => {
     if (existingHost) {
       return res.status(400).json({ message: 'Host already exists with this username' });
     }
-    const host = new Host({ username, name, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const host = new Host({ username, name, password: hashedPassword });
     await host.save();
-    res.status(201).json({ message: 'Host created successfully', host });
+    const { password: _, ...hostData } = host.toObject();
+    res.status(201).json({ message: 'Host created successfully', host: hostData });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -70,15 +73,20 @@ export const deleteHost = async (req, res) => {
 
 export const loginHost = async (req, res) => {
   try {
-    const { username } = req.body;
-    if (!username) {
-      return res.status(400).json({ message: 'Username is required' });
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
     }
     const host = await Host.findOne({ username });
     if (!host) {
-      return res.status(404).json({ message: 'Host not found' });
+      return res.status(401).json({ message: 'Invalid username or password' });
     }
-    res.json({ message: 'Login successful', host });
+    const isMatch = await bcrypt.compare(password, host.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid username or password' });
+    }
+    const { password: _, ...hostData } = host.toObject();
+    res.json({ message: 'Login successful', host: hostData });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
