@@ -55,7 +55,7 @@ export default function HostLogin({ onLogin }) {
             </div>
 
             <Input
-              placeholder="Enter username or gmail"
+              placeholder="Enter username"
               value={form.username}
               onChange={e => setForm({ ...form, username: e.target.value })}
             />
