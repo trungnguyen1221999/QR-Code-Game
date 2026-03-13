@@ -60,7 +60,7 @@ export default function PlayerGame() {
   const [completed, setCompleted] = useState(2);
   const [current, setCurrent] = useState(3);
   const [life, setLife] = useState(4);
-  const [coins, setCoins] = useState(200);
+  const [coins, setCoins] = useState(2000);
 
   // Apply result coming back from challenge page
   useEffect(() => {
