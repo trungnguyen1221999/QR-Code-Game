@@ -495,10 +495,10 @@ export default function FinalChallenge() {
           style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}>
           <p className="text-5xl">🎉</p>
           <p className="text-2xl font-black text-white text-center">
-            Chúc mừng!
+            Congratulations!
           </p>
           <p className="text-sm text-white text-center opacity-90 leading-relaxed">
-            Bạn đã tìm được đường ra khỏi khu rừng!
+            You found the way out of the forest!
           </p>
           <button
             onMouseDown={(e) => e.stopPropagation()}
@@ -515,7 +515,7 @@ export default function FinalChallenge() {
       {showWinVideo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
           <video
-            src="/winningscene.mp4"
+            src="/intro.mp4"
             autoPlay
             controls={false}
             style={{
