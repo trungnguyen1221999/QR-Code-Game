@@ -431,10 +431,16 @@ export default function FinalChallenge() {
       {/* Perfect message */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
         style={{ opacity: perfectMsg ? 1 : 0, transition: 'opacity 1.2s' }}>
-        <p className="text-2xl font-black" style={{ color: '#E8730A' }}>PERFECT!</p>
-        <p className="text-lg font-black" style={{ color: '#E8730A' }}>
-          {perfectMsg === 'triple' ? 'TRIPLE SCORE!' : 'DOUBLE SCORE!'}
-        </p>
+        {perfectMsg && (
+          <>
+            <p className="text-2xl font-black" style={{ color: '#E8730A' }}>PERFECT!</p>
+            {perfectMsg === 'triple' ? (
+              <p className="text-lg font-black" style={{ color: '#E8730A' }}>TRIPLE SCORE!</p>
+            ) : perfectMsg === 'double' ? (
+              !initX3Score && <p className="text-lg font-black" style={{ color: '#E8730A' }}>DOUBLE SCORE!</p>
+            ) : null}
+          </>
+        )}
       </div>
 
       {/* Buddy helped overlay */}
