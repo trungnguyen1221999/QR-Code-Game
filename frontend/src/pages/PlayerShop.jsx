@@ -17,7 +17,7 @@ export default function PlayerShop() {
   const location = useLocation();
   const state = location.state ?? {};
   const checkpoint = state.checkpoint ?? 1;
-  const baseCoins = state.coins ?? 200;
+  const baseCoins = state.coins ?? 1000;
 
   const [coins, setCoins] = useState(baseCoins + COINS_EARNED);
   const [items, setItems] = useState(ALL_ITEMS);
