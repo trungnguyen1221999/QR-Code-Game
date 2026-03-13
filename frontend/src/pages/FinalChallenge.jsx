@@ -7,12 +7,13 @@ const PLAT_H   = 100;
 const HERO_DIST = 10;
 const PAD_X    = 100;
 const PERFECT  = 10;
-const HELPER_TOLERANCE = 18; // extra px forgiven with Bridge Buddy
+const HELPER_TOLERANCE = 18;
 const BG_MULT  = 0.2;
 const H1_BASE = 100, H1_AMP = 10, H1_STR = 1;
 const H2_BASE = 70,  H2_AMP = 20, H2_STR = 0.5;
 const SPD_STRETCH = 4, SPD_TURN = 4, SPD_WALK = 4, SPD_TRANS = 2, SPD_FALL = 2;
 const HERO_W = 40;
+const WIN_CHECKPOINTS = 40;
 
 // ── Pure helpers ───────────────────────────────────────────────
 const sin  = (deg) => Math.sin((deg / 180) * Math.PI);
@@ -24,31 +25,22 @@ function playPerfectSound() {
     const AudioCtx = window.AudioContext || window['webkitAudioContext'];
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-
-    // Two cute ascending chirps: C5 → E5 → G5 → C6
     [523, 659, 784, 1047].forEach((freq, i) => {
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-
       osc.type = 'sine';
       osc.frequency.value = freq;
-
       const t = ctx.currentTime + i * 0.07;
       gain.gain.setValueAtTime(0, t);
       gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
-
       osc.start(t);
       osc.stop(t + 0.2);
     });
-
-    // Close context after sounds finish
     setTimeout(() => ctx.close(), 800);
-  } catch {
-    // ignore if audio not supported
-  }
+  } catch { /* ignore */ }
 }
 
 function playBuddySound() {
@@ -56,7 +48,6 @@ function playBuddySound() {
     const AudioCtx = window.AudioContext || window['webkitAudioContext'];
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    // Soft whoosh: descending then rising tone
     [[440, 520], [380, 480]].forEach(([start, end], i) => {
       const osc  = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -123,12 +114,37 @@ function drawFrame(ctx, g, w, h, heroImg) {
   ctx.translate((w - CW) / 2 - g.sceneOffset, (h - CH) / 2);
 
   // Platforms
-  g.platforms.forEach(({ x, w: pw }) => {
+  g.platforms.forEach(({ x, w: pw, isFinal }) => {
     ctx.fillStyle = '#1a1a2e';
     ctx.fillRect(x, CH - PLAT_H, pw, PLAT_H + (h - CH) / 2);
+
+    // Perfect zone marker
     if (last(g.sticks).x < x) {
       ctx.fillStyle = '#EF4444';
       ctx.fillRect(x + pw / 2 - PERFECT / 2, CH - PLAT_H, PERFECT, PERFECT);
+    }
+
+    // Finish line flag on the winning platform
+    if (isFinal) {
+      const px = x + pw / 2;
+      const py = CH - PLAT_H;
+      // Pole
+      ctx.fillStyle = '#374151';
+      ctx.fillRect(px - 1, py - 55, 2, 55);
+      // Flag (triangular, red)
+      ctx.fillStyle = '#EF4444';
+      ctx.beginPath();
+      ctx.moveTo(px + 1, py - 55);
+      ctx.lineTo(px + 22, py - 46);
+      ctx.lineTo(px + 1, py - 37);
+      ctx.closePath();
+      ctx.fill();
+      // "FINISH" label
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold 7px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('FINISH', px + 10, py - 58);
+      ctx.textAlign = 'left';
     }
   });
 
@@ -166,11 +182,15 @@ function drawFrame(ctx, g, w, h, heroImg) {
   ctx.restore();
 }
 
-function initState(lives = 1, x3score = false, helper = false) {
+function initState(lives = 1, buddyCount = 0) {
+  // Pre-generate all 46 platforms so finish line is at a fixed location
   const platforms = [{ x: 50, w: 50 }];
-  for (let i = 0; i < 4; i++) mkPlatform(platforms);
+  for (let i = 0; i < 45; i++) mkPlatform(platforms);
+  platforms[WIN_CHECKPOINTS].isFinal = true;
+
   const trees = [];
   for (let i = 0; i < 10; i++) mkTree(trees);
+
   return {
     phase: 'waiting',
     lastTimestamp: undefined,
@@ -180,11 +200,10 @@ function initState(lives = 1, x3score = false, helper = false) {
     platforms,
     sticks: [{ x: platforms[0].x + platforms[0].w, length: 0, rotation: 0 }],
     trees,
-    score: 0,
     lives,
-    x3score,
-    helper,
+    buddyCount,
     currentPlatformIdx: 0,
+    buddyBridge: null,
   };
 }
 
@@ -193,23 +212,23 @@ export default function FinalChallenge() {
   const navigate  = useNavigate();
   const location  = useLocation();
 
-  const initLives   = location.state?.lives   ?? 1;
-  const initX3Score = location.state?.x3score ?? false;
-  const initHelper  = location.state?.helper  ?? false;
+  const initLives  = location.state?.lives      ?? 1;
+  const initBuddy  = location.state?.buddyCount ?? 0;
 
   const canvasRef  = useRef(null);
-  const gRef       = useRef(initState(initLives, initX3Score, initHelper));
+  const gRef       = useRef(initState(initLives, initBuddy));
   const rafRef     = useRef(null);
   const heroImgRef = useRef(null);
 
-  const [score, setScore]             = useState(0);
-  const [lives, setLives]             = useState(initLives);
-  const [showIntro, setShowIntro]     = useState(true);
-  const [perfectMsg, setPerfectMsg]   = useState(null); // null | 'double' | 'triple'
-  const [lostLife, setLostLife]       = useState(false);
-  const [showBuddy, setShowBuddy]     = useState(false);
-  const [gameOver, setGameOver]       = useState(false);
-  const [finalScore, setFinalScore]   = useState(0);
+  const [lives, setLives]               = useState(initLives);
+  const [buddyCount, setBuddyCount]     = useState(initBuddy);
+  const [showIntro, setShowIntro]       = useState(true);
+  const [perfectMsg, setPerfectMsg]     = useState(false);
+  const [lostLife, setLostLife]         = useState(false);
+  const [showBuddy, setShowBuddy]       = useState(false);
+  const [gameOver, setGameOver]         = useState(false);
+  const [win, setWin]                   = useState(false);
+  const [showWinVideo, setShowWinVideo] = useState(false);
 
   const redraw = useCallback(() => {
     const c = canvasRef.current;
@@ -228,12 +247,12 @@ export default function FinalChallenge() {
   const platformHit = useCallback(() => {
     const g    = gRef.current;
     const stick = last(g.sticks);
-    if (stick.rotation !== 90) return [undefined, false];
+    if (stick.rotation !== 90) return [undefined, false, false];
     const farX = stick.x + stick.length;
-    const tol  = g.helper ? HELPER_TOLERANCE : 0;
+    const tol  = g.buddyCount > 0 ? HELPER_TOLERANCE : 0;
     const hit  = g.platforms.find(p => p.x - tol < farX && farX < p.x + p.w);
     const perfect     = !!hit && Math.abs(farX - (hit.x + hit.w / 2)) < PERFECT / 2;
-    const buddyHelped = !!hit && g.helper && farX < hit.x; // landed short, buddy bridged the gap
+    const buddyHelped = !!hit && g.buddyCount > 0 && farX < hit.x;
     return [hit, perfect, buddyHelped];
   }, []);
 
@@ -243,12 +262,10 @@ export default function FinalChallenge() {
     setLives(g.lives);
 
     if (g.lives <= 0) {
-      setFinalScore(g.score);
       setGameOver(true);
       return;
     }
 
-    // Flash red then restore position
     setLostLife(true);
     const curPlat = g.platforms[g.currentPlatformIdx];
     g.sticks.pop();
@@ -285,19 +302,26 @@ export default function FinalChallenge() {
           last(g.sticks).rotation = 90;
           const [hit, perfect, buddyHelped] = platformHit();
           if (hit) {
-            const multiplier = perfect ? (g.x3score ? 3 : 2) : 1;
-            g.score += multiplier;
-            setScore(g.score);
             if (perfect) {
-              setPerfectMsg(g.x3score ? 'triple' : 'double');
-              setTimeout(() => setPerfectMsg(null), 1200);
+              if (Math.random() < 0.05 && g.lives < 6) {
+                g.lives += 1;
+                setLives(g.lives);
+              }
+              if (Math.random() < 0.05) {
+                g.buddyCount += 1;
+                setBuddyCount(g.buddyCount);
+              }
+              setPerfectMsg(true);
+              setTimeout(() => setPerfectMsg(false), 1200);
               playPerfectSound();
             }
             if (buddyHelped) {
+              g.buddyCount -= 1;
+              setBuddyCount(g.buddyCount);
               const farX = last(g.sticks).x + last(g.sticks).length;
               g.buddyBridge = { from: farX, to: hit.x };
               setShowBuddy(true);
-              setTimeout(() => { setShowBuddy(false); }, 1500);
+              setTimeout(() => setShowBuddy(false), 1500);
               playBuddySound();
             }
             mkPlatform(g.platforms);
@@ -329,6 +353,13 @@ export default function FinalChallenge() {
           g.currentPlatformIdx = g.platforms.indexOf(hit);
           g.sticks.push({ x: hit.x + hit.w, length: 0, rotation: 0 });
           g.buddyBridge = null;
+          // Win condition: reached the 40th checkpoint
+          if (g.currentPlatformIdx >= WIN_CHECKPOINTS) {
+            cancelAnimationFrame(rafRef.current);
+            redraw();
+            setWin(true);
+            return;
+          }
           g.phase = 'waiting';
         }
         break;
@@ -356,16 +387,19 @@ export default function FinalChallenge() {
 
   const startGame = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    gRef.current = initState(initLives, initX3Score, initHelper);
-    setScore(0);
+    gRef.current = initState(initLives, initBuddy);
     setLives(initLives);
+    setBuddyCount(initBuddy);
     setShowIntro(true);
-    setPerfectMsg(null);
+    setPerfectMsg(false);
     setLostLife(false);
     setShowBuddy(false);
     setGameOver(false);
+    setWin(false);
+    setShowWinVideo(false);
+
     redraw();
-  }, [redraw, initLives, initX3Score, initHelper]);
+  }, [redraw, initLives, initBuddy]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -403,22 +437,25 @@ export default function FinalChallenge() {
     };
   }, [animate, redraw, startGame]);
 
-  // Hearts string
-  const heartsDisplay = Array.from({ length: initLives }, (_, i) => i < lives ? '❤️' : '🖤').join('');
+  const goToLeaderboard = useCallback(() => {
+    navigate('/live-leaderboard');
+  }, [navigate]);
 
   return (
     <div className="fixed inset-0 select-none" style={{ cursor: 'pointer', touchAction: 'none' }}>
       <canvas ref={canvasRef} className="block w-full h-full" />
 
-      {/* Score */}
-      <div className="absolute top-6 right-6 text-3xl font-black" style={{ color: '#1a1a2e' }}>
-        {score}
-      </div>
-
       {/* Lives */}
       <div className="absolute top-6 left-6 text-xl tracking-wide">
-        {heartsDisplay}
+        {'❤️'.repeat(Math.max(0, lives))}
       </div>
+
+      {/* Buddy count */}
+      {buddyCount > 0 && (
+        <div className="absolute top-6 right-6 text-sm font-bold" style={{ color: '#1a1a2e' }}>
+          🌉 {buddyCount}
+        </div>
+      )}
 
       {/* Intro hint */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none"
@@ -432,14 +469,7 @@ export default function FinalChallenge() {
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
         style={{ opacity: perfectMsg ? 1 : 0, transition: 'opacity 1.2s' }}>
         {perfectMsg && (
-          <>
-            <p className="text-2xl font-black" style={{ color: '#E8730A' }}>PERFECT!</p>
-            {perfectMsg === 'triple' ? (
-              <p className="text-lg font-black" style={{ color: '#E8730A' }}>TRIPLE SCORE!</p>
-            ) : perfectMsg === 'double' ? (
-              !initX3Score && <p className="text-lg font-black" style={{ color: '#E8730A' }}>DOUBLE SCORE!</p>
-            ) : null}
-          </>
+          <p className="text-2xl font-black" style={{ color: '#E8730A' }}>PERFECT!</p>
         )}
       </div>
 
@@ -459,17 +489,87 @@ export default function FinalChallenge() {
         </div>
       )}
 
+      {/* Win popup */}
+      {win && !showWinVideo && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-8"
+          style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}>
+          <p className="text-5xl">🎉</p>
+          <p className="text-2xl font-black text-white text-center">
+            Chúc mừng!
+          </p>
+          <p className="text-sm text-white text-center opacity-90 leading-relaxed">
+            Bạn đã tìm được đường ra khỏi khu rừng!
+          </p>
+          <button
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); setShowWinVideo(true); }}
+            className="w-48 py-3 rounded-2xl font-bold text-white text-base"
+            style={{ backgroundColor: '#22C55E' }}
+          >
+            ▶ Go
+          </button>
+        </div>
+      )}
+
+      {/* Win video — fullscreen, same style as IntroVideoModal */}
+      {showWinVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+          <video
+            src="/winningscene.mp4"
+            autoPlay
+            controls={false}
+            style={{
+              width: '100vw',
+              height: '100vh',
+              objectFit: 'cover',
+              maxWidth: '100vw',
+              maxHeight: '100vh',
+              aspectRatio: '9/16',
+            }}
+            onEnded={goToLeaderboard}
+            className="win-video-responsive"
+          />
+          <button
+            onClick={goToLeaderboard}
+            style={{
+              position: 'fixed',
+              top: 24,
+              right: 24,
+              zIndex: 100,
+              background: 'rgba(0,0,0,0.5)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              padding: '10px 22px',
+              fontWeight: 700,
+              fontSize: 16,
+              cursor: 'pointer',
+            }}
+          >
+            Skip
+          </button>
+          <style>{`
+            @media (min-width: 600px) {
+              .win-video-responsive {
+                width: auto !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+              }
+            }
+          `}</style>
+        </div>
+      )}
+
       {/* Game Over */}
       {gameOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5"
           style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}>
           <p className="text-5xl">💀</p>
           <p className="text-2xl font-black text-white">Game Over</p>
-          <p className="text-4xl font-black" style={{ color: '#FCD34D' }}>{finalScore}</p>
-          <p className="text-sm text-white opacity-70">points</p>
           <button
             onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => { e.stopPropagation(); navigate('/live-leaderboard', { state: { finalScore } }); }}
+            onClick={(e) => { e.stopPropagation(); goToLeaderboard(); }}
             className="w-48 py-3 rounded-2xl font-bold text-white text-base"
             style={{ backgroundColor: '#22C55E' }}
           >
