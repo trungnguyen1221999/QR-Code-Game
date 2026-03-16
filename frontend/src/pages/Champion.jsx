@@ -23,8 +23,14 @@ export default function Champion() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex justify-center" style={{ backgroundColor: 'var(--color-bg)' }}>
-      <div className="w-full max-w-sm flex flex-col pb-24">
+    <div className="min-h-screen flex justify-center relative" style={{
+      backgroundImage: 'url(/forest2.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
+      <div className="absolute inset-0" style={{ backgroundColor: 'rgba(240, 255, 230, 0.1)' }} />
+      <div className="w-full max-w-sm flex flex-col pb-24 relative z-10">
 
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 pt-8 pb-5 px-5">
@@ -90,8 +96,8 @@ export default function Champion() {
       </div>
 
       {/* Fixed Done button */}
-      <div className="fixed bottom-0 left-0 right-0 flex justify-center px-5 pb-6 pt-3"
-        style={{ backgroundColor: 'var(--color-bg)' }}>
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center px-5 pb-6 pt-3 z-20"
+        style={{ backgroundColor: 'rgba(242, 249, 236, 0.92)', backdropFilter: 'blur(8px)' }}>
         <div className="w-full max-w-sm">
           <button
             onClick={() => navigate('/')}

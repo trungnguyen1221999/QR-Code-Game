@@ -36,8 +36,14 @@ export default function LiveLeaderboard() {
   }, [timeLeft]);
 
   return (
-    <div className="min-h-screen flex justify-center" style={{ backgroundColor: 'var(--color-bg)' }}>
-      <div className="w-full max-w-sm flex flex-col px-5 pt-8 pb-12 gap-5">
+    <div className="min-h-screen flex justify-center relative" style={{
+      backgroundImage: 'url(/forest2.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundAttachment: 'fixed',
+    }}>
+      <div className="absolute inset-0" style={{ backgroundColor: 'rgba(240, 255, 230, 0.1)' }} />
+      <div className="w-full max-w-sm flex flex-col px-5 pt-8 pb-12 gap-5 relative z-10">
 
         {/* Header */}
         <div className="flex items-center gap-2">
