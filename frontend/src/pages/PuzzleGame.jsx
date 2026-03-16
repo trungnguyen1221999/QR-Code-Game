@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Clock, RotateCcw, Trophy, Puzzle } from 'lucide-react';
@@ -11,6 +11,7 @@ const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
 const PUZZLE_TIME_LIMIT = 120;
 const PUZZLE_REWARD = 100;
+const SNAP_DISTANCE = 90;
 
 const PUZZLE_IMAGES = [
   '/puzzle/puzzle1.png',
@@ -59,6 +60,10 @@ function getPieceStyle(pieceIndex, imageUrl) {
   };
 }
 
+function getDistance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
 export default function PuzzlePlacementGame() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,10 +72,16 @@ export default function PuzzlePlacementGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
+  const boardRef = useRef(null);
+  const slotRefs = useRef([]);
+
   const [selectedImage, setSelectedImage] = useState(() => pickRandomImage());
   const [placedPieces, setPlacedPieces] = useState(Array(TOTAL_PIECES).fill(null));
   const [trayPieces, setTrayPieces] = useState(() => shuffleArray(createPieces()));
   const [selectedPieceId, setSelectedPieceId] = useState(null);
+  const [dragState, setDragState] = useState(null);
+  const [shakeSlotIndex, setShakeSlotIndex] = useState(null);
+
   const [timeLeft, setTimeLeft] = useState(PUZZLE_TIME_LIMIT);
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
@@ -80,6 +91,8 @@ export default function PuzzlePlacementGame() {
     () => placedPieces.filter(Boolean).length,
     [placedPieces]
   );
+
+  const selectedPiece = trayPieces.find((piece) => piece.id === selectedPieceId) || null;
 
   useEffect(() => {
     if (showWin || showLose) return;
@@ -97,47 +110,121 @@ export default function PuzzlePlacementGame() {
   }, [showWin, showLose, timeLeft]);
 
   useEffect(() => {
-    if (placedPieces.every((piece, index) => piece && piece.correctIndex === index)) {
+    const isComplete = placedPieces.every(
+      (piece, index) => piece && piece.correctIndex === index
+    );
+
+    if (isComplete) {
       setShowWin(true);
     }
   }, [placedPieces]);
 
-  const selectedPiece = trayPieces.find((piece) => piece.id === selectedPieceId) || null;
+  useEffect(() => {
+    if (shakeSlotIndex === null) return;
+    const timeout = setTimeout(() => setShakeSlotIndex(null), 300);
+    return () => clearTimeout(timeout);
+  }, [shakeSlotIndex]);
 
-  const handleDragStart = (pieceId) => {
-    if (busy || showWin || showLose) return;
-    setSelectedPieceId(pieceId);
+  const findNearestEmptySlot = (point) => {
+    const candidates = placedPieces
+      .map((piece, index) => ({ piece, index }))
+      .filter((entry) => !entry.piece)
+      .map((entry) => {
+        const el = slotRefs.current[entry.index];
+        if (!el) return null;
+
+        const rect = el.getBoundingClientRect();
+        const center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        };
+
+        return {
+          index: entry.index,
+          distance: getDistance(point, center),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.distance - b.distance);
+
+    if (!candidates.length) return null;
+    if (candidates[0].distance > SNAP_DISTANCE) return null;
+
+    return candidates[0].index;
   };
 
-  const handleDropOnSlot = (slotIndex) => {
-    if (busy || showWin || showLose) return;
-    if (placedPieces[slotIndex]) return;
-    if (!selectedPiece) return;
+  const placePieceIntoSlot = (piece, slotIndex) => {
+    if (!piece) return false;
+    if (placedPieces[slotIndex]) return false;
 
-    if (selectedPiece.correctIndex !== slotIndex) {
-      toast.error('Wrong position');
-      return;
+    if (piece.correctIndex !== slotIndex) {
+      setShakeSlotIndex(slotIndex);
+      toast.error('That piece does not fit there');
+      return false;
     }
 
     setPlacedPieces((current) => {
       const next = [...current];
-      next[slotIndex] = selectedPiece;
+      next[slotIndex] = piece;
       return next;
     });
 
-    setTrayPieces((current) => current.filter((piece) => piece.id !== selectedPiece.id));
+    setTrayPieces((current) => current.filter((entry) => entry.id !== piece.id));
     setSelectedPieceId(null);
+    return true;
   };
 
   const handleSlotClick = (slotIndex) => {
+    if (busy || showWin || showLose) return;
     if (!selectedPiece) return;
-    handleDropOnSlot(slotIndex);
+    placePieceIntoSlot(selectedPiece, slotIndex);
   };
 
-  const handleTrayPieceClick = (pieceId) => {
+  const startPointerDrag = (event, piece) => {
     if (busy || showWin || showLose) return;
 
-    setSelectedPieceId((current) => (current === pieceId ? null : pieceId));
+    const startX = event.clientX;
+    const startY = event.clientY;
+
+    setSelectedPieceId(piece.id);
+    setDragState({
+      pieceId: piece.id,
+      piece,
+      x: startX,
+      y: startY,
+      offsetX: 0,
+      offsetY: 0,
+      width: 96,
+      height: 96,
+    });
+
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  };
+
+  const movePointerDrag = (event) => {
+    if (!dragState) return;
+
+    setDragState((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        x: event.clientX,
+        y: event.clientY,
+      };
+    });
+  };
+
+  const endPointerDrag = (event) => {
+    if (!dragState) return;
+
+    const dropPoint = { x: event.clientX, y: event.clientY };
+    const nearestSlot = findNearestEmptySlot(dropPoint);
+
+    if (nearestSlot !== null) {
+      placePieceIntoSlot(dragState.piece, nearestSlot);
+    }
+
+    setDragState(null);
   };
 
   const handleRetry = () => {
@@ -145,6 +232,8 @@ export default function PuzzlePlacementGame() {
     setPlacedPieces(Array(TOTAL_PIECES).fill(null));
     setTrayPieces(shuffleArray(createPieces()));
     setSelectedPieceId(null);
+    setDragState(null);
+    setShakeSlotIndex(null);
     setTimeLeft(PUZZLE_TIME_LIMIT);
     setShowWin(false);
     setShowLose(false);
@@ -212,6 +301,17 @@ export default function PuzzlePlacementGame() {
 
   return (
     <PageLayout>
+      <style>{`
+        @keyframes puzzle-shake {
+          0% { transform: translateX(0); }
+          20% { transform: translateX(-4px); }
+          40% { transform: translateX(4px); }
+          60% { transform: translateX(-3px); }
+          80% { transform: translateX(3px); }
+          100% { transform: translateX(0); }
+        }
+      `}</style>
+
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
@@ -225,7 +325,7 @@ export default function PuzzlePlacementGame() {
             Piece Placement Puzzle
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Drag each piece into the correct slot. You can also tap a piece, then tap its target slot.
+            Drag the shuffled pieces into the correct slots. On mobile, pieces snap to the nearest slot.
           </p>
         </div>
 
@@ -254,77 +354,102 @@ export default function PuzzlePlacementGame() {
               Selected
             </p>
             <p className="text-sm font-bold mt-1" style={{ color: '#166534' }}>
-              {selectedPiece ? '1 piece ready' : 'None'}
+              {selectedPiece ? 'Ready' : 'None'}
             </p>
           </div>
         </div>
 
-        <div
-          className="rounded-3xl p-4"
-          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
-        >
-          <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
-            Board
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            className="rounded-3xl p-4"
+            style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+          >
+            <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
+              Placement Area
+            </p>
 
-          <div className="grid grid-cols-3 gap-2">
-            {placedPieces.map((piece, slotIndex) => (
+            <div
+              ref={boardRef}
+              className="grid grid-cols-3 gap-2 relative rounded-2xl p-2 overflow-hidden"
+              style={{
+                backgroundImage: `url(${selectedImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+              }}
+            >
               <div
-                key={`slot-${slotIndex}`}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDropOnSlot(slotIndex)}
-                onClick={() => handleSlotClick(slotIndex)}
-                className="aspect-square rounded-2xl flex items-center justify-center"
+                className="absolute inset-0"
                 style={{
-                  border: piece ? '2px solid #22C55E' : '2px dashed #D1D5DB',
-                  backgroundColor: piece ? '#FFFFFF' : '#F9FAFB',
-                  boxShadow: !piece && selectedPiece ? '0 0 0 3px rgba(34,197,94,0.12)' : 'none',
+                  backgroundColor: 'rgba(255,255,255,0.58)',
+                  pointerEvents: 'none',
                 }}
-              >
-                {piece ? (
-                  <div
-                    className="w-full h-full rounded-xl"
-                    style={getPieceStyle(piece.correctIndex, selectedImage)}
-                  />
-                ) : (
-                  <span className="text-[10px] font-semibold" style={{ color: '#9CA3AF' }}>
-                    Slot {slotIndex + 1}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+              />
 
-        <div
-          className="rounded-3xl p-4"
-          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
-        >
-          <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
-            Pieces
-          </p>
-
-          <div className="grid grid-cols-3 gap-2">
-            {trayPieces.map((piece) => {
-              const isSelected = selectedPieceId === piece.id;
-
-              return (
-                <button
-                  key={piece.id}
-                  type="button"
-                  draggable
-                  onDragStart={() => handleDragStart(piece.id)}
-                  onClick={() => handleTrayPieceClick(piece.id)}
-                  className="aspect-square rounded-2xl"
-                  style={{
-                    ...getPieceStyle(piece.correctIndex, selectedImage),
-                    border: isSelected ? '3px solid #22C55E' : '2px solid #C07020',
-                    transform: isSelected ? 'scale(1.03)' : 'none',
-                    boxShadow: isSelected ? '0 0 0 3px rgba(34,197,94,0.15)' : 'none',
+              {placedPieces.map((piece, slotIndex) => (
+                <div
+                  key={`slot-${slotIndex}`}
+                  ref={(el) => {
+                    slotRefs.current[slotIndex] = el;
                   }}
-                />
-              );
-            })}
+                  onClick={() => handleSlotClick(slotIndex)}
+                  className="aspect-square rounded-2xl flex items-center justify-center relative z-10 transition-transform"
+                  style={{
+                    border: piece ? '2px solid #22C55E' : '2px dashed rgba(156,163,175,0.95)',
+                    backgroundColor: piece ? '#FFFFFF' : 'rgba(255,255,255,0.18)',
+                    boxShadow: !piece && selectedPiece ? '0 0 0 3px rgba(34,197,94,0.12)' : 'none',
+                    animation: shakeSlotIndex === slotIndex ? 'puzzle-shake 0.3s ease' : 'none',
+                  }}
+                >
+                  {piece ? (
+                    <div
+                      className="w-full h-full rounded-xl"
+                      style={getPieceStyle(piece.correctIndex, selectedImage)}
+                    />
+                  ) : (
+                    <span className="text-[10px] font-semibold" style={{ color: 'rgba(75,85,99,0.65)' }}>
+                      Drop here
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="rounded-3xl p-4"
+            style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+          >
+            <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
+              Puzzle Pieces
+            </p>
+
+            <div className="grid grid-cols-3 gap-2">
+              {trayPieces.map((piece) => {
+                const isSelected = selectedPieceId === piece.id;
+
+                return (
+                  <button
+                    key={piece.id}
+                    type="button"
+                    onPointerDown={(event) => startPointerDrag(event, piece)}
+                    onPointerMove={movePointerDrag}
+                    onPointerUp={endPointerDrag}
+                    onPointerCancel={() => setDragState(null)}
+                    onClick={() =>
+                      setSelectedPieceId((current) => (current === piece.id ? null : piece.id))
+                    }
+                    className="aspect-square rounded-2xl touch-none select-none"
+                    style={{
+                      ...getPieceStyle(piece.correctIndex, selectedImage),
+                      border: isSelected ? '3px solid #22C55E' : '2px solid #C07020',
+                      transform: isSelected ? 'scale(1.03)' : 'none',
+                      boxShadow: isSelected ? '0 0 0 3px rgba(34,197,94,0.15)' : 'none',
+                      opacity: dragState?.pieceId === piece.id ? 0.35 : 1,
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -333,7 +458,8 @@ export default function PuzzlePlacementGame() {
             How to win
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Drag a piece to the correct slot. On phones, you can also tap a piece first, then tap the matching slot.
+            Drag each piece from the tray toward the board. It will snap to the nearest empty slot.
+            The faded image helps you see the correct place. You can also tap a piece and then tap a slot.
           </p>
         </div>
 
@@ -346,6 +472,23 @@ export default function PuzzlePlacementGame() {
           </Button>
         </div>
       </div>
+
+      {dragState && (
+        <div
+          className="fixed z-[100] pointer-events-none"
+          style={{
+            left: dragState.x - 48,
+            top: dragState.y - 48,
+            width: 96,
+            height: 96,
+            borderRadius: '16px',
+            border: '3px solid #22C55E',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+            transform: 'scale(1.06)',
+            ...getPieceStyle(dragState.piece.correctIndex, selectedImage),
+          }}
+        />
+      )}
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
         <div className="flex flex-col items-center gap-4 text-center">
