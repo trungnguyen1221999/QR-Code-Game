@@ -6,10 +6,15 @@ export default function BackButton({ to = '/' }) {
   return (
     <button
       onClick={() => typeof to === 'number' ? navigate(to) : navigate(to)}
-      className="flex items-center gap-1 text-sm font-semibold cursor-pointer"
-      style={{ color: '#C07020', background: 'none', border: 'none', padding: 0 }}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold btn-press"
+      style={{
+        backgroundColor: '#FEF0E0',
+        color: 'var(--color-primary)',
+        border: '1px solid #FFD9A8',
+      }}
     >
-      <ArrowLeft size={16} /> Back
+      <ArrowLeft size={14} />
+      Back
     </button>
   );
 }

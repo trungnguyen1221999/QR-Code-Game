@@ -1,37 +1,79 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
 
 /* ─── Theme colors ─────────────────────────────────────────── */
 :root {
-  --color-bg:           #FFF8F0;
+  --color-bg:           #F2F9EC;
   --color-primary:      #E8730A;
   --color-primary-dark: #C05A00;
-  --color-green:        #22C55E;
+  --color-green:        #3BAD5A;
   --color-red:          #EF4444;
   --color-orange:       #F97316;
   --color-blue:         #3B82F6;
   --color-yellow:       #FCD34D;
 
   --color-card-bg:      #FFFFFF;
-  --color-text:         #2D1B00;
-  --color-subtext:      #92632A;
-  --color-border:       #FFE0B2;
-  --color-info-bg:      #FFF3E0;
+  --color-text:         #1E3A0F;
+  --color-subtext:      #5A7A40;
+  --color-border:       #C8E6A0;
+  --color-info-bg:      #EEF7E4;
+
+  /* Shadows */
+  --shadow-card:        0 2px 20px rgba(232,115,10,0.09), 0 1px 4px rgba(0,0,0,0.05);
+  --shadow-btn:         0 3px 10px rgba(200,90,0,0.32);
+  --shadow-btn-green:   0 3px 10px rgba(34,197,94,0.38);
+  --shadow-btn-red:     0 3px 10px rgba(220,38,38,0.32);
 }
 
 /* ─── Base overrides ─────────────────────────────────────────── */
 @layer base {
+  html { scroll-behavior: smooth; }
+
   * {
     font-family: 'Nunito', sans-serif;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Baloo 2', cursive;
     font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   button, [role="button"] {
     cursor: pointer;
+  }
+
+  ::selection {
+    background-color: #FFD9AD;
+    color: #2D1B00;
+  }
+}
+
+/* ─── Utilities ─────────────────────────────────────────────── */
+@layer utilities {
+  /* Press animation for buttons */
+  .btn-press {
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  }
+  .btn-press:active {
+    transform: scale(0.95);
+  }
+
+  /* Fade-in for page content */
+  .fade-in {
+    animation: fadeIn 0.3s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Subtle dot grid background */
+  .dot-bg {
+    background-image: radial-gradient(rgba(232,115,10,0.08) 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
   }
 }
