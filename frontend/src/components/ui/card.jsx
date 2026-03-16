@@ -1,12 +1,16 @@
 /**
- * Card – white card with rounded corners, shadow, and default padding p-5.
+ * Card – elevated white card with warm border and shadow.
  * Props:
  *   noPadding – remove default padding for custom layouts
  */
 export default function Card({ children, className = '', noPadding = false, ...props }) {
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm ${noPadding ? '' : 'p-6'} ${className}`}
+      className={`bg-white rounded-2xl ${noPadding ? '' : 'p-5'} ${className}`}
+      style={{
+        boxShadow: 'var(--shadow-card)',
+        border: '1px solid #FFE8CC',
+      }}
       {...props}
     >
       {children}
