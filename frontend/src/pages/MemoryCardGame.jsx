@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, RotateCcw, Trophy } from 'lucide-react';
+import { Clock, Trophy } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import { playerAPI, sessionAPI } from '../utils/api';
 
-const MEMORY_TIME_LIMIT = 20;
-const MATCH_REWARD = 50;
+const MEMORY_TIME_LIMIT = 30;
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
+const PLAYER_PROGRESS_KEY = 'playerGameProgress';
+const DEFAULT_LIFE = 3;
+const DEFAULT_COINS = 0;
 
 function shuffleCards() {
   return [...CARD_EMOJIS, ...CARD_EMOJIS]
@@ -27,6 +29,22 @@ function formatTime(seconds) {
   return `${mins}:${secs}`;
 }
 
+function applyLossToStoredProgress() {
+  const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
+  const progress = raw ? JSON.parse(raw) : { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
+  const nextLife = (progress.life ?? DEFAULT_LIFE) - 1;
+
+  if (nextLife > 0) {
+    const updated = { ...progress, life: nextLife };
+    localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(updated));
+    return { remainingLives: nextLife, resetToStart: false };
+  }
+
+  const reset = { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
+  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(reset));
+  return { remainingLives: 0, resetToStart: true };
+}
+
 export default function MemoryCardGame() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,12 +59,15 @@ export default function MemoryCardGame() {
   const [busy, setBusy] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showWin, setShowWin] = useState(false);
+  const [loseState, setLoseState] = useState({ remainingLives: null, resetToStart: false });
   const resolvingRef = useRef(false);
+  const lossHandledRef = useRef(false);
+  const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
     if (showWin || showLose) return;
     if (timeLeft <= 0) {
-      setShowLose(true);
+      void handleLoss();
       return;
     }
 
@@ -113,7 +134,42 @@ export default function MemoryCardGame() {
     setTimeLeft(MEMORY_TIME_LIMIT);
     setShowLose(false);
     setShowWin(false);
+    setLoseState({ remainingLives: null, resetToStart: false });
     resolvingRef.current = false;
+    lossHandledRef.current = false;
+  };
+
+  const registerLifeLoss = async () => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const summary = applyLossToStoredProgress();
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.loseLife(playerSessionId);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    return summary;
+  };
+
+  const handleLoss = async () => {
+    if (lossHandledRef.current) return;
+    lossHandledRef.current = true;
+    setBusy(true);
+
+    const summary = await registerLifeLoss();
+    setLoseState(summary);
+    setBusy(false);
+    setShowLose(true);
+  };
+
+  const handleBackExit = async () => {
+    if (busy || showWin || showLose) return;
+    setBusy(true);
+    await registerLifeLoss();
+    navigate('/game');
   };
 
   const handleBackToGame = async () => {
@@ -132,7 +188,7 @@ export default function MemoryCardGame() {
         if (matchedCheckpoint?._id) {
           await playerAPI.checkpoint(playerSessionId, {
             checkpointId: matchedCheckpoint._id,
-            scoreEarned: MATCH_REWARD,
+            scoreEarned: earnedCoins,
           });
         }
       }
@@ -144,7 +200,7 @@ export default function MemoryCardGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: MATCH_REWARD,
+          rewardCoins: earnedCoins,
           resultId,
         },
       });
@@ -242,11 +298,8 @@ export default function MemoryCardGame() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button variant="red" onClick={() => navigate('/game')}>
+          <Button variant="red" onClick={handleBackExit} disabled={busy}>
             Back
-          </Button>
-          <Button variant="green" onClick={handleRetry}>
-            <RotateCcw size={16} /> Restart
           </Button>
         </div>
       </div>
@@ -264,7 +317,7 @@ export default function MemoryCardGame() {
               You win!
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              All cards are matched. Your checkpoint will move forward.
+              All cards are matched. You earned {earnedCoins} coins from the time left.
             </p>
           </div>
           <Button variant="green" onClick={handleBackToGame} disabled={busy}>
@@ -281,15 +334,21 @@ export default function MemoryCardGame() {
               Time is up
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You did not finish the board in time. One life will be removed.
+              {loseState.resetToStart
+                ? 'No lives left. You will return to checkpoint 1.'
+                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
-            <Button variant="red" onClick={handleRetry} disabled={busy}>
-              Retry
+            <Button
+              variant="red"
+              onClick={loseState.resetToStart ? () => navigate('/game') : handleRetry}
+              disabled={busy}
+            >
+              {loseState.resetToStart ? 'Checkpoint 1' : 'Play again'}
             </Button>
-            <Button variant="green" onClick={handleTimeoutContinue} disabled={busy}>
-              Continue
+            <Button variant="green" onClick={() => navigate('/game')} disabled={busy}>
+              Exit game
             </Button>
           </div>
         </div>

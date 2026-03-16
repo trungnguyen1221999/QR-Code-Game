@@ -9,9 +9,11 @@ import { playerAPI, sessionAPI } from '../utils/api';
 
 const GAME_TIME_LIMIT = 20;
 const WINNING_SCORE = 14;
-const MOLE_REWARD = 75;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
+const PLAYER_PROGRESS_KEY = 'playerGameProgress';
+const DEFAULT_LIFE = 3;
+const DEFAULT_COINS = 0;
 const ANIMALS = [
   { key: 'mouse', emoji: '🐭', label: 'Mouse' },
   { key: 'bird', emoji: '🐦', label: 'Bird' },
@@ -33,6 +35,22 @@ function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5);
 }
 
+function applyLossToStoredProgress() {
+  const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
+  const progress = raw ? JSON.parse(raw) : { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
+  const nextLife = (progress.life ?? DEFAULT_LIFE) - 1;
+
+  if (nextLife > 0) {
+    const updated = { ...progress, life: nextLife };
+    localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(updated));
+    return { remainingLives: nextLife, resetToStart: false };
+  }
+
+  const reset = { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
+  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(reset));
+  return { remainingLives: 0, resetToStart: true };
+}
+
 export default function WhackAMoleGame() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,14 +67,17 @@ export default function WhackAMoleGame() {
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [loseState, setLoseState] = useState({ remainingLives: null, resetToStart: false });
   const hasEndedRef = useRef(false);
+  const lossHandledRef = useRef(false);
+  const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
     if (showWin || showLose) return;
     if (timeLeft <= 0) {
       hasEndedRef.current = true;
-      setShowLose(true);
       setActiveAnimals({});
+      void handleLoss();
       return;
     }
 
@@ -123,6 +144,53 @@ export default function WhackAMoleGame() {
     return () => clearTimeout(timeout);
   }, [feedback]);
 
+  const resetGame = () => {
+    setTimeLeft(GAME_TIME_LIMIT);
+    setScore(0);
+    setTargetAnimalKey(pickRandom(ANIMALS).key);
+    setActiveAnimals({});
+    setBusy(false);
+    setShowWin(false);
+    setShowLose(false);
+    setFeedback(null);
+    setLoseState({ remainingLives: null, resetToStart: false });
+    hasEndedRef.current = false;
+    lossHandledRef.current = false;
+  };
+
+  const registerLifeLoss = async () => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const summary = applyLossToStoredProgress();
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.loseLife(playerSessionId);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    return summary;
+  };
+
+  const handleLoss = async () => {
+    if (lossHandledRef.current) return;
+    lossHandledRef.current = true;
+    setBusy(true);
+
+    const summary = await registerLifeLoss();
+    setLoseState(summary);
+    setBusy(false);
+    setShowLose(true);
+  };
+
+  const handleBackExit = async () => {
+    if (busy || showWin || showLose) return;
+    setBusy(true);
+    await registerLifeLoss();
+    navigate('/game');
+  };
+
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const sessionId = session?._id || session?.id;
@@ -139,7 +207,7 @@ export default function WhackAMoleGame() {
         if (matchedCheckpoint?._id) {
           await playerAPI.checkpoint(playerSessionId, {
             checkpointId: matchedCheckpoint._id,
-            scoreEarned: MOLE_REWARD,
+            scoreEarned: earnedCoins,
           });
         }
       }
@@ -151,7 +219,7 @@ export default function WhackAMoleGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: MOLE_REWARD,
+          rewardCoins: earnedCoins,
           resultId,
         },
       });
@@ -284,7 +352,7 @@ export default function WhackAMoleGame() {
           </p>
         </div>
 
-        <Button variant="red" onClick={() => navigate('/game')}>
+        <Button variant="red" onClick={handleBackExit} disabled={busy}>
           Back
         </Button>
       </div>
@@ -302,7 +370,7 @@ export default function WhackAMoleGame() {
               Nice job!
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You reached the target score. Checkpoint 2 is complete.
+              You reached the target score and earned {earnedCoins} coins.
             </p>
           </div>
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
@@ -319,12 +387,23 @@ export default function WhackAMoleGame() {
               Time is up
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You did not reach {WINNING_SCORE} points in time. One life will be removed.
+              {loseState.resetToStart
+                ? 'No lives left. You will return to checkpoint 1.'
+                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
-          <Button variant="green" onClick={handleLoseContinue} disabled={busy}>
-            Continue
-          </Button>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button
+              variant="red"
+              onClick={loseState.resetToStart ? () => navigate('/game') : resetGame}
+              disabled={busy}
+            >
+              {loseState.resetToStart ? 'Checkpoint 1' : 'Play again'}
+            </Button>
+            <Button variant="green" onClick={() => navigate('/game')} disabled={busy}>
+              Exit game
+            </Button>
+          </div>
         </div>
       </Popup>
     </PageLayout>

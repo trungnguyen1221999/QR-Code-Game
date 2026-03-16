@@ -11,7 +11,9 @@ import { playerAPI, sessionAPI } from '../utils/api';
 const QUIZ_TIME_LIMIT = 70;
 const PASS_SCORE = 7;
 const TOTAL_QUESTIONS = 10;
-const QUIZ_REWARD = 100;
+const PLAYER_PROGRESS_KEY = 'playerGameProgress';
+const DEFAULT_LIFE = 3;
+const DEFAULT_COINS = 0;
 
 const QUESTION_BANK = [
   { id: 'sunglasses', pictures: ['☀️', '🕶️'], answer: 'sunglasses', hint: 'Something you wear on a sunny day' },
@@ -72,6 +74,22 @@ function normalizeAnswer(value) {
   return value.toLowerCase().replace(/\s+/g, '');
 }
 
+function applyLossToStoredProgress() {
+  const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
+  const progress = raw ? JSON.parse(raw) : { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
+  const nextLife = (progress.life ?? DEFAULT_LIFE) - 1;
+
+  if (nextLife > 0) {
+    const updated = { ...progress, life: nextLife };
+    localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(updated));
+    return { remainingLives: nextLife, resetToStart: false };
+  }
+
+  const reset = { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
+  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(reset));
+  return { remainingLives: 0, resetToStart: true };
+}
+
 export default function CombinedWordQuizGame() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,6 +107,8 @@ export default function CombinedWordQuizGame() {
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
+  const [loseState, setLoseState] = useState({ remainingLives: null, resetToStart: false });
+  const earnedCoins = Math.max(0, timeLeft * 2);
 
   const currentQuestion = questions[currentIndex];
   const remainingQuestions = TOTAL_QUESTIONS - submittedIds.length;
@@ -97,7 +117,7 @@ export default function CombinedWordQuizGame() {
   useEffect(() => {
     if (showWin || showLose) return;
     if (timeLeft <= 0) {
-      setShowLose(true);
+      void handleLoss();
       return;
     }
 
@@ -115,7 +135,7 @@ export default function CombinedWordQuizGame() {
       return;
     }
     if (submittedIds.length >= TOTAL_QUESTIONS || !canStillPass) {
-      setShowLose(true);
+      void handleLoss();
     }
   }, [canStillPass, score, showLose, showWin, submittedIds.length]);
 
@@ -131,6 +151,50 @@ export default function CombinedWordQuizGame() {
       setCurrentIndex(nextIndex);
       setAnswer('');
     }
+  };
+
+  const resetGame = () => {
+    setTimeLeft(QUIZ_TIME_LIMIT);
+    setCurrentIndex(0);
+    setScore(0);
+    setAnswer('');
+    setFeedback(null);
+    setSubmittedIds([]);
+    setBusy(false);
+    setShowWin(false);
+    setShowLose(false);
+    setLoseState({ remainingLives: null, resetToStart: false });
+  };
+
+  const registerLifeLoss = async () => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const summary = applyLossToStoredProgress();
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.loseLife(playerSessionId);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    return summary;
+  };
+
+  const handleLoss = async () => {
+    if (busy || showLose) return;
+    setBusy(true);
+    const summary = await registerLifeLoss();
+    setLoseState(summary);
+    setBusy(false);
+    setShowLose(true);
+  };
+
+  const handleBackExit = async () => {
+    if (busy || showWin || showLose) return;
+    setBusy(true);
+    await registerLifeLoss();
+    navigate('/game');
   };
 
   const handleSubmitAnswer = () => {
@@ -169,7 +233,7 @@ export default function CombinedWordQuizGame() {
         if (matchedCheckpoint?._id) {
           await playerAPI.checkpoint(playerSessionId, {
             checkpointId: matchedCheckpoint._id,
-            scoreEarned: QUIZ_REWARD,
+            scoreEarned: earnedCoins,
           });
         }
       }
@@ -181,7 +245,7 @@ export default function CombinedWordQuizGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: QUIZ_REWARD,
+          rewardCoins: earnedCoins,
           resultId,
         },
       });
@@ -301,7 +365,7 @@ export default function CombinedWordQuizGame() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button variant="red" onClick={() => navigate('/game')}>
+          <Button variant="red" onClick={handleBackExit} disabled={busy}>
             Back
           </Button>
           <Button variant="green" onClick={handleSubmitAnswer} disabled={!answer.trim() || showWin || showLose}>
@@ -323,7 +387,7 @@ export default function CombinedWordQuizGame() {
               Quiz cleared!
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You reached the pass grade. Checkpoint 3 is complete.
+              You reached the pass grade and earned {earnedCoins} coins.
             </p>
           </div>
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
@@ -340,12 +404,23 @@ export default function CombinedWordQuizGame() {
               Quiz over
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You needed at least {PASS_SCORE} correct answers to pass this checkpoint.
+              {loseState.resetToStart
+                ? 'No lives left. You will return to checkpoint 1.'
+                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
-          <Button variant="green" onClick={handleLoseContinue} disabled={busy}>
-            Continue
-          </Button>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button
+              variant="red"
+              onClick={loseState.resetToStart ? () => navigate('/game') : resetGame}
+              disabled={busy}
+            >
+              {loseState.resetToStart ? 'Checkpoint 1' : 'Play again'}
+            </Button>
+            <Button variant="green" onClick={() => navigate('/game')} disabled={busy}>
+              Exit game
+            </Button>
+          </div>
         </div>
       </Popup>
     </PageLayout>
