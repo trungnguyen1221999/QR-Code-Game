@@ -7,9 +7,10 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import { playerAPI, sessionAPI } from '../utils/api';
 
-const PUZZLE_TIME_LIMIT = 90;
-const PUZZLE_REWARD = 100;
 const GRID_SIZE = 3;
+const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
+const PUZZLE_TIME_LIMIT = 120;
+const PUZZLE_REWARD = 100;
 
 const PUZZLE_IMAGES = [
   '/puzzle/puzzle1.png',
@@ -18,8 +19,6 @@ const PUZZLE_IMAGES = [
   '/puzzle/puzzle4.png',
   '/puzzle/puzzle5.png',
 ];
-
-const SOLVED_TILES = ['0', '1', '2', '3', '4', '5', '6', '7', 'blank'];
 
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -36,75 +35,31 @@ function shuffleArray(items) {
   return arr;
 }
 
-function countInversions(arr) {
-  const nums = arr.filter((item) => item !== 'blank').map(Number);
-  let inversions = 0;
-
-  for (let i = 0; i < nums.length; i += 1) {
-    for (let j = i + 1; j < nums.length; j += 1) {
-      if (nums[i] > nums[j]) inversions += 1;
-    }
-  }
-
-  return inversions;
-}
-
-function isSolvable(arr) {
-  return countInversions(arr) % 2 === 0;
-}
-
-function generateShuffledPuzzle() {
-  let shuffled = shuffleArray(SOLVED_TILES);
-
-  while (
-    !isSolvable(shuffled) ||
-    shuffled.every((tile, index) => tile === SOLVED_TILES[index])
-  ) {
-    shuffled = shuffleArray(SOLVED_TILES);
-  }
-
-  return shuffled;
-}
-
-function areAdjacent(indexA, indexB) {
-  const rowA = Math.floor(indexA / GRID_SIZE);
-  const colA = indexA % GRID_SIZE;
-  const rowB = Math.floor(indexB / GRID_SIZE);
-  const colB = indexB % GRID_SIZE;
-
-  return (
-    (rowA === rowB && Math.abs(colA - colB) === 1) ||
-    (colA === colB && Math.abs(rowA - rowB) === 1)
-  );
-}
-
 function pickRandomImage() {
   return PUZZLE_IMAGES[Math.floor(Math.random() * PUZZLE_IMAGES.length)];
 }
 
-function getTileBackgroundStyle(tile, imageUrl) {
-  if (tile === 'blank') {
-    return {
-      backgroundColor: '#F3F4F6',
-      border: '2px dashed #D1D5DB',
-    };
-  }
+function createPieces() {
+  return Array.from({ length: TOTAL_PIECES }, (_, index) => ({
+    id: `piece-${index}`,
+    correctIndex: index,
+  }));
+}
 
-  const tileIndex = Number(tile);
-  const row = Math.floor(tileIndex / GRID_SIZE);
-  const col = tileIndex % GRID_SIZE;
+function getPieceStyle(pieceIndex, imageUrl) {
+  const row = Math.floor(pieceIndex / GRID_SIZE);
+  const col = pieceIndex % GRID_SIZE;
 
   return {
     backgroundImage: `url(${imageUrl})`,
     backgroundSize: `${GRID_SIZE * 100}% ${GRID_SIZE * 100}%`,
     backgroundPosition: `${(col / (GRID_SIZE - 1)) * 100}% ${(row / (GRID_SIZE - 1)) * 100}%`,
     backgroundRepeat: 'no-repeat',
-    border: '2px solid #C07020',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
   };
 }
 
-export default function PuzzleGame() {
+export default function PuzzlePlacementGame() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -113,14 +68,18 @@ export default function PuzzleGame() {
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
   const [selectedImage, setSelectedImage] = useState(() => pickRandomImage());
-  const [tiles, setTiles] = useState(() => generateShuffledPuzzle());
-  const [moves, setMoves] = useState(0);
+  const [placedPieces, setPlacedPieces] = useState(Array(TOTAL_PIECES).fill(null));
+  const [trayPieces, setTrayPieces] = useState(() => shuffleArray(createPieces()));
+  const [selectedPieceId, setSelectedPieceId] = useState(null);
   const [timeLeft, setTimeLeft] = useState(PUZZLE_TIME_LIMIT);
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
 
-  const blankIndex = useMemo(() => tiles.indexOf('blank'), [tiles]);
+  const completedCount = useMemo(
+    () => placedPieces.filter(Boolean).length,
+    [placedPieces]
+  );
 
   useEffect(() => {
     if (showWin || showLose) return;
@@ -138,26 +97,54 @@ export default function PuzzleGame() {
   }, [showWin, showLose, timeLeft]);
 
   useEffect(() => {
-    const solved = tiles.every((tile, index) => tile === SOLVED_TILES[index]);
-    if (solved) {
+    if (placedPieces.every((piece, index) => piece && piece.correctIndex === index)) {
       setShowWin(true);
     }
-  }, [tiles]);
+  }, [placedPieces]);
 
-  const handleTileClick = (index) => {
+  const selectedPiece = trayPieces.find((piece) => piece.id === selectedPieceId) || null;
+
+  const handleDragStart = (pieceId) => {
     if (busy || showWin || showLose) return;
-    if (!areAdjacent(index, blankIndex)) return;
+    setSelectedPieceId(pieceId);
+  };
 
-    const nextTiles = [...tiles];
-    [nextTiles[index], nextTiles[blankIndex]] = [nextTiles[blankIndex], nextTiles[index]];
-    setTiles(nextTiles);
-    setMoves((value) => value + 1);
+  const handleDropOnSlot = (slotIndex) => {
+    if (busy || showWin || showLose) return;
+    if (placedPieces[slotIndex]) return;
+    if (!selectedPiece) return;
+
+    if (selectedPiece.correctIndex !== slotIndex) {
+      toast.error('Wrong position');
+      return;
+    }
+
+    setPlacedPieces((current) => {
+      const next = [...current];
+      next[slotIndex] = selectedPiece;
+      return next;
+    });
+
+    setTrayPieces((current) => current.filter((piece) => piece.id !== selectedPiece.id));
+    setSelectedPieceId(null);
+  };
+
+  const handleSlotClick = (slotIndex) => {
+    if (!selectedPiece) return;
+    handleDropOnSlot(slotIndex);
+  };
+
+  const handleTrayPieceClick = (pieceId) => {
+    if (busy || showWin || showLose) return;
+
+    setSelectedPieceId((current) => (current === pieceId ? null : pieceId));
   };
 
   const handleRetry = () => {
     setSelectedImage(pickRandomImage());
-    setTiles(generateShuffledPuzzle());
-    setMoves(0);
+    setPlacedPieces(Array(TOTAL_PIECES).fill(null));
+    setTrayPieces(shuffleArray(createPieces()));
+    setSelectedPieceId(null);
     setTimeLeft(PUZZLE_TIME_LIMIT);
     setShowWin(false);
     setShowLose(false);
@@ -166,7 +153,7 @@ export default function PuzzleGame() {
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const sessionId = session?._id || session?.id;
-    const resultId = `puzzle-win-${Date.now()}`;
+    const resultId = `puzzle-placement-win-${Date.now()}`;
 
     setBusy(true);
 
@@ -177,9 +164,7 @@ export default function PuzzleGame() {
           ? sessionData.checkpointIds
           : [];
 
-        const matchedCheckpoint = checkpoints.find(
-          (entry) => entry.level === checkpoint
-        );
+        const matchedCheckpoint = checkpoints.find((entry) => entry.level === checkpoint);
 
         if (matchedCheckpoint?._id) {
           await playerAPI.checkpoint(playerSessionId, {
@@ -205,7 +190,7 @@ export default function PuzzleGame() {
 
   const handleLoseContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `puzzle-timeout-${Date.now()}`;
+    const resultId = `puzzle-placement-timeout-${Date.now()}`;
 
     setBusy(true);
 
@@ -237,19 +222,16 @@ export default function PuzzleGame() {
             style={{ color: 'var(--color-text)' }}
           >
             <Puzzle size={20} />
-            Slide Puzzle
+            Piece Placement Puzzle
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Rearrange the image by moving tiles into the empty space before time runs out.
+            Drag each piece into the correct slot. You can also tap a piece, then tap its target slot.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
-            <p
-              className="text-xs font-semibold flex items-center gap-1"
-              style={{ color: '#2563EB' }}
-            >
+            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
               Time left
             </p>
@@ -260,44 +242,87 @@ export default function PuzzleGame() {
 
           <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Moves
+              Placed
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
-              {moves}
+              {completedCount}/{TOTAL_PIECES}
+            </p>
+          </div>
+
+          <div className="rounded-2xl p-3" style={{ backgroundColor: '#DCFCE7' }}>
+            <p className="text-xs font-semibold" style={{ color: '#15803D' }}>
+              Selected
+            </p>
+            <p className="text-sm font-bold mt-1" style={{ color: '#166534' }}>
+              {selectedPiece ? '1 piece ready' : 'None'}
             </p>
           </div>
         </div>
 
         <div
           className="rounded-3xl p-4"
-          style={{
-            backgroundColor: 'white',
-            border: '1px solid var(--color-border)',
-          }}
+          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
         >
+          <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
+            Board
+          </p>
+
           <div className="grid grid-cols-3 gap-2">
-            {tiles.map((tile, index) => {
-              const movable = areAdjacent(index, blankIndex) && tile !== 'blank';
+            {placedPieces.map((piece, slotIndex) => (
+              <div
+                key={`slot-${slotIndex}`}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDropOnSlot(slotIndex)}
+                onClick={() => handleSlotClick(slotIndex)}
+                className="aspect-square rounded-2xl flex items-center justify-center"
+                style={{
+                  border: piece ? '2px solid #22C55E' : '2px dashed #D1D5DB',
+                  backgroundColor: piece ? '#FFFFFF' : '#F9FAFB',
+                  boxShadow: !piece && selectedPiece ? '0 0 0 3px rgba(34,197,94,0.12)' : 'none',
+                }}
+              >
+                {piece ? (
+                  <div
+                    className="w-full h-full rounded-xl"
+                    style={getPieceStyle(piece.correctIndex, selectedImage)}
+                  />
+                ) : (
+                  <span className="text-[10px] font-semibold" style={{ color: '#9CA3AF' }}>
+                    Slot {slotIndex + 1}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          className="rounded-3xl p-4"
+          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+        >
+          <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
+            Pieces
+          </p>
+
+          <div className="grid grid-cols-3 gap-2">
+            {trayPieces.map((piece) => {
+              const isSelected = selectedPieceId === piece.id;
 
               return (
                 <button
-                  key={`${tile}-${index}`}
+                  key={piece.id}
                   type="button"
-                  onClick={() => handleTileClick(index)}
-                  disabled={busy || tile === 'blank'}
-                  className="aspect-square rounded-2xl transition-transform"
+                  draggable
+                  onDragStart={() => handleDragStart(piece.id)}
+                  onClick={() => handleTrayPieceClick(piece.id)}
+                  className="aspect-square rounded-2xl"
                   style={{
-                    ...getTileBackgroundStyle(tile, selectedImage),
-                    boxShadow: movable ? '0 0 0 3px rgba(34,197,94,0.18)' : 'none',
-                    transform: movable ? 'scale(1.01)' : 'none',
+                    ...getPieceStyle(piece.correctIndex, selectedImage),
+                    border: isSelected ? '3px solid #22C55E' : '2px solid #C07020',
+                    transform: isSelected ? 'scale(1.03)' : 'none',
+                    boxShadow: isSelected ? '0 0 0 3px rgba(34,197,94,0.15)' : 'none',
                   }}
-                >
-                  {tile === 'blank' ? (
-                    <span className="text-xs font-semibold" style={{ color: '#9CA3AF' }}>
-                      Empty
-                    </span>
-                  ) : null}
-                </button>
+                />
               );
             })}
           </div>
@@ -307,11 +332,8 @@ export default function PuzzleGame() {
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
             How to win
           </p>
-          <p
-            className="text-xs mt-1"
-            style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}
-          >
-            Tap a tile next to the empty space to move it. Complete the full picture before time ends.
+          <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
+            Drag a piece to the correct slot. On phones, you can also tap a piece first, then tap the matching slot.
           </p>
         </div>
 
@@ -336,10 +358,10 @@ export default function PuzzleGame() {
 
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Puzzle solved!
+              Puzzle completed!
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              Great job. Your checkpoint will move forward.
+              All pieces are in the correct place.
             </p>
           </div>
 
