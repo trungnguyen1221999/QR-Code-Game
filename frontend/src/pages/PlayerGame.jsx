@@ -5,9 +5,16 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import IntroVideoModal from '../components/ui/IntroVideoModal';
+import { playerAPI, sessionAPI } from '../utils/api';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
+
+function getCheckpointRoute(checkpoint) {
+  if (checkpoint === 1) return '/memory-game';
+  if (checkpoint === 2) return '/whack-a-mole';
+  return '/memory-game';
+}
 
 function formatTime(secs) {
   const h = Math.floor(secs / 3600).toString().padStart(2, '0');
@@ -51,6 +58,8 @@ export default function PlayerGame() {
   const navigate = useNavigate();
   const location = useLocation();
   const player = JSON.parse(localStorage.getItem('player') || 'null');
+  const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
+  const session = JSON.parse(localStorage.getItem('session') || 'null');
 
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
   const [showExitPopup, setShowExitPopup] = useState(false);
@@ -59,19 +68,67 @@ export default function PlayerGame() {
   const [showIntro, setShowIntro] = useState(true);
 
   // Track completed checkpoints; accept update from challenge page
-  const [completed, setCompleted] = useState(2);
-  const [current, setCurrent] = useState(3);
-  const [life, setLife] = useState(4);
-  const [coins, setCoins] = useState(2000);
+  const [completed, setCompleted] = useState(0);
+  const [current, setCurrent] = useState(1);
+  const [life, setLife] = useState(3);
+  const [coins, setCoins] = useState(0);
+
+  useEffect(() => {
+    if (location.state?.justCompleted || location.state?.wrongAnswer) return;
+
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const sessionId = session?._id || session?.id;
+
+    const loadProgress = async () => {
+      try {
+        const [playerSessionData, sessionData] = await Promise.all([
+          playerSessionId ? playerAPI.getById(playerSessionId) : Promise.resolve(null),
+          sessionId ? sessionAPI.getById(sessionId) : Promise.resolve(null),
+        ]);
+
+        if (playerSessionData) {
+          const completedCount = playerSessionData.completedCheckpoints?.length ?? 0;
+          setCompleted(completedCount);
+          setCurrent(Math.min(completedCount + 1, TOTAL_CHECKPOINTS + 1));
+          setLife(playerSessionData.lives ?? 3);
+          setCoins(playerSessionData.money ?? 0);
+        }
+
+        const expiresAt = sessionData?.expiresAt || session?.expiresAt;
+        if (expiresAt) {
+          const remainingSeconds = Math.max(
+            0,
+            Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
+          );
+          setTimeLeft(remainingSeconds);
+        }
+      } catch {
+        // Keep the local fallback state if the backend data is unavailable.
+      }
+    };
+
+    loadProgress();
+  }, []);
 
   // Apply result coming back from challenge page
   useEffect(() => {
     const state = location.state;
     if (!state) return;
+    if (state.resultId) {
+      const processedKey = `player-game-result:${state.resultId}`;
+      if (sessionStorage.getItem(processedKey)) return;
+      sessionStorage.setItem(processedKey, '1');
+    }
     if (state.justCompleted) {
-      setCompleted(v => Math.min(v + 1, TOTAL_CHECKPOINTS));
-      setCurrent(v => Math.min(v + 1, TOTAL_CHECKPOINTS + 1));
-      setCoins(v => v + 50);
+      setCompleted((value) => {
+        const nextCompleted = state.completedCheckpoint ?? (value + 1);
+        return Math.min(Math.max(value, nextCompleted), TOTAL_CHECKPOINTS);
+      });
+      setCurrent((value) => {
+        const nextCurrent = state.nextCheckpoint ?? (value + 1);
+        return Math.min(Math.max(value, nextCurrent), TOTAL_CHECKPOINTS + 1);
+      });
+      setCoins(v => v + (state.rewardCoins ?? 50));
     }
     if (state.wrongAnswer) {
       setLife(v => Math.max(v - 1, 0));
@@ -90,7 +147,7 @@ export default function PlayerGame() {
     setScanning(true);
     setTimeout(() => {
       setScanning(false);
-      navigate('/challenge', { state: { checkpoint: current } });
+      navigate(getCheckpointRoute(current), { state: { checkpoint: current } });
     }, 3000);
   };
 

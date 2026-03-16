@@ -13,6 +13,8 @@ import WaitingRoom from './pages/WaitingRoom';
 import PlayerGame from './pages/PlayerGame';
 import PlayerChallenge from './pages/PlayerChallenge';
 import PlayerShop from './pages/PlayerShop';
+import MemoryCardGame from './pages/MemoryCardGame';
+import WhackAMoleGame from './pages/WhackAMoleGame';
 import GameOver from './pages/GameOver';
 import FinalShop from './pages/FinalShop';
 import FinalChallenge from './pages/FinalChallenge';
@@ -42,6 +44,8 @@ function App() {
         <Route path="/select-avatar" element={<AvatarSelect />} />
         <Route path="/waiting-room" element={<WaitingRoom player={player} />} />
         <Route path="/game" element={<PlayerGame />} />
+        <Route path="/memory-game" element={<MemoryCardGame />} />
+        <Route path="/whack-a-mole" element={<WhackAMoleGame />} />
         <Route path="/challenge" element={<PlayerChallenge />} />
         <Route path="/shop" element={<PlayerShop />} />
         <Route path="/game-over" element={<GameOver />} />
