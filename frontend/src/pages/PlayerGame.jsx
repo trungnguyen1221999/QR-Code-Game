@@ -9,10 +9,14 @@ import { playerAPI, sessionAPI } from '../utils/api';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
+const DEFAULT_LIFE = 3;
+const DEFAULT_COINS = 0;
+const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 
 function getCheckpointRoute(checkpoint) {
   if (checkpoint === 1) return '/memory-game';
   if (checkpoint === 2) return '/whack-a-mole';
+  if (checkpoint === 3) return '/combined-word-quiz';
   return '/memory-game';
 }
 
@@ -21,6 +25,46 @@ function formatTime(secs) {
   const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
   const s = (secs % 60).toString().padStart(2, '0');
   return `${h}:${m}:${s}`;
+}
+
+function readSavedProgress() {
+  const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
+  if (!raw) {
+    return {
+      hasSavedProgress: false,
+      completed: 0,
+      current: 1,
+      life: DEFAULT_LIFE,
+      coins: DEFAULT_COINS,
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      hasSavedProgress: true,
+      completed: parsed.completed ?? 0,
+      current: parsed.current ?? 1,
+      life: parsed.life ?? DEFAULT_LIFE,
+      coins: parsed.coins ?? DEFAULT_COINS,
+    };
+  } catch {
+    return {
+      hasSavedProgress: false,
+      completed: 0,
+      current: 1,
+      life: DEFAULT_LIFE,
+      coins: DEFAULT_COINS,
+    };
+  }
+}
+
+function saveProgress(progress) {
+  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(progress));
+}
+
+function clearProgress() {
+  localStorage.removeItem(PLAYER_PROGRESS_KEY);
 }
 
 function ScanningOverlay() {
@@ -60,6 +104,7 @@ export default function PlayerGame() {
   const player = JSON.parse(localStorage.getItem('player') || 'null');
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
+  const initialProgress = readSavedProgress();
 
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
   const [showExitPopup, setShowExitPopup] = useState(false);
@@ -68,10 +113,14 @@ export default function PlayerGame() {
   const [showIntro, setShowIntro] = useState(true);
 
   // Track completed checkpoints; accept update from challenge page
-  const [completed, setCompleted] = useState(0);
-  const [current, setCurrent] = useState(1);
-  const [life, setLife] = useState(3);
-  const [coins, setCoins] = useState(0);
+  const [completed, setCompleted] = useState(initialProgress.completed);
+  const [current, setCurrent] = useState(initialProgress.current);
+  const [life, setLife] = useState(initialProgress.life);
+  const [coins, setCoins] = useState(initialProgress.coins);
+
+  useEffect(() => {
+    saveProgress({ completed, current, life, coins });
+  }, [coins, completed, current, life]);
 
   useEffect(() => {
     if (location.state?.justCompleted || location.state?.wrongAnswer) return;
@@ -86,12 +135,12 @@ export default function PlayerGame() {
           sessionId ? sessionAPI.getById(sessionId) : Promise.resolve(null),
         ]);
 
-        if (playerSessionData) {
+        if (playerSessionData && !initialProgress.hasSavedProgress) {
           const completedCount = playerSessionData.completedCheckpoints?.length ?? 0;
           setCompleted(completedCount);
           setCurrent(Math.min(completedCount + 1, TOTAL_CHECKPOINTS + 1));
-          setLife(playerSessionData.lives ?? 3);
-          setCoins(playerSessionData.money ?? 0);
+          setLife(playerSessionData.lives ?? DEFAULT_LIFE);
+          setCoins(playerSessionData.money ?? DEFAULT_COINS);
         }
 
         const expiresAt = sessionData?.expiresAt || session?.expiresAt;
@@ -108,7 +157,7 @@ export default function PlayerGame() {
     };
 
     loadProgress();
-  }, []);
+  }, [initialProgress.hasSavedProgress]);
 
   // Apply result coming back from challenge page
   useEffect(() => {
@@ -131,9 +180,18 @@ export default function PlayerGame() {
       setCoins(v => v + (state.rewardCoins ?? 50));
     }
     if (state.wrongAnswer) {
-      setLife(v => Math.max(v - 1, 0));
+      const nextLife = life - 1;
+      if (nextLife > 0) {
+        setLife(nextLife);
+      } else {
+        setLife(DEFAULT_LIFE);
+        setCompleted(0);
+        setCurrent(1);
+        setCoins(DEFAULT_COINS);
+        clearProgress();
+      }
     }
-  }, []);
+  }, [life]);
 
   useEffect(() => {
     if (timeLeft <= 0) { navigate('/game-over'); return; }
@@ -309,7 +367,7 @@ export default function PlayerGame() {
             Are you sure to exit game?
           </h3>
           <div className="flex flex-col gap-2 w-full">
-            <Button variant="green" onClick={() => navigate('/')}>Confirm</Button>
+            <Button variant="green" onClick={() => { clearProgress(); navigate('/'); }}>Confirm</Button>
             <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
           </div>
         </div>

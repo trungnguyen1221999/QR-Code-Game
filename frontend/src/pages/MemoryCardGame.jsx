@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import { playerAPI, sessionAPI } from '../utils/api';
 
-const MEMORY_TIME_LIMIT = 60;
+const MEMORY_TIME_LIMIT = 20;
 const MATCH_REWARD = 50;
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
 

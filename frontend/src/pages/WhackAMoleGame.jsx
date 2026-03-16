@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import { playerAPI, sessionAPI } from '../utils/api';
 
-const GAME_TIME_LIMIT = 60;
+const GAME_TIME_LIMIT = 20;
 const WINNING_SCORE = 14;
 const MOLE_REWARD = 75;
 const HOLE_COUNT = 9;
