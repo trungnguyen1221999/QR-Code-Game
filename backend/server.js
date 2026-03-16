@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import connectDB from './config/database.js';
 import userRoutes from './routes/userRoutes.js';
 import itemRoutes from './routes/itemRoutes.js';
 import shopRoutes from './routes/shopRoutes.js';
@@ -10,6 +9,7 @@ import hostRoutes from './routes/hostRoutes.js';
 import sessionRoutes from './routes/sessionRoutes.js';
 import playerSessionRoutes from './routes/playerSessionRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import { connectDB1, connectDB2 } from './config/database.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,7 +37,8 @@ app.get('/', (req, res) => {
 
 // Connect to MongoDB and start server
 const startServer = async () => {
-  await connectDB();
+  await connectDB1();
+  await connectDB2();
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
