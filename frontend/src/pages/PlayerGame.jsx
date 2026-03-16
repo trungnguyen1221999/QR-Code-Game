@@ -17,6 +17,7 @@ function getCheckpointRoute(checkpoint) {
   if (checkpoint === 1) return '/memory-game';
   if (checkpoint === 2) return '/whack-a-mole';
   if (checkpoint === 3) return '/combined-word-quiz';
+   if (checkpoint === 4) return '/puzzle-game';
   return '/memory-game';
 }
 

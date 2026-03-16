@@ -15,6 +15,7 @@ import PlayerChallenge from './pages/PlayerChallenge';
 import PlayerShop from './pages/PlayerShop';
 import MemoryCardGame from './pages/MemoryCardGame';
 import WhackAMoleGame from './pages/WhackAMoleGame';
+import PuzzleGame from './pages/PuzzleGame';
 import CombinedWordQuizGame from './pages/CombinedWordQuizGame';
 import GameOver from './pages/GameOver';
 import FinalShop from './pages/FinalShop';
@@ -47,6 +48,7 @@ function App() {
         <Route path="/game" element={<PlayerGame />} />
         <Route path="/memory-game" element={<MemoryCardGame />} />
         <Route path="/whack-a-mole" element={<WhackAMoleGame />} />
+        <Route path="/puzzle-game" element={<PuzzleGame />} />
         <Route path="/combined-word-quiz" element={<CombinedWordQuizGame />} />
         <Route path="/challenge" element={<PlayerChallenge />} />
         <Route path="/shop" element={<PlayerShop />} />
