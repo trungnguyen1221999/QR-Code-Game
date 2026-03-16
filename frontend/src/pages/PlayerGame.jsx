@@ -56,7 +56,7 @@ export default function PlayerGame() {
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('introPlayed'));
 
   // Track completed checkpoints; accept update from challenge page
   const [completed, setCompleted] = useState(2);
@@ -96,7 +96,11 @@ export default function PlayerGame() {
 
   // Nếu đang show intro video thì chỉ show modal, không show game
   if (showIntro) {
-    return <IntroVideoModal open={true} onSkip={() => setShowIntro(false)} />;
+    const handleDone = () => {
+      localStorage.setItem('introPlayed', '1');
+      setShowIntro(false);
+    };
+    return <IntroVideoModal open={true} onSkip={handleDone} />;
   }
 
   return (
