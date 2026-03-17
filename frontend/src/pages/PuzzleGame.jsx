@@ -72,7 +72,6 @@ export default function PuzzlePlacementGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
-  const boardRef = useRef(null);
   const slotRefs = useRef([]);
 
   const [selectedImage, setSelectedImage] = useState(() => pickRandomImage());
@@ -183,19 +182,12 @@ export default function PuzzlePlacementGame() {
   const startPointerDrag = (event, piece) => {
     if (busy || showWin || showLose) return;
 
-    const startX = event.clientX;
-    const startY = event.clientY;
-
     setSelectedPieceId(piece.id);
     setDragState({
       pieceId: piece.id,
       piece,
-      x: startX,
-      y: startY,
-      offsetX: 0,
-      offsetY: 0,
-      width: 96,
-      height: 96,
+      x: event.clientX,
+      y: event.clientY,
     });
 
     event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -312,155 +304,147 @@ export default function PuzzlePlacementGame() {
         }
       `}</style>
 
-      <div className="pt-5 pb-6 flex flex-col gap-4">
+      <div className="pt-4 pb-4 flex flex-col gap-3">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
             Checkpoint {checkpoint}
           </p>
           <h2
-            className="text-xl font-bold flex items-center gap-2"
+            className="text-lg font-bold flex items-center gap-2"
             style={{ color: 'var(--color-text)' }}
           >
-            <Puzzle size={20} />
+            <Puzzle size={18} />
             Piece Placement Puzzle
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Drag the shuffled pieces into the correct slots. On mobile, pieces snap to the nearest slot.
+            Drag the pieces into the correct places.
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
-            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
-              <Clock size={14} />
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-2xl p-2.5" style={{ backgroundColor: '#EFF6FF' }}>
+            <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
+              <Clock size={12} />
               Time left
             </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
+            <p className="text-base font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
             </p>
           </div>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
-            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
+          <div className="rounded-2xl p-2.5" style={{ backgroundColor: '#FEF3E2' }}>
+            <p className="text-[11px] font-semibold" style={{ color: '#C2410C' }}>
               Placed
             </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
+            <p className="text-base font-bold mt-1" style={{ color: '#9A3412' }}>
               {completedCount}/{TOTAL_PIECES}
             </p>
           </div>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#DCFCE7' }}>
-            <p className="text-xs font-semibold" style={{ color: '#15803D' }}>
+          <div className="rounded-2xl p-2.5" style={{ backgroundColor: '#DCFCE7' }}>
+            <p className="text-[11px] font-semibold" style={{ color: '#15803D' }}>
               Selected
             </p>
-            <p className="text-sm font-bold mt-1" style={{ color: '#166534' }}>
+            <p className="text-xs font-bold mt-1" style={{ color: '#166534' }}>
               {selectedPiece ? 'Ready' : 'None'}
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div
-            className="rounded-3xl p-4"
-            style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
-          >
-            <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
-              Placement Area
-            </p>
+        <div
+          className="rounded-3xl p-3"
+          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+        >
+          <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+            Placement Area
+          </p>
 
+          <div
+            className="grid grid-cols-3 gap-[2px] relative rounded-2xl p-1 overflow-hidden"
+            style={{
+              backgroundImage: `url(${selectedImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          >
             <div
-              ref={boardRef}
-              className="grid grid-cols-3 gap-2 relative rounded-2xl p-2 overflow-hidden"
+              className="absolute inset-0"
               style={{
-                backgroundImage: `url(${selectedImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                backgroundColor: 'rgba(255,255,255,0.58)',
+                pointerEvents: 'none',
               }}
-            >
+            />
+
+            {placedPieces.map((piece, slotIndex) => (
               <div
-                className="absolute inset-0"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.58)',
-                  pointerEvents: 'none',
+                key={`slot-${slotIndex}`}
+                ref={(el) => {
+                  slotRefs.current[slotIndex] = el;
                 }}
-              />
-
-              {placedPieces.map((piece, slotIndex) => (
-                <div
-                  key={`slot-${slotIndex}`}
-                  ref={(el) => {
-                    slotRefs.current[slotIndex] = el;
-                  }}
-                  onClick={() => handleSlotClick(slotIndex)}
-                  className="aspect-square rounded-2xl flex items-center justify-center relative z-10 transition-transform"
-                  style={{
-                    border: piece ? '2px solid #22C55E' : '2px dashed rgba(156,163,175,0.95)',
-                    backgroundColor: piece ? '#FFFFFF' : 'rgba(255,255,255,0.18)',
-                    boxShadow: !piece && selectedPiece ? '0 0 0 3px rgba(34,197,94,0.12)' : 'none',
-                    animation: shakeSlotIndex === slotIndex ? 'puzzle-shake 0.3s ease' : 'none',
-                  }}
-                >
-                  {piece ? (
-                    <div
-                      className="w-full h-full rounded-xl"
-                      style={getPieceStyle(piece.correctIndex, selectedImage)}
-                    />
-                  ) : (
-                    <span className="text-[10px] font-semibold" style={{ color: 'rgba(75,85,99,0.65)' }}>
-                      Drop here
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className="rounded-3xl p-4"
-            style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
-          >
-            <p className="text-sm font-bold mb-3" style={{ color: 'var(--color-text)' }}>
-              Puzzle Pieces
-            </p>
-
-            <div className="grid grid-cols-3 gap-2">
-              {trayPieces.map((piece) => {
-                const isSelected = selectedPieceId === piece.id;
-
-                return (
-                  <button
-                    key={piece.id}
-                    type="button"
-                    onPointerDown={(event) => startPointerDrag(event, piece)}
-                    onPointerMove={movePointerDrag}
-                    onPointerUp={endPointerDrag}
-                    onPointerCancel={() => setDragState(null)}
-                    onClick={() =>
-                      setSelectedPieceId((current) => (current === piece.id ? null : piece.id))
-                    }
-                    className="aspect-square rounded-2xl touch-none select-none"
-                    style={{
-                      ...getPieceStyle(piece.correctIndex, selectedImage),
-                      border: isSelected ? '3px solid #22C55E' : '2px solid #C07020',
-                      transform: isSelected ? 'scale(1.03)' : 'none',
-                      boxShadow: isSelected ? '0 0 0 3px rgba(34,197,94,0.15)' : 'none',
-                      opacity: dragState?.pieceId === piece.id ? 0.35 : 1,
-                    }}
+                onClick={() => handleSlotClick(slotIndex)}
+                className="aspect-square rounded-md flex items-center justify-center relative z-10 transition-transform"
+                style={{
+                  border: piece ? '1.5px solid #22C55E' : '1.5px dashed rgba(156,163,175,0.95)',
+                  backgroundColor: piece ? '#FFFFFF' : 'rgba(255,255,255,0.18)',
+                  boxShadow: !piece && selectedPiece ? '0 0 0 2px rgba(34,197,94,0.12)' : 'none',
+                  animation: shakeSlotIndex === slotIndex ? 'puzzle-shake 0.3s ease' : 'none',
+                }}
+              >
+                {piece ? (
+                  <div
+                    className="w-full h-full rounded-[4px]"
+                    style={getPieceStyle(piece.correctIndex, selectedImage)}
                   />
-                );
-              })}
-            </div>
+                ) : null}
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-          <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            How to win
+        <div
+          className="rounded-3xl p-3"
+          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+        >
+          <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+            Puzzle Pieces
           </p>
-          <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Drag each piece from the tray toward the board. It will snap to the nearest empty slot.
-            The faded image helps you see the correct place. You can also tap a piece and then tap a slot.
-          </p>
+
+          <div
+            className="grid grid-cols-5 gap-1 items-center"
+            style={{ minHeight: 92 }}
+          >
+            {trayPieces.map((piece) => {
+              const isSelected = selectedPieceId === piece.id;
+              const isDragging = dragState?.pieceId === piece.id;
+
+              return (
+                <button
+                  key={piece.id}
+                  type="button"
+                  onPointerDown={(event) => startPointerDrag(event, piece)}
+                  onPointerMove={movePointerDrag}
+                  onPointerUp={endPointerDrag}
+                  onPointerCancel={() => setDragState(null)}
+                  onClick={() =>
+                    setSelectedPieceId((current) => (current === piece.id ? null : piece.id))
+                  }
+                  className="touch-none select-none"
+                  style={{
+                    ...getPieceStyle(piece.correctIndex, selectedImage),
+                    width: isSelected ? 56 : 46,
+                    height: isSelected ? 56 : 46,
+                    justifySelf: 'center',
+                    borderRadius: '8px',
+                    border: isSelected ? '2px solid #22C55E' : '1.5px solid #C07020',
+                    transform: isSelected ? 'scale(1.08)' : 'scale(1)',
+                    boxShadow: isSelected ? '0 0 0 2px rgba(34,197,94,0.15)' : 'none',
+                    opacity: isDragging ? 0.25 : 1,
+                    transition: 'all 0.15s ease',
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -477,12 +461,12 @@ export default function PuzzlePlacementGame() {
         <div
           className="fixed z-[100] pointer-events-none"
           style={{
-            left: dragState.x - 48,
-            top: dragState.y - 48,
-            width: 96,
-            height: 96,
-            borderRadius: '16px',
-            border: '3px solid #22C55E',
+            left: dragState.x - 34,
+            top: dragState.y - 34,
+            width: 68,
+            height: 68,
+            borderRadius: '10px',
+            border: '2px solid #22C55E',
             boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
             transform: 'scale(1.06)',
             ...getPieceStyle(dragState.piece.correctIndex, selectedImage),
