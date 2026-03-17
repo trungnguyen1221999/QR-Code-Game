@@ -17,52 +17,73 @@ import {
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
 
-const QUIZ_TIME_LIMIT = 7;
+const QUIZ_TIME_LIMIT = 70;
 const PASS_SCORE = 2;
 const TOTAL_QUESTIONS = 10;
+
+const COPY = {
+  checkpoint: 'Checkpoint',
+  title: 'Combined word quiz',
+  subtitle: `Solve picture-word combinations. Get at least ${PASS_SCORE} correct out of ${TOTAL_QUESTIONS} before time runs out.`,
+  timeLeft: 'Time left',
+  score: 'Score',
+  question: 'Question',
+  hint: 'Hint',
+  answerLabel: 'Your answer',
+  answerPlaceholder: 'Type the combined word',
+  howToWin: 'How to win',
+  howToWinText: `Combine the picture clues into one word. You need at least ${PASS_SCORE} correct answers to clear checkpoint 3.`,
+  back: 'Back',
+  submit: 'Submit answer',
+  correct: (answer) => `Correct! ${answer}`,
+  wrong: (answer) => `Wrong! Correct answer: ${answer}`,
+  winTitle: 'Quiz cleared!',
+  winText: (coins) => `You reached the pass grade and earned ${coins} coins.`,
+  loseTitle: 'Quiz over',
+  loseNoLife: 'No lives left. Buy an extra life now to keep your current checkpoint.',
+  loseHasLife: (lives) => `One life was removed. ${lives} lives left.`,
+  backTitle: 'Leave this game?',
+  backText: 'If you go back now, one life will be lost.',
+  backResetText: 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.',
+  confirm: 'Confirm',
+  cancel: 'Cancel',
+  continue: 'Continue',
+  exitGame: 'Exit game',
+  playAgain: 'Play again',
+};
+
 const QUESTION_BANK = [
-  { id: 'sunglasses', pictures: ['☀️', '🕶️'], answer: 'sunglasses', hint: 'Something you wear on a sunny day' },
-  { id: 'starfish', pictures: ['⭐', '🐟'], answer: 'starfish', hint: 'A sea animal with five arms' },
-  { id: 'snowman', pictures: ['❄️', '👨'], answer: 'snowman', hint: 'Built during winter' },
-  { id: 'fireman', pictures: ['🔥', '👨'], answer: 'fireman', hint: 'Comes to help stop fires' },
-  { id: 'bookworm', pictures: ['📚', '🪱'], answer: 'bookworm', hint: 'A person who loves reading' },
-  { id: 'rainbow', pictures: ['🌧️', '🏹'], answer: 'rainbow', hint: 'Colorful sky after rain' },
-  { id: 'cupcake', pictures: ['🥤', '🍰'], answer: 'cupcake', hint: 'A small sweet dessert' },
-  { id: 'football', pictures: ['🦶', '⚽'], answer: 'football', hint: 'A sport played with a ball' },
-  { id: 'seahorse', pictures: ['🌊', '🐴'], answer: 'seahorse', hint: 'A tiny ocean creature' },
-  { id: 'mailbox', pictures: ['✉️', '📦'], answer: 'mailbox', hint: 'Letters go here' },
-  { id: 'sunflower', pictures: ['☀️', '🌼'], answer: 'sunflower', hint: 'A tall yellow flower' },
-  { id: 'moonlight', pictures: ['🌙', '💡'], answer: 'moonlight', hint: 'Glow from the night sky' },
-  { id: 'toothbrush', pictures: ['🦷', '🪥'], answer: 'toothbrush', hint: 'Used every morning and night' },
-  { id: 'handbag', pictures: ['✋', '👜'], answer: 'handbag', hint: 'You carry it with you' },
-  { id: 'raincoat', pictures: ['🌧️', '🧥'], answer: 'raincoat', hint: 'You wear it in wet weather' },
-  { id: 'basketball', pictures: ['🧺', '🏀'], answer: 'basketball', hint: 'A sport with hoops' },
-  { id: 'firefly', pictures: ['🔥', '🪰'], answer: 'firefly', hint: 'A glowing insect at night' },
-  { id: 'ladybug', pictures: ['👩', '🐞'], answer: 'ladybug', hint: 'A tiny spotted insect' },
-  { id: 'cupboard', pictures: ['☕', '🪵'], answer: 'cupboard', hint: 'A kitchen storage place' },
-  { id: 'bedroom', pictures: ['🛏️', '🏠'], answer: 'bedroom', hint: 'A place where you sleep' },
-  { id: 'notebook', pictures: ['📝', '📚'], answer: 'notebook', hint: 'Used for writing things down' },
-  { id: 'pancake', pictures: ['🍳', '🍰'], answer: 'pancake', hint: 'A flat breakfast favorite' },
-  { id: 'starfruit', pictures: ['⭐', '🍎'], answer: 'starfruit', hint: 'A tropical fruit with a fun shape' },
-  { id: 'doghouse', pictures: ['🐶', '🏠'], answer: 'doghouse', hint: 'A little home for a pet' },
-  { id: 'jellyfish', pictures: ['🍇', '🐟'], answer: 'jellyfish', hint: 'A soft ocean creature' },
-  { id: 'lighthouse', pictures: ['💡', '🏠'], answer: 'lighthouse', hint: 'Guides ships near the coast' },
-  { id: 'mailman', pictures: ['✉️', '👨'], answer: 'mailman', hint: 'Brings letters to your home' },
-  { id: 'fishbowl', pictures: ['🐟', '🥣'], answer: 'fishbowl', hint: 'A round home for a pet fish' },
-  { id: 'teapot', pictures: ['🫖', '🍲'], answer: 'teapot', hint: 'Used to pour hot tea' },
-  { id: 'blueberry', pictures: ['🔵', '🍓'], answer: 'blueberry', hint: 'A small blue fruit' },
-  { id: 'earring', pictures: ['👂', '💍'], answer: 'earring', hint: 'Jewelry you wear on one side of your head' },
-  { id: 'keyboard', pictures: ['🔑', '📋'], answer: 'keyboard', hint: 'You type on it' },
-  { id: 'strawberry', pictures: ['🥤', '🍓'], answer: 'strawberry', hint: 'A sweet red berry' },
-  { id: 'houseplant', pictures: ['🏠', '🪴'], answer: 'houseplant', hint: 'A green decoration indoors' },
-  { id: 'butterfly', pictures: ['🧈', '🪰'], answer: 'butterfly', hint: 'A colorful winged insect' },
-  { id: 'sunrise', pictures: ['☀️', '⬆️'], answer: 'sunrise', hint: 'The start of a new day' },
-  { id: 'watermelon', pictures: ['💧', '🍈'], answer: 'watermelon', hint: 'A big juicy summer fruit' },
-  { id: 'bookcase', pictures: ['📚', '🧳'], answer: 'bookcase', hint: 'Furniture for storing books' },
-  { id: 'sandwich', pictures: ['🏖️', '🥪'], answer: 'sandwich', hint: 'A meal between slices of bread' },
-  { id: 'headphones', pictures: ['😀', '🎧'], answer: 'headphones', hint: 'You wear them to listen to music' },
-  { id: 'cowboy', pictures: ['🐄', '👦'], answer: 'cowboy', hint: 'Famous for riding horses and wearing hats' },
-  { id: 'newspaper', pictures: ['🆕', '📰'], answer: 'newspaper', hint: 'Printed daily news' },
+  { id: 'aurinkolasit', pictures: ['☀️', '🕶️'], answer: 'aurinkolasit', hint: 'Jotain, jota kaytat aurinkoisena paivana' },
+  { id: 'meritahti', pictures: ['⭐', '🐟'], answer: 'meritahti', hint: 'Merielain, jolla on viisi sakaraa' },
+  { id: 'lumimies', pictures: ['❄️', '👨'], answer: 'lumimies', hint: 'Rakennetaan talvella' },
+  { id: 'palomies', pictures: ['🔥', '👨'], answer: 'palomies', hint: 'Tulee auttamaan tulipaloissa' },
+  { id: 'kirjatoukka', pictures: ['📚', '🪱'], answer: 'kirjatoukka', hint: 'Henkilo, joka rakastaa lukemista' },
+  { id: 'sateenkaari', pictures: ['🌧️', '🏹'], answer: 'sateenkaari', hint: 'Varikas ilmio sateen jalkeen' },
+  { id: 'kuppikakku', pictures: ['☕', '🍰'], answer: 'kuppikakku', hint: 'Pieni makea jalkiruoka' },
+  { id: 'jalkapallo', pictures: ['🦶', '⚽'], answer: 'jalkapallo', hint: 'Pallolla pelattava urheilulaji' },
+  { id: 'merihevonen', pictures: ['🌊', '🐴'], answer: 'merihevonen', hint: 'Pieni merielain' },
+  { id: 'postilaatikko', pictures: ['✉️', '📦'], answer: 'postilaatikko', hint: 'Kirjeet tulevat tanne' },
+  { id: 'auringonkukka', pictures: ['☀️', '🌼'], answer: 'auringonkukka', hint: 'Korkea keltainen kukka' },
+  { id: 'hammasharja', pictures: ['🦷', '🪥'], answer: 'hammasharja', hint: 'Kaytetaan joka aamu ja ilta' },
+  { id: 'kasilaukku', pictures: ['✋', '👝'], answer: 'kasilaukku', hint: 'Kannat sita mukanasi' },
+  { id: 'sadetakki', pictures: ['🌧️', '🧥'], answer: 'sadetakki', hint: 'Pidat sita sateella' },
+  { id: 'koripallo', pictures: ['🧺', '🏀'], answer: 'koripallo', hint: 'Urheilulaji, jossa on koreja' },
+  { id: 'makuuhuone', pictures: ['🛏️', '🏠'], answer: 'makuuhuone', hint: 'Huone, jossa nukut' },
+  { id: 'muistikirja', pictures: ['📝', '📚'], answer: 'muistikirja', hint: 'Kaytetaan muistiinpanoihin' },
+  { id: 'pannukakku', pictures: ['🍳', '🍰'], answer: 'pannukakku', hint: 'Littea aamiaisherkku' },
+  { id: 'koirankoppi', pictures: ['🐶', '🏠'], answer: 'koirankoppi', hint: 'Pieni koti lemmikille' },
+  { id: 'majakka', pictures: ['💡', '🏠'], answer: 'majakka', hint: 'Ohjaa laivoja rannikon lahella' },
+  { id: 'postimies', pictures: ['✉️', '👨'], answer: 'postimies', hint: 'Tuo kirjeet kotiisi' },
+  { id: 'teekannu', pictures: ['🫖', '🍲'], answer: 'teekannu', hint: 'Silla kaadetaan kuumaa teeta' },
+  { id: 'korvakoru', pictures: ['👂', '💍'], answer: 'korvakoru', hint: 'Koru, jota pidetaan korvassa' },
+  { id: 'nappaimisto', pictures: ['🔑', '📋'], answer: 'nappaimisto', hint: 'Silla kirjoitetaan' },
+  { id: 'koiranruoka', pictures: ['🐶', '🍖'], answer: 'koiranruoka', hint: 'Anna tämä koirallesi, kun se on nälkäinen.' },
+  { id: 'auringonnousu', pictures: ['☀️', '⬆️'], answer: 'auringonnousu', hint: 'Uuden paivan alku' },
+  { id: 'vesimeloni', pictures: ['💧', '🍈'], answer: 'vesimeloni', hint: 'Iso mehukas kesahedelma' },
+  { id: 'kirjahylly', pictures: ['📚', '🧳'], answer: 'kirjahylly', hint: 'Huonekalu kirjojen sailytykseen' },
+  { id: 'voileipa', pictures: ['🧈', '🥪'], answer: 'voileipa', hint: 'Ateria leipapalojen valissa' },
+  { id: 'mansikkahillo', pictures: ['🍓', '🫙'], answer: 'mansikkahillo', hint: 'Makea hillo, joka on tehty mansikoista' },
+  { id: 'omenamehu', pictures: ['🍎', '🧃'], answer: 'omenamehu', hint: 'Makea mehu, joka on tehty omenoista' },
 ];
 
 function shuffle(items) {
@@ -76,7 +97,11 @@ function formatTime(seconds) {
 }
 
 function normalizeAnswer(value) {
-  return value.toLowerCase().replace(/\s+/g, '');
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '');
 }
 
 export default function CombinedWordQuizGame() {
@@ -154,6 +179,7 @@ export default function CombinedWordQuizGame() {
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
+    setShowBackConfirm(false);
     setLoseState({ remainingLives: null, needsLifePurchase: false });
   };
 
@@ -232,9 +258,9 @@ export default function CombinedWordQuizGame() {
 
     if (isCorrect) {
       setScore((value) => value + 1);
-      setFeedback({ type: 'good', text: `Correct! ${currentQuestion.answer}` });
+      setFeedback({ type: 'good', text: COPY.correct(currentQuestion.answer) });
     } else {
-      setFeedback({ type: 'bad', text: `Wrong! Correct answer: ${currentQuestion.answer}` });
+      setFeedback({ type: 'bad', text: COPY.wrong(currentQuestion.answer) });
     }
 
     setTimeout(() => {
@@ -283,13 +309,13 @@ export default function CombinedWordQuizGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {COPY.checkpoint} {checkpoint}
           </p>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Combined word quiz
+            {COPY.title}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Solve picture-word combinations. Get at least {PASS_SCORE} correct out of {TOTAL_QUESTIONS} before time runs out.
+            {COPY.subtitle}
           </p>
         </div>
 
@@ -297,7 +323,7 @@ export default function CombinedWordQuizGame() {
           <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
-              Time left
+              {COPY.timeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -307,7 +333,7 @@ export default function CombinedWordQuizGame() {
           <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#C2410C' }}>
               <Trophy size={14} />
-              Score
+              {COPY.score}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {score}/{PASS_SCORE}
@@ -317,7 +343,7 @@ export default function CombinedWordQuizGame() {
           <div className="rounded-2xl p-3" style={{ backgroundColor: '#ECFCCB' }}>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#3F6212' }}>
               <HelpCircle size={14} />
-              Question
+              {COPY.question}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#365314' }}>
               {Math.min(currentIndex + 1, TOTAL_QUESTIONS)}/{TOTAL_QUESTIONS}
@@ -340,12 +366,12 @@ export default function CombinedWordQuizGame() {
             </div>
 
             <p className="text-sm text-center mb-4" style={{ color: 'var(--color-subtext)' }}>
-              Hint: {currentQuestion.hint}
+              {COPY.hint}: {currentQuestion.hint}
             </p>
 
             <Input
-              label="Your answer"
-              placeholder="Type the combined word"
+              label={COPY.answerLabel}
+              placeholder={COPY.answerPlaceholder}
               value={answer}
               onChange={(event) => setAnswer(event.target.value)}
             />
@@ -366,19 +392,19 @@ export default function CombinedWordQuizGame() {
 
         <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            How to win
+            {COPY.howToWin}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Combine the picture clues into one word. You need at least {PASS_SCORE} correct answers to clear checkpoint 3.
+            {COPY.howToWinText}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            Back
+            {COPY.back}
           </Button>
           <Button variant="green" onClick={handleSubmitAnswer} disabled={!answer.trim() || showWin || showLose}>
-            Submit answer
+            {COPY.submit}
           </Button>
         </div>
       </div>
@@ -393,15 +419,15 @@ export default function CombinedWordQuizGame() {
           </div>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Quiz cleared!
+              {COPY.winTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You reached the pass grade and earned {earnedCoins} coins.
+              {COPY.winText(earnedCoins)}
             </p>
           </div>
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {COPY.continue}
           </Button>
         </div>
       </Popup>
@@ -411,12 +437,12 @@ export default function CombinedWordQuizGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Quiz over
+              {COPY.loseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? COPY.loseNoLife
+                : COPY.loseHasLife(loseState.remainingLives ?? 0)}
             </p>
           </div>
           <CheckpointShopPanel
@@ -429,15 +455,11 @@ export default function CombinedWordQuizGame() {
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
-            <Button
-              variant="red"
-              onClick={handleLosePrimaryAction}
-              disabled={busy}
-            >
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+            <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
+              {loseState.needsLifePurchase ? 'Checkpoint 1' : COPY.playAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {COPY.exitGame}
             </Button>
           </div>
         </div>
@@ -448,20 +470,18 @@ export default function CombinedWordQuizGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {COPY.backTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+              {backWillResetToStart ? COPY.backResetText : COPY.backText}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {COPY.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {COPY.cancel}
             </Button>
           </div>
         </div>

@@ -16,12 +16,12 @@ import {
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
 
-const GAME_TIME_LIMIT = 3;
+const GAME_TIME_LIMIT = 10;
 const WINNING_SCORE = 2;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMALS = [
-  { key: 'mouse', emoji: '🐭', label: 'Mouse' },
+  { key: 'cat', emoji: '🐈', label: 'Cat' },
   { key: 'bird', emoji: '🐦', label: 'Bird' },
   { key: 'frog', emoji: '🐸', label: 'Frog' },
   { key: 'rabbit', emoji: '🐰', label: 'Rabbit' },
