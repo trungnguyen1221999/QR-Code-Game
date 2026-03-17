@@ -5,9 +5,11 @@ import { Clock, Trophy } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
+import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI, sessionAPI } from '../utils/api';
+import { getInitialGameTime, getReplayGameTime } from '../utils/checkpointShop';
 
-const MEMORY_TIME_LIMIT = 30;
+const MEMORY_TIME_LIMIT = 40;
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 const DEFAULT_LIFE = 3;
@@ -55,7 +57,7 @@ export default function MemoryCardGame() {
   const [cards, setCards] = useState(() => shuffleCards());
   const [flippedIds, setFlippedIds] = useState([]);
   const [moves, setMoves] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(MEMORY_TIME_LIMIT);
+  const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(MEMORY_TIME_LIMIT, 'memory', location.key));
   const [busy, setBusy] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showWin, setShowWin] = useState(false);
@@ -131,7 +133,7 @@ export default function MemoryCardGame() {
     setCards(shuffleCards());
     setFlippedIds([]);
     setMoves(0);
-    setTimeLeft(MEMORY_TIME_LIMIT);
+    setTimeLeft(getReplayGameTime(MEMORY_TIME_LIMIT));
     setShowLose(false);
     setShowWin(false);
     setLoseState({ remainingLives: null, resetToStart: false });
@@ -200,27 +202,10 @@ export default function MemoryCardGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: earnedCoins,
+          rewardCoins: 0,
           resultId,
         },
       });
-    }
-  };
-
-  const handleTimeoutContinue = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `memory-timeout-${Date.now()}`;
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      navigate('/game', { state: { wrongAnswer: true, resultId } });
     }
   };
 
@@ -320,6 +305,7 @@ export default function MemoryCardGame() {
               All cards are matched. You earned {earnedCoins} coins from the time left.
             </p>
           </div>
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} />
           <Button variant="green" onClick={handleBackToGame} disabled={busy}>
             Continue
           </Button>
@@ -339,6 +325,7 @@ export default function MemoryCardGame() {
                 : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
+          <CheckpointShopPanel />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
               variant="red"

@@ -5,10 +5,12 @@ import { Clock, Target, Trophy } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
+import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI, sessionAPI } from '../utils/api';
+import { getInitialGameTime, getReplayGameTime } from '../utils/checkpointShop';
 
 const GAME_TIME_LIMIT = 20;
-const WINNING_SCORE = 14;
+const WINNING_SCORE = 2;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
@@ -59,7 +61,7 @@ export default function WhackAMoleGame() {
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
   const holes = useMemo(() => Array.from({ length: HOLE_COUNT }, (_, index) => index), []);
-  const [timeLeft, setTimeLeft] = useState(GAME_TIME_LIMIT);
+  const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'whack-a-mole', location.key));
   const [score, setScore] = useState(0);
   const [targetAnimalKey, setTargetAnimalKey] = useState(() => pickRandom(ANIMALS).key);
   const [activeAnimals, setActiveAnimals] = useState({});
@@ -145,7 +147,7 @@ export default function WhackAMoleGame() {
   }, [feedback]);
 
   const resetGame = () => {
-    setTimeLeft(GAME_TIME_LIMIT);
+    setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
     setScore(0);
     setTargetAnimalKey(pickRandom(ANIMALS).key);
     setActiveAnimals({});
@@ -219,27 +221,10 @@ export default function WhackAMoleGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: earnedCoins,
+          rewardCoins: 0,
           resultId,
         },
       });
-    }
-  };
-
-  const handleLoseContinue = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `whack-timeout-${Date.now()}`;
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      navigate('/game', { state: { wrongAnswer: true, resultId } });
     }
   };
 
@@ -373,6 +358,7 @@ export default function WhackAMoleGame() {
               You reached the target score and earned {earnedCoins} coins.
             </p>
           </div>
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
@@ -392,6 +378,7 @@ export default function WhackAMoleGame() {
                 : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
+          <CheckpointShopPanel />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
               variant="red"

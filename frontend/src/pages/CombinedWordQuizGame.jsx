@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Clock, HelpCircle, Trophy } from 'lucide-react';
@@ -6,10 +6,12 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import Input from '../components/ui/Input';
+import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI, sessionAPI } from '../utils/api';
+import { getInitialGameTime, getReplayGameTime } from '../utils/checkpointShop';
 
 const QUIZ_TIME_LIMIT = 70;
-const PASS_SCORE = 7;
+const PASS_SCORE = 2;
 const TOTAL_QUESTIONS = 10;
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 const DEFAULT_LIFE = 3;
@@ -97,8 +99,8 @@ export default function CombinedWordQuizGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
-  const questions = useMemo(() => shuffle(QUESTION_BANK).slice(0, TOTAL_QUESTIONS), []);
-  const [timeLeft, setTimeLeft] = useState(QUIZ_TIME_LIMIT);
+  const [questions, setQuestions] = useState(() => shuffle(QUESTION_BANK).slice(0, TOTAL_QUESTIONS));
+  const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(QUIZ_TIME_LIMIT, 'combined-word-quiz', location.key));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [answer, setAnswer] = useState('');
@@ -154,7 +156,8 @@ export default function CombinedWordQuizGame() {
   };
 
   const resetGame = () => {
-    setTimeLeft(QUIZ_TIME_LIMIT);
+    setQuestions(shuffle(QUESTION_BANK).slice(0, TOTAL_QUESTIONS));
+    setTimeLeft(getReplayGameTime(QUIZ_TIME_LIMIT));
     setCurrentIndex(0);
     setScore(0);
     setAnswer('');
@@ -245,27 +248,10 @@ export default function CombinedWordQuizGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: earnedCoins,
+          rewardCoins: 0,
           resultId,
         },
       });
-    }
-  };
-
-  const handleLoseContinue = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `quiz-lose-${Date.now()}`;
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      navigate('/game', { state: { wrongAnswer: true, resultId } });
     }
   };
 
@@ -390,6 +376,7 @@ export default function CombinedWordQuizGame() {
               You reached the pass grade and earned {earnedCoins} coins.
             </p>
           </div>
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
@@ -409,6 +396,7 @@ export default function CombinedWordQuizGame() {
                 : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
+          <CheckpointShopPanel />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
               variant="red"
