@@ -524,6 +524,3 @@ export default function PuzzlePlacementGame() {
     </PageLayout>
   );
 }
-
-
-
