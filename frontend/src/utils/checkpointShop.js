@@ -5,7 +5,7 @@ export const SHOP_ITEMS = [
     img: '/shop/x2time.png',
     label: 'Time Boost',
     desc: 'Extend the next game time limit by 10 seconds',
-    price: 50,
+    price: 10,
   },
   {
     id: 'life',
@@ -13,13 +13,14 @@ export const SHOP_ITEMS = [
     img: null,
     label: 'Extra Life',
     desc: 'Add one more life to your player',
-    price: 50,
+    price: 10,
   },
 ];
 
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 const PLAYER_POWERUPS_KEY = 'playerGamePowerups';
-const DEFAULT_PROGRESS = { completed: 0, current: 1, life: 3, coins: 0 };
+export const DEFAULT_PROGRESS = { completed: 0, current: 1, life: 3, coins: 0 };
+const DEFAULT_POWERUPS = { timeBoost: 0, extraLife: 0 };
 
 function readJson(key, fallback) {
   const raw = localStorage.getItem(key);
@@ -44,6 +45,37 @@ export function setPlayerProgress(progress) {
   writeJson(PLAYER_PROGRESS_KEY, progress);
 }
 
+export function applyLossToStoredProgress() {
+  const progress = getPlayerProgress();
+  const nextLife = Math.max(0, (progress.life ?? DEFAULT_PROGRESS.life) - 1);
+  const updated = { ...progress, life: nextLife };
+  const powerups = getStoredPowerups();
+
+  if ((powerups.extraLife ?? 0) > 0) {
+    setStoredPowerups({ ...powerups, extraLife: powerups.extraLife - 1 });
+  }
+
+  setPlayerProgress(updated);
+
+  return {
+    remainingLives: nextLife,
+    needsLifePurchase: nextLife === 0,
+  };
+}
+
+export function resetProgressToCheckpointOne() {
+  const progress = getPlayerProgress();
+  const reset = {
+    ...progress,
+    completed: 0,
+    current: 1,
+    life: DEFAULT_PROGRESS.life,
+  };
+
+  setPlayerProgress(reset);
+  return reset;
+}
+
 export function addCoinsToProgress(amount) {
   const progress = getPlayerProgress();
   const updated = { ...progress, coins: (progress.coins ?? 0) + amount };
@@ -52,11 +84,26 @@ export function addCoinsToProgress(amount) {
 }
 
 export function getStoredPowerups() {
-  return readJson(PLAYER_POWERUPS_KEY, { timeBoost: 0 });
+  return readJson(PLAYER_POWERUPS_KEY, DEFAULT_POWERUPS);
 }
 
 export function setStoredPowerups(powerups) {
   writeJson(PLAYER_POWERUPS_KEY, powerups);
+}
+
+export function clearUnusedExtraLife() {
+  const powerups = getStoredPowerups();
+  if ((powerups.extraLife ?? 0) <= 0) return null;
+
+  const progress = getPlayerProgress();
+  const updatedProgress = {
+    ...progress,
+    life: Math.max(0, (progress.life ?? DEFAULT_PROGRESS.life) - 1),
+  };
+
+  setPlayerProgress(updatedProgress);
+  setStoredPowerups({ ...powerups, extraLife: 0 });
+  return updatedProgress;
 }
 
 export function buyCheckpointItem(itemId) {
@@ -66,23 +113,25 @@ export function buyCheckpointItem(itemId) {
   }
 
   const progress = getPlayerProgress();
+  const powerups = getStoredPowerups();
+
   if ((progress.coins ?? 0) < item.price) {
     return { ok: false, message: 'Not enough coins' };
   }
 
   const updatedProgress = { ...progress, coins: progress.coins - item.price };
-  const powerups = getStoredPowerups();
 
   if (itemId === 'life') {
     updatedProgress.life = (updatedProgress.life ?? DEFAULT_PROGRESS.life) + 1;
+    setStoredPowerups({ ...powerups, extraLife: (powerups.extraLife ?? 0) + 1 });
   }
 
   if (itemId === 'time') {
-    setStoredPowerups({ ...powerups, timeBoost: (powerups.timeBoost ?? 0) + 1 });
+    setStoredPowerups({ ...powerups, timeBoost: 1 });
   }
 
   setPlayerProgress(updatedProgress);
-  return { ok: true, progress: updatedProgress };
+  return { ok: true, progress: updatedProgress, item };
 }
 
 function consumeTimeBoost() {
@@ -91,7 +140,7 @@ function consumeTimeBoost() {
 
   if (available <= 0) return 0;
 
-  setStoredPowerups({ ...powerups, timeBoost: available - 1 });
+  setStoredPowerups({ ...powerups, timeBoost: 0 });
   return 10;
 }
 
@@ -109,4 +158,13 @@ export function getInitialGameTime(baseTime, gameId, routeKey) {
 
 export function getReplayGameTime(baseTime) {
   return baseTime + consumeTimeBoost();
+}
+
+export function getOwnedCount(itemId) {
+  const powerups = getStoredPowerups();
+
+  if (itemId === 'time') return powerups.timeBoost ?? 0;
+  if (itemId === 'life') return powerups.extraLife ?? 0;
+
+  return 0;
 }

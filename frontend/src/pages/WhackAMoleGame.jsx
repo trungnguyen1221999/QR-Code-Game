@@ -7,15 +7,19 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI, sessionAPI } from '../utils/api';
-import { getInitialGameTime, getReplayGameTime } from '../utils/checkpointShop';
+import {
+  applyLossToStoredProgress,
+  clearUnusedExtraLife,
+  getPlayerProgress,
+  getInitialGameTime,
+  getReplayGameTime,
+  resetProgressToCheckpointOne,
+} from '../utils/checkpointShop';
 
-const GAME_TIME_LIMIT = 20;
+const GAME_TIME_LIMIT = 3;
 const WINNING_SCORE = 2;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
-const PLAYER_PROGRESS_KEY = 'playerGameProgress';
-const DEFAULT_LIFE = 3;
-const DEFAULT_COINS = 0;
 const ANIMALS = [
   { key: 'mouse', emoji: '🐭', label: 'Mouse' },
   { key: 'bird', emoji: '🐦', label: 'Bird' },
@@ -37,22 +41,6 @@ function shuffle(items) {
   return [...items].sort(() => Math.random() - 0.5);
 }
 
-function applyLossToStoredProgress() {
-  const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
-  const progress = raw ? JSON.parse(raw) : { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
-  const nextLife = (progress.life ?? DEFAULT_LIFE) - 1;
-
-  if (nextLife > 0) {
-    const updated = { ...progress, life: nextLife };
-    localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(updated));
-    return { remainingLives: nextLife, resetToStart: false };
-  }
-
-  const reset = { completed: 0, current: 1, life: DEFAULT_LIFE, coins: DEFAULT_COINS };
-  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(reset));
-  return { remainingLives: 0, resetToStart: true };
-}
-
 export default function WhackAMoleGame() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -68,14 +56,15 @@ export default function WhackAMoleGame() {
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [feedback, setFeedback] = useState(null);
-  const [loseState, setLoseState] = useState({ remainingLives: null, resetToStart: false });
+  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
   const hasEndedRef = useRef(false);
   const lossHandledRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose) return;
+    if (showWin || showLose || showBackConfirm) return;
     if (timeLeft <= 0) {
       hasEndedRef.current = true;
       setActiveAnimals({});
@@ -88,7 +77,7 @@ export default function WhackAMoleGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
     if (showWin || showLose) return;
@@ -155,9 +144,38 @@ export default function WhackAMoleGame() {
     setShowWin(false);
     setShowLose(false);
     setFeedback(null);
-    setLoseState({ remainingLives: null, resetToStart: false });
+    setLoseState({ remainingLives: null, needsLifePurchase: false });
     hasEndedRef.current = false;
     lossHandledRef.current = false;
+  };
+
+  const handleLoseShopPurchase = (result) => {
+    if (result.item?.id !== 'life') return;
+
+    setLoseState({
+      remainingLives: result.progress?.life ?? 1,
+      needsLifePurchase: false,
+    });
+  };
+
+  const handleLoseExit = () => {
+    if (loseState.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+    } else {
+      clearUnusedExtraLife();
+    }
+
+    navigate('/game');
+  };
+
+  const handleLosePrimaryAction = () => {
+    if (loseState.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+      navigate('/game');
+      return;
+    }
+
+    resetGame();
   };
 
   const registerLifeLoss = async () => {
@@ -187,11 +205,16 @@ export default function WhackAMoleGame() {
   };
 
   const handleBackExit = async () => {
-    if (busy || showWin || showLose) return;
     setBusy(true);
-    await registerLifeLoss();
+    const summary = await registerLifeLoss();
+    if (summary.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+    }
     navigate('/game');
   };
+
+  const currentLives = getPlayerProgress().life ?? 0;
+  const backWillResetToStart = currentLives <= 1;
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
@@ -216,6 +239,7 @@ export default function WhackAMoleGame() {
     } catch (error) {
       toast.error(error.message);
     } finally {
+      clearUnusedExtraLife();
       navigate('/game', {
         state: {
           justCompleted: true,
@@ -337,7 +361,7 @@ export default function WhackAMoleGame() {
           </p>
         </div>
 
-        <Button variant="red" onClick={handleBackExit} disabled={busy}>
+        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
           Back
         </Button>
       </div>
@@ -358,7 +382,7 @@ export default function WhackAMoleGame() {
               You reached the target score and earned {earnedCoins} coins.
             </p>
           </div>
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
@@ -373,22 +397,54 @@ export default function WhackAMoleGame() {
               Time is up
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {loseState.resetToStart
-                ? 'No lives left. You will return to checkpoint 1.'
+              {loseState.needsLifePurchase
+                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
                 : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
-          <CheckpointShopPanel />
+          <CheckpointShopPanel
+            isOpen={showLose}
+            warningMessage={
+              loseState.needsLifePurchase
+                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                : ''
+            }
+            onPurchase={handleLoseShopPurchase}
+          />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
               variant="red"
-              onClick={loseState.resetToStart ? () => navigate('/game') : resetGame}
+              onClick={handleLosePrimaryAction}
               disabled={busy}
             >
-              {loseState.resetToStart ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
             </Button>
-            <Button variant="green" onClick={() => navigate('/game')} disabled={busy}>
+            <Button variant="green" onClick={handleLoseExit} disabled={busy}>
               Exit game
+            </Button>
+          </div>
+        </div>
+      </Popup>
+
+      <Popup open={showBackConfirm} onClose={() => setShowBackConfirm(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">!</span>
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              Leave this game?
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {backWillResetToStart
+                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
+                : 'If you go back now, one life will be lost.'}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleBackExit} disabled={busy}>
+              Confirm
+            </Button>
+            <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
+              Cancel
             </Button>
           </div>
         </div>
