@@ -1,16 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, RotateCcw, Trophy, Puzzle } from 'lucide-react';
+import { Clock, Trophy, Puzzle } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
+import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI, sessionAPI } from '../utils/api';
+import {
+  applyLossToStoredProgress,
+  clearUnusedExtraLife,
+  getInitialGameTime,
+  getPlayerProgress,
+  resetProgressToCheckpointOne,
+} from '../utils/checkpointShop';
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
-const PUZZLE_TIME_LIMIT = 120;
-const PUZZLE_REWARD = 100;
+const PUZZLE_TIME_LIMIT = 30;
+const COINS_PER_SECOND = 2;
 const SNAP_DISTANCE = 90;
 
 const PUZZLE_IMAGES = [
@@ -81,10 +89,15 @@ export default function PuzzlePlacementGame() {
   const [dragState, setDragState] = useState(null);
   const [shakeSlotIndex, setShakeSlotIndex] = useState(null);
 
-  const [timeLeft, setTimeLeft] = useState(PUZZLE_TIME_LIMIT);
+  const [timeLeft, setTimeLeft] = useState(() =>
+    getInitialGameTime(PUZZLE_TIME_LIMIT, 'puzzle', location.key)
+  );
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
+
+  const earnedCoins = Math.max(0, timeLeft * COINS_PER_SECOND);
 
   const completedCount = useMemo(
     () => placedPieces.filter(Boolean).length,
@@ -231,6 +244,35 @@ export default function PuzzlePlacementGame() {
     setShowLose(false);
   };
 
+  const registerLifeLoss = async () => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const summary = applyLossToStoredProgress();
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.loseLife(playerSessionId);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    return summary;
+  };
+
+  const handleBackExit = async () => {
+    setBusy(true);
+    const summary = await registerLifeLoss();
+
+    if (summary.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+    }
+
+    navigate('/game');
+  };
+
+  const currentLives = getPlayerProgress().life ?? 0;
+  const backWillResetToStart = currentLives <= 1;
+
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const sessionId = session?._id || session?.id;
@@ -250,19 +292,20 @@ export default function PuzzlePlacementGame() {
         if (matchedCheckpoint?._id) {
           await playerAPI.checkpoint(playerSessionId, {
             checkpointId: matchedCheckpoint._id,
-            scoreEarned: PUZZLE_REWARD,
+            scoreEarned: earnedCoins,
           });
         }
       }
     } catch (error) {
       toast.error(error.message);
     } finally {
+      clearUnusedExtraLife();
       navigate('/game', {
         state: {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: PUZZLE_REWARD,
+          rewardCoins: 0,
           resultId,
         },
       });
@@ -447,12 +490,13 @@ export default function PuzzlePlacementGame() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Button variant="red" onClick={() => navigate('/game')}>
+        <div className="grid grid-cols-1 gap-3">
+          <Button
+            variant="red"
+            onClick={() => setShowBackConfirm(true)}
+            disabled={busy || showWin || showLose}
+          >
             Back
-          </Button>
-          <Button variant="green" onClick={handleRetry}>
-            <RotateCcw size={16} /> Restart
           </Button>
         </div>
       </div>
@@ -488,13 +532,41 @@ export default function PuzzlePlacementGame() {
               Puzzle completed!
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              All pieces are in the correct place.
+              All pieces are in the correct place. You earned {earnedCoins} coins from the time left.
             </p>
           </div>
+
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
 
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
+        </div>
+      </Popup>
+
+      <Popup open={showBackConfirm} onClose={() => setShowBackConfirm(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">!</span>
+
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              Leave this game?
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {backWillResetToStart
+                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
+                : 'If you go back now, one life will be lost.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleBackExit} disabled={busy}>
+              Confirm
+            </Button>
+            <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
+              Cancel
+            </Button>
+          </div>
         </div>
       </Popup>
 

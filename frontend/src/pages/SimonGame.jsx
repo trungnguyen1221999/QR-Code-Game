@@ -1,14 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, Play, RotateCcw, Trophy, Volume2 } from 'lucide-react';
+import { Clock, Play, Trophy, Volume2 } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
+import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI, sessionAPI } from '../utils/api';
+import {
+  applyLossToStoredProgress,
+  clearUnusedExtraLife,
+  getInitialGameTime,
+  getPlayerProgress,
+  resetProgressToCheckpointOne,
+} from '../utils/checkpointShop';
 
-const SIMON_TIME_LIMIT = 60;
-const SIMON_REWARD = 50;
+const SIMON_TIME_LIMIT = 30;
+const COINS_PER_SECOND = 2;
 
 const COLORS = [
   { id: 'green', label: 'Green', base: '#22C55E', glow: '#86EFAC', freq: 329.63 },
@@ -41,17 +49,21 @@ export default function SimonGame() {
   const [round, setRound] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [status, setStatus] = useState('Press Start to begin.');
-  const [timeLeft, setTimeLeft] = useState(SIMON_TIME_LIMIT);
+  const [timeLeft, setTimeLeft] = useState(() =>
+    getInitialGameTime(SIMON_TIME_LIMIT, 'simon', location.key)
+  );
   const [flashWrong, setFlashWrong] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(true);
   const [showLose, setShowLose] = useState(false);
   const [showWin, setShowWin] = useState(false);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const audioContextRef = useRef(null);
   const mountedRef = useRef(true);
 
   const targetRound = useMemo(() => 5, []);
+  const earnedCoins = Math.max(0, timeLeft * COINS_PER_SECOND);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -190,6 +202,35 @@ export default function SimonGame() {
     setShowWin(false);
   };
 
+  const registerLifeLoss = async () => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const summary = applyLossToStoredProgress();
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.loseLife(playerSessionId);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    return summary;
+  };
+
+  const handleBackExit = async () => {
+    setBusy(true);
+    const summary = await registerLifeLoss();
+
+    if (summary.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+    }
+
+    navigate('/game');
+  };
+
+  const currentLives = getPlayerProgress().life ?? 0;
+  const backWillResetToStart = currentLives <= 1;
+
   const handleWrongInput = async () => {
     setBestScore((prev) => Math.max(prev, round));
     setStatus('Wrong pattern!');
@@ -266,19 +307,20 @@ export default function SimonGame() {
         if (matchedCheckpoint?._id) {
           await playerAPI.checkpoint(playerSessionId, {
             checkpointId: matchedCheckpoint._id,
-            scoreEarned: SIMON_REWARD,
+            scoreEarned: earnedCoins,
           });
         }
       }
     } catch (error) {
       toast.error(error.message);
     } finally {
+      clearUnusedExtraLife();
       navigate('/game', {
         state: {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: SIMON_REWARD,
+          rewardCoins: 0,
           resultId,
         },
       });
@@ -397,14 +439,17 @@ export default function SimonGame() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button onClick={startGame} disabled={gameStarted || isPlayingSequence}>
+          <Button onClick={startGame} disabled={gameStarted || isPlayingSequence || busy}>
             <Play size={16} />
             Start
           </Button>
 
-          <Button variant="ghost" onClick={handleReset}>
-            <RotateCcw size={16} />
-            Reset
+          <Button
+            variant="red"
+            onClick={() => setShowBackConfirm(true)}
+            disabled={busy || showWin || showLose}
+          >
+            Back
           </Button>
         </div>
 
@@ -448,11 +493,40 @@ export default function SimonGame() {
             You win!
           </h3>
           <p className="text-sm text-center" style={{ color: 'var(--color-subtext)' }}>
-            You completed the Simon pattern challenge and earned {SIMON_REWARD} coins.
+            You completed the Simon pattern challenge and earned {earnedCoins} coins from the time left.
           </p>
+
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
+
           <Button onClick={handleBackToGame} disabled={busy}>
             Back to game
           </Button>
+        </div>
+      </Popup>
+
+      <Popup open={showBackConfirm} onClose={() => setShowBackConfirm(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">!</span>
+
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              Leave this game?
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {backWillResetToStart
+                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
+                : 'If you go back now, one life will be lost.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleBackExit} disabled={busy}>
+              Confirm
+            </Button>
+            <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
+              Cancel
+            </Button>
+          </div>
         </div>
       </Popup>
 
