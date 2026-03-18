@@ -17,7 +17,7 @@ import {
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
 
-const QUIZ_TIME_LIMIT = 70;
+const QUIZ_TIME_LIMIT = 30;
 const PASS_SCORE = 2;
 const TOTAL_QUESTIONS = 10;
 

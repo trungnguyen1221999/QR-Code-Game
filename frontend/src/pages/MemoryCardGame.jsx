@@ -16,7 +16,7 @@ import {
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
 
-const MEMORY_TIME_LIMIT = 40;
+const MEMORY_TIME_LIMIT = 30;
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
 function shuffleCards() {
   return [...CARD_EMOJIS, ...CARD_EMOJIS]

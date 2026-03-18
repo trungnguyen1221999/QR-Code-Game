@@ -95,15 +95,8 @@ export function clearUnusedExtraLife() {
   const powerups = getStoredPowerups();
   if ((powerups.extraLife ?? 0) <= 0) return null;
 
-  const progress = getPlayerProgress();
-  const updatedProgress = {
-    ...progress,
-    life: Math.max(0, (progress.life ?? DEFAULT_PROGRESS.life) - 1),
-  };
-
-  setPlayerProgress(updatedProgress);
   setStoredPowerups({ ...powerups, extraLife: 0 });
-  return updatedProgress;
+  return getPlayerProgress();
 }
 
 export function buyCheckpointItem(itemId) {
