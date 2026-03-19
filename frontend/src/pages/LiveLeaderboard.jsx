@@ -1,38 +1,58 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Info } from 'lucide-react';
-
-const TOTAL_SECONDS = 10 * 60; // 10 min
-
-const MOCK_PLAYERS = [
-  { rank: 1, name: 'Shun',  avatar: '/avatar/avatar1.png', score: 2000 },
-  { rank: 2, name: 'Trung', avatar: '/avatar/avatar2.png', score: 1800 },
-  { rank: 3, name: 'Yan',   avatar: '/avatar/avatar3.png', score: 1750 },
-  { rank: 4, name: 'Helen', avatar: '/avatar/avatar4.png', score: 1510 },
-];
-
-const STAR_COLORS = { 1: '#FBBF24', 2: '#6366F1', 3: '#EF4444' };
-
-function RankBadge({ rank }) {
-  if (rank <= 3) return <span className="text-xl" style={{ color: STAR_COLORS[rank] }}>★</span>;
-  return <span className="text-sm font-bold text-white">{rank}</span>;
-}
+import LeaderboardList from '../components/LeaderboardList';
+import { sessionAPI } from '../utils/api';
 
 function formatTime(secs) {
-  const h = Math.floor(secs / 3600).toString().padStart(2, '0');
-  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const m = Math.floor(secs / 60).toString().padStart(2, '0');
   const s = (secs % 60).toString().padStart(2, '0');
-  return `${h}:${m}:${s}`;
+  return `${m}:${s}`;
 }
 
 export default function LiveLeaderboard() {
   const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
+  const session  = JSON.parse(localStorage.getItem('session') || 'null');
+  const player   = JSON.parse(localStorage.getItem('player')  || 'null');
+  const sessionId = session?.id || session?._id;
 
+  const [players,  setPlayers]  = useState([]);
+  const [timeLeft, setTimeLeft] = useState(null);
+
+  // Poll players every 5s
   useEffect(() => {
-    if (timeLeft <= 0) { navigate('/champion'); return; }
-    const t = setInterval(() => setTimeLeft(v => v - 1), 1000);
-    return () => clearInterval(t);
+    if (!sessionId) return;
+    const load = async () => {
+      try {
+        const data = await sessionAPI.getPlayers(sessionId);
+        setPlayers(data);
+      } catch { /* ignore */ }
+    };
+    load();
+    const iv = setInterval(load, 5000);
+    return () => clearInterval(iv);
+  }, [sessionId]);
+
+  // Poll session for timeLeft + finished status
+  useEffect(() => {
+    if (!sessionId) return;
+    const check = async () => {
+      try {
+        const s = await sessionAPI.getById(sessionId);
+        if (s.timeLeft != null) setTimeLeft(s.timeLeft);
+        if (s.status === 'finished') navigate('/champion');
+      } catch { /* ignore */ }
+    };
+    check();
+    const iv = setInterval(check, 3000);
+    return () => clearInterval(iv);
+  }, [sessionId, navigate]);
+
+  // Local countdown
+  useEffect(() => {
+    if (timeLeft == null || timeLeft <= 0) return;
+    const t = setTimeout(() => setTimeLeft(v => v - 1), 1000);
+    return () => clearTimeout(t);
   }, [timeLeft]);
 
   return (
@@ -42,74 +62,57 @@ export default function LiveLeaderboard() {
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
     }}>
-      <div className="absolute inset-0" style={{ backgroundColor: 'rgba(240, 255, 230, 0.1)' }} />
+      <div className="absolute inset-0" style={{ backgroundColor: 'rgba(240,255,230,0.1)' }} />
       <div className="w-full max-w-sm flex flex-col px-5 pt-8 pb-12 gap-5 relative z-10">
 
         {/* Header */}
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">⚙️</span>
-          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Leaderboard in progress...
-          </h2>
-        </div>
-
-        {/* Gears animation */}
-        <div className="flex justify-center">
-          <style>{`
-            @keyframes spin-cw  { from{transform:rotate(0deg)}   to{transform:rotate(360deg)} }
-            @keyframes spin-ccw { from{transform:rotate(0deg)}   to{transform:rotate(-360deg)} }
-            .gear-cw  { animation: spin-cw  2s linear infinite; display:inline-block; }
-            .gear-ccw { animation: spin-ccw 2s linear infinite; display:inline-block; }
-          `}</style>
-          <span className="gear-cw  text-5xl" style={{ color: 'var(--color-primary)' }}>⚙️</span>
-          <span className="gear-ccw text-3xl -ml-2 mt-4" style={{ color: 'var(--color-primary)' }}>⚙️</span>
-        </div>
-
-        {/* Timer */}
-        <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-          Time left :{' '}
-          <span className="font-bold" style={{ color: '#EF4444' }}>{formatTime(timeLeft)}</span>
-        </p>
-
-        {/* Leaderboard table */}
-        <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#4AADE8' }}>
-          <div className="flex items-center px-4 py-2.5 gap-2">
-            <span className="w-12 text-xs font-bold text-white">Rank</span>
-            <span className="flex-1 text-xs font-bold text-white">Name</span>
-            <span className="text-xs font-bold text-white">Score</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🏆</span>
+            <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
+              Leaderboard
+            </h2>
           </div>
-          <div className="flex flex-col gap-1 px-2 pb-3">
-            {MOCK_PLAYERS.map(p => (
-              <div key={p.rank}
-                className="flex items-center px-3 py-2 rounded-xl gap-2"
-                style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
-                <div className="w-10 flex items-center justify-center">
-                  <RankBadge rank={p.rank} />
-                </div>
-                <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
-                <span className="flex-1 text-sm font-semibold text-white">{p.name}</span>
-                <span className="text-sm font-bold text-white">{p.score}</span>
+          {timeLeft != null && (
+            <span className="text-sm font-bold px-3 py-1 rounded-full"
+              style={{ backgroundColor: timeLeft < 60 ? '#FEE2E2' : '#EFF6FF', color: timeLeft < 60 ? '#EF4444' : '#3B82F6' }}>
+              ⏱ {formatTime(timeLeft)}
+            </span>
+          )}
+        </div>
+
+        {/* Player list */}
+        {players.length > 0
+          ? <LeaderboardList players={players} highlightName={player?.username} />
+          : (
+            <div className="flex flex-col items-center gap-4 pt-12">
+              <style>{`
+                @keyframes spin-cw  { to { transform: rotate(360deg) } }
+                @keyframes spin-ccw { to { transform: rotate(-360deg) } }
+                .gear-cw  { animation: spin-cw  2s linear infinite; display:inline-block }
+                .gear-ccw { animation: spin-ccw 2s linear infinite; display:inline-block }
+              `}</style>
+              <div>
+                <span className="gear-cw  text-5xl" style={{ color: 'var(--color-primary)' }}>⚙️</span>
+                <span className="gear-ccw text-3xl -ml-2 mt-4" style={{ color: 'var(--color-primary)' }}>⚙️</span>
               </div>
-            ))}
-          </div>
-        </div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-subtext)' }}>Loading results...</p>
+            </div>
+          )
+        }
 
-        {/* Note box */}
+        {/* Note */}
         <div className="rounded-xl p-4 flex gap-3"
           style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE' }}>
           <Info size={16} style={{ color: '#3B82F6', flexShrink: 0, marginTop: 1 }} />
-          <div>
-            <p className="text-sm font-bold mb-1" style={{ color: 'var(--color-text)' }}>Note</p>
-            <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-              Current ranking of players who has completed the game. Rank can be changed when total playing time is end!
-            </p>
-          </div>
+          <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
+            Finished players rank by score. Unfinished players rank by checkpoints reached.
+          </p>
         </div>
 
-        {/* If time up button (test) */}
+        {/* Dev shortcut */}
         <div className="flex justify-end">
-          <button
-            onClick={() => navigate('/champion')}
+          <button onClick={() => navigate('/champion')}
             className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
             style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
             if time up

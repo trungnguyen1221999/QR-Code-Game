@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { playerAPI } from '../utils/api';
 
 // ── Constants ──────────────────────────────────────────────────
 const CW = 375, CH = 375;
@@ -272,10 +273,14 @@ export default function FinalChallenge() {
   const bgRafRef   = useRef(null);
   const heroImgRef = useRef(null);
   const reptileRef = useRef(null);
+  const scoreRef   = useRef(0);
 
   const [lives, setLives]               = useState(initLives);
   const [buddyCount, setBuddyCount]     = useState(initBuddy);
   const [currentIdx, setCurrentIdx]     = useState(0);
+  const [score, setScore]               = useState(0);
+  const [scorePopup, setScorePopup]     = useState(null);
+  const [scoreVisible, setScoreVisible] = useState(false);
   const [showIntro, setShowIntro]       = useState(true);
   const [perfectMsg, setPerfectMsg]     = useState(false);
   const [rewardMsg, setRewardMsg]       = useState(null);
@@ -319,7 +324,13 @@ export default function FinalChallenge() {
   const restoreAfterFall = useCallback(() => {
     const g = gRef.current;
     g.lives -= 1; setLives(g.lives);
-    if (g.lives <= 0) { setGameOver(true); return; }
+    if (g.lives <= 0) {
+      setGameOver(true);
+      const ps = JSON.parse(localStorage.getItem('playerSession') || 'null');
+      const psId = ps?.id || ps?._id;
+      if (psId) playerAPI.finish(psId, { score: scoreRef.current }).catch(() => {});
+      return;
+    }
     setLostLife(true);
     const curPlat = g.platforms[g.currentPlatformIdx];
     g.sticks.pop();
@@ -345,6 +356,17 @@ export default function FinalChallenge() {
           last(g.sticks).rotation = 90;
           const [hit, perfect, buddyHelped] = platformHit();
           if (hit) {
+            // ── Score ──────────────────────────────────────────
+            const hitIdx = g.platforms.indexOf(hit);
+            const cols = Math.max(1, hitIdx - g.currentPlatformIdx);
+            const basePoints = cols * 10 + Math.max(0, cols - 1) * 25;
+            const points = perfect ? basePoints * 2 : basePoints;
+            scoreRef.current += points; setScore(scoreRef.current);
+            const praise = cols >= 5 ? '🔥 LEGENDARY!' : cols === 4 ? '🤩 Incredible!' : cols === 3 ? '😲 Amazing!' : cols === 2 ? '👏 Good job!' : null;
+            setScorePopup({ total: `+${points}`, base: cols, extra: cols - 1, praise, doubled: perfect }); setScoreVisible(true);
+            setTimeout(() => setScoreVisible(false), 1800);
+            setTimeout(() => setScorePopup(null), 2000);
+
             if (perfect) {
               let reward = null;
               if (Math.random() < 0.20) {
@@ -387,7 +409,14 @@ export default function FinalChallenge() {
           g.sticks.push({ x: hit.x + hit.w, length: 0, rotation: 0 });
           g.buddyBridge = null;
           if (g.currentPlatformIdx >= WIN_CHECKPOINTS) {
-            cancelAnimationFrame(rafRef.current); redraw(); setWin(true); return;
+            cancelAnimationFrame(rafRef.current); redraw(); setWin(true);
+            // Submit score + finishedAt to backend
+            const ps = JSON.parse(localStorage.getItem('playerSession') || 'null');
+            const psId = ps?.id || ps?._id;
+            if (psId) {
+              playerAPI.finish(psId, { score: scoreRef.current, finishedAt: new Date().toISOString() }).catch(() => {});
+            }
+            return;
           }
           g.phase = 'waiting';
         }
@@ -410,7 +439,8 @@ export default function FinalChallenge() {
   const startGame = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     gRef.current = initState(initLives, initBuddy);
-    setLives(initLives); setBuddyCount(initBuddy); setCurrentIdx(0);
+    scoreRef.current = 0;
+    setLives(initLives); setBuddyCount(initBuddy); setCurrentIdx(0); setScore(0); setScorePopup(null); setScoreVisible(false);
     setShowIntro(true); setPerfectMsg(false); setLostLife(false);
     setShowBuddy(false); setGameOver(false); setWin(false); setShowWinVideo(false);
     redraw();
@@ -462,9 +492,13 @@ export default function FinalChallenge() {
     <div className="fixed inset-0 select-none" style={{ cursor: 'pointer', touchAction: 'none' }}>
       <canvas ref={canvasRef} className="block w-full h-full" />
 
-      {/* Lives */}
-      <div className="absolute top-6 left-6 text-xl tracking-wide">
-        {'❤️'.repeat(Math.max(0, lives))}
+      {/* Lives + Score */}
+      <div className="absolute top-6 left-6 flex flex-col gap-1">
+        <div className="text-xl tracking-wide">{'❤️'.repeat(Math.max(0, lives))}</div>
+        <div className="text-sm font-black px-3 py-1 rounded-full w-fit"
+          style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#FFD700' }}>
+          ⭐ {score}
+        </div>
       </div>
 
       {/* Column progress */}
@@ -493,6 +527,41 @@ export default function FinalChallenge() {
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
         style={{ opacity: perfectMsg ? 1 : 0, transition: 'opacity 1.2s' }}>
         {perfectMsg && <p className="text-2xl font-black" style={{ color: '#E8730A' }}>PERFECT!</p>}
+      </div>
+
+      {/* Score popup */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
+        style={{ paddingBottom: 60, opacity: scoreVisible ? 1 : 0, transition: 'opacity 0.5s ease-out' }}>
+        {scorePopup && (<>
+          {scorePopup.base > 1 && (
+            <div className="flex flex-wrap justify-center gap-1 px-2 max-w-xs">
+              {Array(scorePopup.base).fill(null).map((_, i) => (
+                <span key={`b${i}`} className="text-base font-black px-2 py-0.5"
+                  style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>+10</span>
+              ))}
+              {Array(scorePopup.extra).fill(null).map((_, i) => (
+                <span key={`e${i}`} className="text-base font-black px-2 py-0.5"
+                  style={{ color: '#FF6B35', textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>+25🔥</span>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <p className="text-2xl font-black px-4 py-1 rounded-xl"
+              style={{ color: '#FFD700', textShadow: '0 1px 6px rgba(0,0,0,0.8)' }}>
+              {scorePopup.total}
+            </p>
+            {scorePopup.doubled && (
+              <span className="text-sm font-black px-2 py-0.5 rounded-lg"
+                style={{ backgroundColor: '#E8730A', color: '#fff' }}>x2</span>
+            )}
+          </div>
+          {scorePopup.praise && (
+            <p className="text-lg font-black px-4 py-1 rounded-xl"
+              style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+              {scorePopup.praise}
+            </p>
+          )}
+        </>)}
       </div>
 
       {/* Reward bonus message */}
