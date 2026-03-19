@@ -31,6 +31,17 @@ function formatTime(secs) {
   return `${h}:${m}:${s}`;
 }
 
+function getRemainingSessionSeconds(expiresAt, fallback = TOTAL_SECONDS) {
+  if (!expiresAt) return fallback;
+
+  const remainingSeconds = Math.max(
+    0,
+    Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
+  );
+
+  return Number.isFinite(remainingSeconds) ? remainingSeconds : fallback;
+}
+
 function readSavedProgress() {
   const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
   if (!raw) {
@@ -109,8 +120,9 @@ export default function PlayerGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
   const initialProgress = readSavedProgress();
+  const shouldSkipProgressRefresh = !!(location.state?.justCompleted || location.state?.wrongAnswer);
 
-  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(() => getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS));
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -127,8 +139,6 @@ export default function PlayerGame() {
   }, [coins, completed, current, life]);
 
   useEffect(() => {
-    if (location.state?.justCompleted || location.state?.wrongAnswer) return;
-
     const playerSessionId = playerSession?._id || playerSession?.id;
     const sessionId = session?._id || session?.id;
 
@@ -139,7 +149,7 @@ export default function PlayerGame() {
           sessionId ? sessionAPI.getById(sessionId) : Promise.resolve(null),
         ]);
 
-        if (playerSessionData && !initialProgress.hasSavedProgress) {
+        if (!shouldSkipProgressRefresh && playerSessionData && !initialProgress.hasSavedProgress) {
           const completedCount = playerSessionData.completedCheckpoints?.length ?? 0;
           setCompleted(completedCount);
           setCurrent(Math.min(completedCount + 1, TOTAL_CHECKPOINTS + 1));
@@ -148,20 +158,25 @@ export default function PlayerGame() {
         }
 
         const expiresAt = sessionData?.expiresAt || session?.expiresAt;
-        if (expiresAt) {
-          const remainingSeconds = Math.max(
-            0,
-            Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
-          );
-          setTimeLeft(remainingSeconds);
-        }
+        setTimeLeft(getRemainingSessionSeconds(expiresAt, TOTAL_SECONDS));
       } catch {
-        // Keep the local fallback state if the backend data is unavailable.
+        setTimeLeft((currentValue) => {
+          if (currentValue !== TOTAL_SECONDS) return currentValue;
+          return getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS);
+        });
       }
     };
 
     loadProgress();
-  }, [initialProgress.hasSavedProgress]);
+  }, [
+    initialProgress.hasSavedProgress,
+    playerSession?._id,
+    playerSession?.id,
+    session?._id,
+    session?.id,
+    session?.expiresAt,
+    shouldSkipProgressRefresh,
+  ]);
 
   // Apply result coming back from challenge page
   useEffect(() => {
