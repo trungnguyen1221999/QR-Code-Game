@@ -45,6 +45,7 @@ export default function SimonGame() {
   const [activeButton, setActiveButton] = useState(null);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [backEnabled, setBackEnabled] = useState(false);
   const [round, setRound] = useState(0);
   const [bestScore, setBestScore] = useState(0);
   const [status, setStatus] = useState('Press Start to begin.');
@@ -60,6 +61,13 @@ export default function SimonGame() {
 
   const audioContextRef = useRef(null);
   const mountedRef = useRef(true);
+  const soundsRef = useRef({
+    green: typeof Audio !== 'undefined' ? new Audio('/sounds/green.mp3') : null,
+    red: typeof Audio !== 'undefined' ? new Audio('/sounds/red.mp3') : null,
+    yellow: typeof Audio !== 'undefined' ? new Audio('/sounds/yellow.mp3') : null,
+    blue: typeof Audio !== 'undefined' ? new Audio('/sounds/blue.mp3') : null,
+    wrong: typeof Audio !== 'undefined' ? new Audio('/sounds/wrong.mp3') : null,
+  });
 
   const targetRound = useMemo(() => 5, []);
   const earnedCoins = Math.max(0, timeLeft * COINS_PER_SECOND);
@@ -130,7 +138,28 @@ export default function SimonGame() {
     oscillator.stop(context.currentTime + duration / 1000 + 0.02);
   };
 
+  const playColorSound = (colorId) => {
+    const sound = soundsRef.current[colorId];
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play().catch(() => { });
+      return;
+    }
+
+    const color = COLORS.find((item) => item.id === colorId);
+    if (color) {
+      playTone(color.freq, 180);
+    }
+  };
+
   const playWrongSound = async () => {
+    const sound = soundsRef.current.wrong;
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play().catch(() => { });
+      return;
+    }
+
     playTone(180, 160, 'sawtooth', 0.05);
     await sleep(120);
     playTone(110, 260, 'square', 0.05);
@@ -142,12 +171,8 @@ export default function SimonGame() {
   };
 
   const flashButton = async (colorId, duration = 420) => {
-    const color = COLORS.find((item) => item.id === colorId);
     setActiveButton(colorId);
-
-    if (color) {
-      playTone(color.freq, Math.max(150, duration - 60));
-    }
+    playColorSound(colorId);
 
     await sleep(duration);
 
@@ -180,6 +205,7 @@ export default function SimonGame() {
     setRound(1);
     setTimeLeft(SIMON_TIME_LIMIT);
     setGameStarted(true);
+    setBackEnabled(true);
     setShowLose(false);
     setShowWin(false);
     setFlashWrong(false);
@@ -193,6 +219,7 @@ export default function SimonGame() {
     setActiveButton(null);
     setIsPlayingSequence(false);
     setGameStarted(false);
+    setBackEnabled(false);
     setRound(0);
     setTimeLeft(SIMON_TIME_LIMIT);
     setFlashWrong(false);
@@ -247,10 +274,7 @@ export default function SimonGame() {
   const handleButtonClick = async (colorId) => {
     if (!canPlayerInput) return;
 
-    const color = COLORS.find((item) => item.id === colorId);
-    if (color) {
-      playTone(color.freq, 180);
-    }
+    playColorSound(colorId);
 
     setActiveButton(colorId);
     setTimeout(() => {
@@ -333,6 +357,35 @@ export default function SimonGame() {
     }
   };
 
+  const handleTryAgainHere = async () => {
+    const currentLives = getPlayerProgress().life ?? 0;
+
+    if (currentLives <= 1) {
+      await handleLoseContinue();
+      return;
+    }
+
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const summary = applyLossToStoredProgress();
+
+    setBusy(true);
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.loseLife(playerSessionId);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+
+    if (summary.needsLifePurchase) {
+      await handleLoseContinue();
+      return;
+    }
+
+    handleReset();
+    setBusy(false);
+  };
   return (
     <PageLayout className="pb-6">
       <div
@@ -433,13 +486,32 @@ export default function SimonGame() {
             Start
           </Button>
 
-          <Button
-            variant="red"
-            onClick={() => setShowBackConfirm(true)}
-            disabled={busy || showWin || showLose}
-          >
-            Back
-          </Button>
+          {backEnabled ? (
+            <Button
+              key="back-enabled"
+              variant="red"
+              onClick={() => setShowBackConfirm(true)}
+              disabled={busy || showWin || showLose}
+            >
+              Back
+            </Button>
+          ) : (
+            <button
+              key="back-disabled"
+              type="button"
+              disabled
+              className="w-full rounded-2xl px-4 py-3 text-sm font-semibold"
+              style={{
+                backgroundColor: '#D1D5DB',
+                border: '1px solid #D1D5DB',
+                color: '#6B7280',
+                cursor: 'not-allowed',
+                opacity: 1,
+              }}
+            >
+              Back
+            </button>
+          )}
         </div>
 
         <button
@@ -475,7 +547,7 @@ export default function SimonGame() {
         </div>
       </Popup>
 
-      <Popup open={showWin} onClose={() => {}} showClose={false}>
+      <Popup open={showWin} onClose={() => { }} showClose={false}>
         <div className="flex flex-col items-center gap-3 py-2">
           <span className="text-5xl">🎉</span>
           <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
@@ -519,7 +591,7 @@ export default function SimonGame() {
         </div>
       </Popup>
 
-      <Popup open={showLose} onClose={() => {}} showClose={false}>
+      <Popup open={showLose} onClose={() => { }} showClose={false}>
         <div className="flex flex-col items-center gap-3 py-2">
           <span className="text-5xl">❌</span>
           <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
@@ -532,7 +604,7 @@ export default function SimonGame() {
             <Button onClick={handleLoseContinue} disabled={busy}>
               Continue
             </Button>
-            <Button variant="ghost" onClick={handleReset} disabled={busy}>
+            <Button variant="ghost" onClick={handleTryAgainHere} disabled={busy}>
               Try again here
             </Button>
           </div>
