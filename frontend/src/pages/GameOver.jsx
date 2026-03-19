@@ -1,29 +1,46 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LeaderboardList, { rankPlayers } from '../components/LeaderboardList';
+import { sessionAPI } from '../utils/api';
 
-const MOCK_RANK = 9;
-const MOCK_TOTAL = 12;
-const GAME_DURATION = '30 min';
-
-const MOCK_PLAYERS = [
-  { rank: 1, name: 'Shun',    avatar: '/avatar/avatar1.png', score: 2000 },
-  { rank: 2, name: 'Trung',   avatar: '/avatar/avatar2.png', score: 1800 },
-  { rank: 3, name: 'Yan',     avatar: '/avatar/avatar3.png', score: 1750 },
-  { rank: 4, name: 'Helen',   avatar: '/avatar/avatar4.png', score: 1510 },
-  { rank: 5, name: 'Stev',    avatar: '/avatar/avatar1.png', score: 1510 },
-  { rank: 6, name: 'Micheal', avatar: '/avatar/avatar2.png', score: 1501 },
-  { rank: 7, name: 'Mar',     avatar: '/avatar/avatar3.png', score: 0    },
-  { rank: 8, name: 'Kaung',   avatar: '/avatar/avatar4.png', score: 0    },
-];
-
-const STAR_COLORS = { 1: '#FBBF24', 2: '#6366F1', 3: '#EF4444' };
-
-function RankBadge({ rank }) {
-  if (rank <= 3) return <span className="text-xl" style={{ color: STAR_COLORS[rank] }}>★</span>;
-  return <span className="text-sm font-bold" style={{ color: 'white' }}>{rank}</span>;
+function formatDuration(startedAt, endedAt) {
+  if (!startedAt) return '—';
+  const ms = new Date(endedAt || Date.now()) - new Date(startedAt);
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m} min`;
 }
 
 export default function GameOver() {
   const navigate = useNavigate();
+  const session  = JSON.parse(localStorage.getItem('session') || 'null');
+  const player   = JSON.parse(localStorage.getItem('player')  || 'null');
+  const sessionId = session?.id || session?._id;
+
+  const [players,     setPlayers]     = useState([]);
+  const [sessionData, setSessionData] = useState(null);
+  const [loading,     setLoading]     = useState(true);
+
+  useEffect(() => {
+    if (!sessionId) { setLoading(false); return; }
+    Promise.all([
+      sessionAPI.getPlayers(sessionId).catch(() => []),
+      sessionAPI.getById(sessionId).catch(() => null),
+    ]).then(([ps, s]) => {
+      setPlayers(ps);
+      setSessionData(s);
+      setLoading(false);
+    });
+  }, [sessionId]);
+
+  const ranked   = rankPlayers(players);
+  const myName   = player?.username || player?.name;
+  const me       = ranked.find(p => (p.username || p.name) === myName);
+  const myRank   = me?.rank ?? '—';
+  const total    = ranked.length;
+  const duration = formatDuration(sessionData?.startedAt, sessionData?.endedAt);
 
   return (
     <div className="min-h-screen flex justify-center relative" style={{
@@ -40,24 +57,30 @@ export default function GameOver() {
           <span className="text-6xl">🏆</span>
           <div className="flex gap-1 text-2xl">⭐⭐⭐</div>
           <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>Game is ended.</h2>
-          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You are in #{MOCK_RANK} place</p>
+          {myRank !== '—' && (
+            <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You are in #{myRank} place</p>
+          )}
         </div>
 
         {/* Rank card */}
         <div className="mx-5 rounded-2xl p-5 mb-5" style={{ backgroundColor: '#FEF3E2' }}>
           <p className="text-xs text-center mb-1" style={{ color: 'var(--color-subtext)' }}>Your rank</p>
           <p className="text-4xl font-bold text-center mb-4" style={{ color: 'var(--color-primary)' }}>
-            #{MOCK_RANK}
+            #{myRank}
           </p>
           <div className="flex justify-around">
             <div className="text-center">
               <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Total players</p>
-              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{MOCK_TOTAL}</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
+                {loading ? '…' : total}
+              </p>
             </div>
             <div className="w-px" style={{ backgroundColor: '#E8C99A' }} />
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Game durations</p>
-              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{GAME_DURATION}</p>
+              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Game duration</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
+                {loading ? '…' : duration}
+              </p>
             </div>
           </div>
         </div>
@@ -65,38 +88,10 @@ export default function GameOver() {
         {/* Leaderboard */}
         <div className="px-5">
           <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>Final leaderboard</p>
-          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#4AADE8' }}>
-            {/* Header */}
-            <div className="flex items-center px-4 py-2.5 gap-2">
-              <span className="w-10 text-xs font-bold text-white">Rank</span>
-              <span className="flex-1 text-xs font-bold text-white">Name</span>
-              <span className="text-xs font-bold text-white">Score</span>
-            </div>
-            {/* Rows */}
-            <div className="flex flex-col gap-1 px-2 pb-3">
-              {MOCK_PLAYERS.map(p => {
-                const isZero = p.score === 0;
-                return (
-                  <div key={p.rank}
-                    className="flex items-center px-3 py-2 rounded-xl gap-2"
-                    style={{ backgroundColor: isZero ? '#FEF9F5' : 'rgba(255,255,255,0.18)' }}>
-                    <div className="w-10 flex items-center justify-center">
-                      <RankBadge rank={p.rank} />
-                    </div>
-                    <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
-                    <span className="flex-1 text-sm font-semibold"
-                      style={{ color: isZero ? 'var(--color-text)' : 'white' }}>
-                      {p.name}
-                    </span>
-                    <span className="text-sm font-bold"
-                      style={{ color: isZero ? '#EF4444' : 'white' }}>
-                      {p.score}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          {loading
+            ? <p className="text-center text-sm py-8" style={{ color: 'var(--color-subtext)' }}>Loading...</p>
+            : <LeaderboardList players={players} highlightName={myName} />
+          }
         </div>
 
       </div>

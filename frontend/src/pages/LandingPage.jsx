@@ -38,12 +38,18 @@ export default function LandingPage({ onLogout }) {
     const sessionId = session?.id || session?._id;
     if (!sessionId) return;
     sessionAPI.getById(sessionId).then(data => {
-      if (data.status === 'finished') {
+      const expired = data.expiresAt && new Date() > new Date(data.expiresAt);
+      if (data.status === 'finished' || data.status === 'waiting' || expired) {
         localStorage.removeItem('playerSession');
         localStorage.removeItem('session');
         setInGame(false);
       }
-    }).catch(() => {});
+    }).catch(() => {
+      // Can't reach server or session not found → clear banner
+      localStorage.removeItem('playerSession');
+      localStorage.removeItem('session');
+      setInGame(false);
+    });
   }, []);
 
   const handleLogout = () => {
