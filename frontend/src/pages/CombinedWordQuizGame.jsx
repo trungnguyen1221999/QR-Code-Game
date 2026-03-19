@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import Input from '../components/ui/Input';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
-import { playerAPI, sessionAPI } from '../utils/api';
+import { playerAPI } from '../utils/api';
 import {
   applyLossToStoredProgress,
   clearUnusedExtraLife,
@@ -109,7 +109,6 @@ export default function CombinedWordQuizGame() {
   const location = useLocation();
   const checkpoint = location.state?.checkpoint ?? 3;
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
-  const session = JSON.parse(localStorage.getItem('session') || 'null');
 
   const [questions, setQuestions] = useState(() => shuffle(QUESTION_BANK).slice(0, TOTAL_QUESTIONS));
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(QUIZ_TIME_LIMIT, 'combined-word-quiz', location.key));
@@ -270,23 +269,13 @@ export default function CombinedWordQuizGame() {
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    const sessionId = session?._id || session?.id;
     const resultId = `quiz-win-${Date.now()}`;
 
     setBusy(true);
 
     try {
-      if (playerSessionId && sessionId) {
-        const sessionData = await sessionAPI.getById(sessionId);
-        const checkpoints = Array.isArray(sessionData?.checkpointIds) ? sessionData.checkpointIds : [];
-        const matchedCheckpoint = checkpoints.find((entry) => entry.level === checkpoint);
-
-        if (matchedCheckpoint?._id) {
-          await playerAPI.checkpoint(playerSessionId, {
-            checkpointId: matchedCheckpoint._id,
-            scoreEarned: earnedCoins,
-          });
-        }
+      if (playerSessionId) {
+        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
       }
     } catch (error) {
       toast.error(error.message);

@@ -136,15 +136,16 @@ export const getSessionPlayers = async (req, res) => {
       _id: p._id,
       username: p.userId?.username,
       avatar: p.userId?.avatar,
+      userId: p.userId,
       status: p.status,
+      lives: p.lives,
+      money: p.money,
       score: p.score,
       finishedAt: p.finishedAt,
       currentCheckpointIndex: p.currentCheckpointIndex,
+      checkpointsCompleted: p.currentCheckpointIndex,
       lastCheckpointAt: p.lastCheckpointAt,
       joinedAt: p.joinedAt,
-      // also include userId for host dashboard
-      userId: p.userId,
-      checkpointsCompleted: p.completedCheckpoints.length,
     }));
 
     res.json(result);
@@ -166,7 +167,7 @@ export const getLeaderboard = async (req, res) => {
       avatar: p.userId?.avatar,
       score: p.score,
       status: p.status,
-      completedCheckpoints: p.completedCheckpoints.length
+      completedCheckpoints: p.currentCheckpointIndex
     }));
 
     res.json(leaderboard);

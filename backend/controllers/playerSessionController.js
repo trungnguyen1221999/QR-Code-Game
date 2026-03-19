@@ -69,7 +69,6 @@ export const getPlayerSession = async (req, res) => {
   try {
     const ps = await PlayerSession.findById(req.params.id)
       .populate('userId', 'username avatar')
-      .populate('completedCheckpoints')
       .populate('purchasedItems');
 
     if (!ps) return res.status(404).json({ message: 'Player session not found' });
@@ -83,15 +82,14 @@ export const getPlayerSession = async (req, res) => {
 // PATCH /api/player-sessions/:id/checkpoint - player completes a mini game
 export const updateCheckpoint = async (req, res) => {
   try {
-    const { checkpointId, scoreEarned } = req.body;
+    const { level, scoreEarned } = req.body;
     const ps = await PlayerSession.findById(req.params.id);
 
     if (!ps) return res.status(404).json({ message: 'Player session not found' });
 
-    // Add to completed if not already
-    if (!ps.completedCheckpoints.map(String).includes(String(checkpointId))) {
-      ps.completedCheckpoints.push(checkpointId);
-      ps.currentCheckpointIndex += 1;
+    // Only update if this level hasn't been completed yet
+    if (level && ps.currentCheckpointIndex < level) {
+      ps.currentCheckpointIndex = level;
       ps.money += scoreEarned || 0;
       ps.lastCheckpointAt = new Date();
     }

@@ -6,7 +6,7 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
-import { playerAPI, sessionAPI } from '../utils/api';
+import { playerAPI } from '../utils/api';
 import {
   applyLossToStoredProgress,
   clearUnusedExtraLife,
@@ -76,7 +76,6 @@ export default function TowerBuilderGame() {
   const location = useLocation();
   const checkpoint = location.state?.checkpoint ?? 4;
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
-  const session = JSON.parse(localStorage.getItem('session') || 'null');
 
   const [canvasSize, setCanvasSize] = useState(() => getCanvasSize());
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'tower-builder', location.key));
@@ -268,23 +267,13 @@ export default function TowerBuilderGame() {
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    const sessionId = session?._id || session?.id;
     const resultId = `tower-win-${Date.now()}`;
 
     setBusy(true);
 
     try {
-      if (playerSessionId && sessionId) {
-        const sessionData = await sessionAPI.getById(sessionId);
-        const checkpoints = Array.isArray(sessionData?.checkpointIds) ? sessionData.checkpointIds : [];
-        const matchedCheckpoint = checkpoints.find((entry) => entry.level === checkpoint);
-
-        if (matchedCheckpoint?._id) {
-          await playerAPI.checkpoint(playerSessionId, {
-            checkpointId: matchedCheckpoint._id,
-            scoreEarned: earnedCoins,
-          });
-        }
+      if (playerSessionId) {
+        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
       }
     } catch (error) {
       toast.error(error.message);

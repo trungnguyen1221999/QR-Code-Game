@@ -23,10 +23,7 @@ const playerSessionSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  completedCheckpoints: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Checkpoint'
-  }],
+
   purchasedItems: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Item'

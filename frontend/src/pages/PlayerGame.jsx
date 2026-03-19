@@ -152,7 +152,7 @@ export default function PlayerGame() {
         ]);
 
         if (!shouldSkipProgressRefresh && playerSessionData && !initialProgress.hasSavedProgress) {
-          const completedCount = playerSessionData.completedCheckpoints?.length ?? 0;
+          const completedCount = playerSessionData.currentCheckpointIndex ?? 0;
           setCompleted(completedCount);
           setCurrent(Math.min(completedCount + 1, TOTAL_CHECKPOINTS + 1));
           setLife(playerSessionData.lives ?? DEFAULT_LIFE);
