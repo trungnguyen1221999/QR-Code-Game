@@ -134,12 +134,17 @@ export const getSessionPlayers = async (req, res) => {
 
     const result = players.map(p => ({
       _id: p._id,
-      userId: p.userId,
+      username: p.userId?.username,
+      avatar: p.userId?.avatar,
       status: p.status,
       score: p.score,
-      checkpointsCompleted: p.completedCheckpoints.length,
+      finishedAt: p.finishedAt,
+      currentCheckpointIndex: p.currentCheckpointIndex,
       lastCheckpointAt: p.lastCheckpointAt,
       joinedAt: p.joinedAt,
+      // also include userId for host dashboard
+      userId: p.userId,
+      checkpointsCompleted: p.completedCheckpoints.length,
     }));
 
     res.json(result);

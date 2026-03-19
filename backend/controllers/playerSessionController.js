@@ -80,7 +80,7 @@ export const getPlayerSession = async (req, res) => {
   }
 };
 
-// PATCH /api/player-sessions/:id/checkpoint - player scans QR, updates checkpoint
+// PATCH /api/player-sessions/:id/checkpoint - player completes a mini game
 export const updateCheckpoint = async (req, res) => {
   try {
     const { checkpointId, scoreEarned } = req.body;
@@ -89,10 +89,10 @@ export const updateCheckpoint = async (req, res) => {
     if (!ps) return res.status(404).json({ message: 'Player session not found' });
 
     // Add to completed if not already
-    if (!ps.completedCheckpoints.includes(checkpointId)) {
+    if (!ps.completedCheckpoints.map(String).includes(String(checkpointId))) {
       ps.completedCheckpoints.push(checkpointId);
       ps.currentCheckpointIndex += 1;
-      ps.score += scoreEarned || 0;
+      ps.money += scoreEarned || 0;
       ps.lastCheckpointAt = new Date();
     }
 
@@ -160,17 +160,19 @@ export const loseLife = async (req, res) => {
   }
 };
 
-// PATCH /api/player-sessions/:id/finish - player finishes the final game
+// PATCH /api/player-sessions/:id/finish - player finishes the final game (win or game-over)
 export const finishPlayer = async (req, res) => {
   try {
-    const { finalScore } = req.body;
+    const { score, finishedAt } = req.body;
     const ps = await PlayerSession.findById(req.params.id);
 
     if (!ps) return res.status(404).json({ message: 'Player session not found' });
 
     ps.status = 'finished';
-    ps.finishedAt = new Date();
-    if (finalScore !== undefined) ps.score = finalScore;
+    if (score !== undefined) ps.score = score;
+    // finishedAt present = completed the game; absent = game-over (lost all lives)
+    if (finishedAt) ps.finishedAt = new Date(finishedAt);
+
     await ps.save();
 
     // Update user aggregate stats

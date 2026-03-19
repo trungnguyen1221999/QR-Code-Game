@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import LeaderboardList, { rankPlayers } from '../components/LeaderboardList';
+import { rankPlayers } from '../components/LeaderboardList';
+import PodiumLeaderboard from '../components/PodiumLeaderboard';
 import { sessionAPI } from '../utils/api';
 
 function formatDuration(startedAt, endedAt) {
@@ -55,7 +56,6 @@ export default function GameOver() {
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 pt-8 pb-5 px-5">
           <span className="text-6xl">🏆</span>
-          <div className="flex gap-1 text-2xl">⭐⭐⭐</div>
           <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>Game is ended.</h2>
           {myRank !== '—' && (
             <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You are in #{myRank} place</p>
@@ -88,10 +88,7 @@ export default function GameOver() {
         {/* Leaderboard */}
         <div className="px-5">
           <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>Final leaderboard</p>
-          {loading
-            ? <p className="text-center text-sm py-8" style={{ color: 'var(--color-subtext)' }}>Loading...</p>
-            : <LeaderboardList players={players} highlightName={myName} />
-          }
+          <PodiumLeaderboard players={players} highlightName={myName} />
         </div>
 
       </div>

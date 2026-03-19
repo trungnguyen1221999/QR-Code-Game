@@ -30,17 +30,11 @@ function statusColor(status) {
 export default function HostGameInProgress({ onLogout }) {
   const navigate = useNavigate();
   const host = JSON.parse(localStorage.getItem('host') || 'null');
-  const session = JSON.parse(localStorage.getItem('session') || 'null');
+  const localSession = JSON.parse(localStorage.getItem('session') || 'null');
+  const sessionId = localSession?.id || localSession?._id;
 
-  const MOCK_PLAYERS = [
-    { _id: '1', userId: { username: 'Shun', avatar: '/avatar/avatar1.png' }, status: 'finished', checkpointsCompleted: 6, lastCheckpointAt: '2024-01-01T10:05:00Z' },
-    { _id: '2', userId: { username: 'Trung', avatar: '/avatar/avatar2.png' }, status: 'active', checkpointsCompleted: 4, lastCheckpointAt: '2024-01-01T10:12:00Z' },
-    { _id: '3', userId: { username: 'Yan', avatar: '/avatar/avatar3.png' }, status: 'active', checkpointsCompleted: 4, lastCheckpointAt: '2024-01-01T10:15:00Z' },
-    { _id: '4', userId: { username: 'Helen', avatar: '/avatar/avatar4.png' }, status: 'eliminated', checkpointsCompleted: 2, lastCheckpointAt: '2024-01-01T10:08:00Z' },
-    { _id: '5', userId: { username: 'Stev', avatar: '/avatar/avatar1.png' }, status: 'active', checkpointsCompleted: 1, lastCheckpointAt: null },
-  ];
-
-  const [players] = useState(MOCK_PLAYERS);
+  const [sessionData, setSessionData] = useState(localSession);
+  const [players, setPlayers] = useState([]);
   const [timeLeft, setTimeLeft] = useState(null);
   const [showEndPopup, setShowEndPopup] = useState(false);
   const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
@@ -48,31 +42,36 @@ export default function HostGameInProgress({ onLogout }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(session?.code ?? '').catch(() => {});
+    navigator.clipboard.writeText(sessionData?.code ?? '').catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // TODO: re-enable when ready
-  // useEffect(() => {
-  //   if (!session?._id) return;
-  //   const fetchPlayers = async () => {
-  //     try {
-  //       const data = await sessionAPI.getPlayers(session._id);
-  //       setPlayers(Array.isArray(data) ? data : []);
-  //     } catch { /* silently ignore */ }
-  //   };
-  //   fetchPlayers();
-  //   const interval = setInterval(fetchPlayers, 2000);
-  //   return () => clearInterval(interval);
-  // }, [session?._id]);
-
-  // Countdown based on session.expiresAt
+  // Fetch fresh session data (to always get the code)
   useEffect(() => {
-    const expiresAt = session?.expiresAt ? new Date(session.expiresAt) : null;
+    if (!sessionId) return;
+    sessionAPI.getById(sessionId).then(s => setSessionData(s)).catch(() => {});
+  }, [sessionId]);
+
+  // Poll players every 3s
+  useEffect(() => {
+    if (!sessionId) return;
+    const fetchPlayers = async () => {
+      try {
+        const data = await sessionAPI.getPlayers(sessionId);
+        setPlayers(Array.isArray(data) ? data : []);
+      } catch { /* silently ignore */ }
+    };
+    fetchPlayers();
+    const interval = setInterval(fetchPlayers, 3000);
+    return () => clearInterval(interval);
+  }, [sessionId]);
+
+  // Countdown based on sessionData.expiresAt
+  useEffect(() => {
+    const expiresAt = sessionData?.expiresAt ? new Date(sessionData.expiresAt) : null;
     if (!expiresAt) {
-      // Fallback: use totalTime from session
-      setTimeLeft((session?.totalTime || 30) * 60);
+      setTimeLeft((sessionData?.totalTime || 30) * 60);
       return;
     }
 
@@ -85,7 +84,7 @@ export default function HostGameInProgress({ onLogout }) {
     tick();
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
-  }, [session?.expiresAt]);
+  }, [sessionData?.expiresAt]);
 
   const completedCount = players.filter(p => p.status === 'finished').length;
   const inGameCount = players.filter(p => p.status === 'active').length;
@@ -112,7 +111,6 @@ export default function HostGameInProgress({ onLogout }) {
   };
 
   const handleEnd = async () => {
-    const sessionId = session?.id || session?._id;
     try {
       await sessionAPI.finish(sessionId);
     } catch {
@@ -152,7 +150,7 @@ export default function HostGameInProgress({ onLogout }) {
             className="flex items-center gap-1.5 font-bold text-lg tracking-widest px-3 py-1 rounded-xl"
             style={{ backgroundColor: '#FEF3E2', color: 'var(--color-primary)' }}
           >
-            {session?.code || '------'}
+            {sessionData?.code || '------'}
             {copied
               ? <Check size={16} style={{ color: 'var(--color-green)' }} />
               : <Copy size={16} />
@@ -274,7 +272,7 @@ export default function HostGameInProgress({ onLogout }) {
           <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>Game Settings:</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• 6 QR Checkpoints to discover</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
-            • Total play time is {session?.totalTime || 30} minutes.
+            • Total play time is {sessionData?.totalTime || 30} minutes.
           </p>
         </div>
 

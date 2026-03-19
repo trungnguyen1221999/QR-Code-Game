@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info } from 'lucide-react';
-import LeaderboardList from '../components/LeaderboardList';
+import PodiumLeaderboard from '../components/PodiumLeaderboard';
 import { sessionAPI } from '../utils/api';
 
 function formatTime(secs) {
@@ -11,9 +10,9 @@ function formatTime(secs) {
 }
 
 export default function LiveLeaderboard() {
-  const navigate = useNavigate();
-  const session  = JSON.parse(localStorage.getItem('session') || 'null');
-  const player   = JSON.parse(localStorage.getItem('player')  || 'null');
+  const navigate  = useNavigate();
+  const session   = JSON.parse(localStorage.getItem('session') || 'null');
+  const player    = JSON.parse(localStorage.getItem('player')  || 'null');
   const sessionId = session?.id || session?._id;
 
   const [players,  setPlayers]  = useState([]);
@@ -23,10 +22,7 @@ export default function LiveLeaderboard() {
   useEffect(() => {
     if (!sessionId) return;
     const load = async () => {
-      try {
-        const data = await sessionAPI.getPlayers(sessionId);
-        setPlayers(data);
-      } catch { /* ignore */ }
+      try { setPlayers(await sessionAPI.getPlayers(sessionId)); } catch { /* ignore */ }
     };
     load();
     const iv = setInterval(load, 5000);
@@ -69,55 +65,18 @@ export default function LiveLeaderboard() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🏆</span>
-            <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-              Leaderboard
-            </h2>
+            <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Leaderboard</h2>
           </div>
           {timeLeft != null && (
             <span className="text-sm font-bold px-3 py-1 rounded-full"
-              style={{ backgroundColor: timeLeft < 60 ? '#FEE2E2' : '#EFF6FF', color: timeLeft < 60 ? '#EF4444' : '#3B82F6' }}>
+              style={{ backgroundColor: timeLeft < 60 ? '#FEE2E2' : '#EFF6FF',
+                       color: timeLeft < 60 ? '#EF4444' : '#3B82F6' }}>
               ⏱ {formatTime(timeLeft)}
             </span>
           )}
         </div>
 
-        {/* Player list */}
-        {players.length > 0
-          ? <LeaderboardList players={players} highlightName={player?.username} />
-          : (
-            <div className="flex flex-col items-center gap-4 pt-12">
-              <style>{`
-                @keyframes spin-cw  { to { transform: rotate(360deg) } }
-                @keyframes spin-ccw { to { transform: rotate(-360deg) } }
-                .gear-cw  { animation: spin-cw  2s linear infinite; display:inline-block }
-                .gear-ccw { animation: spin-ccw 2s linear infinite; display:inline-block }
-              `}</style>
-              <div>
-                <span className="gear-cw  text-5xl" style={{ color: 'var(--color-primary)' }}>⚙️</span>
-                <span className="gear-ccw text-3xl -ml-2 mt-4" style={{ color: 'var(--color-primary)' }}>⚙️</span>
-              </div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--color-subtext)' }}>Loading results...</p>
-            </div>
-          )
-        }
-
-        {/* Note */}
-        <div className="rounded-xl p-4 flex gap-3"
-          style={{ backgroundColor: '#EFF6FF', border: '1px solid #BFDBFE' }}>
-          <Info size={16} style={{ color: '#3B82F6', flexShrink: 0, marginTop: 1 }} />
-          <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Finished players rank by score. Unfinished players rank by checkpoints reached.
-          </p>
-        </div>
-
-        {/* Dev shortcut */}
-        <div className="flex justify-end">
-          <button onClick={() => navigate('/champion')}
-            className="px-4 py-2 rounded-xl text-sm font-semibold cursor-pointer"
-            style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
-            if time up
-          </button>
-        </div>
+        <PodiumLeaderboard players={players} highlightName={player?.username} />
 
       </div>
     </div>

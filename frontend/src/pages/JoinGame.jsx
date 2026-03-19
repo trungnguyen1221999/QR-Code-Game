@@ -33,6 +33,8 @@ export default function JoinGame({ onJoin }) {
       localStorage.setItem('player', JSON.stringify(data.user));
       localStorage.setItem('playerSession', JSON.stringify(data.playerSession));
       localStorage.setItem('session', JSON.stringify(data.session));
+      localStorage.removeItem('playerGameProgress');
+      localStorage.removeItem('playerGamePowerups');
       onJoin?.(data.user);
       navigate(`/${data.redirect || 'waiting-room'}`);
     } catch (err) {
