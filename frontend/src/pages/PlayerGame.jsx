@@ -233,7 +233,14 @@ export default function PlayerGame() {
     setHostEndedCountdown(5);
     const t = setInterval(() => {
       setHostEndedCountdown(v => {
-        if (v <= 1) { clearInterval(t); navigate('/'); return 0; }
+        if (v <= 1) {
+          clearInterval(t);
+          clearProgress();
+          localStorage.removeItem('playerSession');
+          localStorage.removeItem('session');
+          navigate('/');
+          return 0;
+        }
         return v - 1;
       });
     }, 1000);
@@ -288,7 +295,7 @@ export default function PlayerGame() {
             style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
           >
             <LogOut size={13} />
-            Leave
+            Sign out
           </button>
         </div>
 
@@ -413,7 +420,7 @@ export default function PlayerGame() {
 
       </div>
 
-      {/* Exit confirmation popup */}
+      {/* Sign out confirmation popup */}
       <Popup open={showExitPopup} onClose={() => setShowExitPopup(false)} showClose={false}>
         <div className="flex flex-col items-center gap-4">
           <div className="h-14 w-14 rounded-full flex items-center justify-center"
@@ -421,10 +428,14 @@ export default function PlayerGame() {
             <LogOut size={28} style={{ color: 'var(--color-red)' }} />
           </div>
           <h3 className="text-lg font-bold text-center" style={{ color: 'var(--color-text)' }}>
-            Are you sure to exit game?
+            Are you sure you want to sign out?
           </h3>
           <div className="flex flex-col gap-2 w-full">
-            <Button variant="green" onClick={() => { clearProgress(); navigate('/'); }}>Confirm</Button>
+            <Button variant="green" onClick={() => {
+              clearProgress();
+              localStorage.clear();
+              navigate('/');
+            }}>Confirm</Button>
             <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
           </div>
         </div>

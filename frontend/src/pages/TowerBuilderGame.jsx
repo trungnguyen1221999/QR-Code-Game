@@ -16,8 +16,8 @@ import {
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
 
-const GAME_TIME_LIMIT = 35;
-const TARGET_FLOORS = 6;
+const GAME_TIME_LIMIT = 180;
+const TARGET_FLOORS = 12;
 const CANVAS_ID = 'tower-original-canvas';
 
 function formatTime(seconds) {

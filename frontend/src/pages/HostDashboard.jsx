@@ -19,13 +19,15 @@ export default function HostDashboard({ onLogout }) {
   const [players, setPlayers] = useState([]);
   const [starting, setStarting] = useState(false);
 
+  const sessionId = session?.id || session?._id;
+
   // Poll players every 2s
   useEffect(() => {
-    if (!session?._id) return;
+    if (!sessionId) return;
 
     const fetchPlayers = async () => {
       try {
-        const data = await sessionAPI.getPlayers(session._id);
+        const data = await sessionAPI.getPlayers(sessionId);
         setPlayers(Array.isArray(data) ? data : []);
       } catch {
         // silently ignore polling errors
@@ -35,7 +37,7 @@ export default function HostDashboard({ onLogout }) {
     fetchPlayers();
     const interval = setInterval(fetchPlayers, 2000);
     return () => clearInterval(interval);
-  }, [session?._id]);
+  }, [sessionId]);
 
   const handleLogout = () => {
     onLogout?.();
@@ -52,7 +54,7 @@ export default function HostDashboard({ onLogout }) {
   const handleStart = async () => {
     setStarting(true);
     try {
-      const updated = await sessionAPI.start(session._id);
+      const updated = await sessionAPI.start(sessionId);
       localStorage.setItem('session', JSON.stringify(updated));
       navigate('/host-game', { replace: true });
     } catch (err) {
@@ -63,7 +65,7 @@ export default function HostDashboard({ onLogout }) {
 
   const handleExit = async () => {
     try {
-      await sessionAPI.finish(session._id);
+      await sessionAPI.finish(sessionId);
     } catch {
       // ignore
     }

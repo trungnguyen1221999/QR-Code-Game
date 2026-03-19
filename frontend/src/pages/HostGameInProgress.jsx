@@ -112,8 +112,9 @@ export default function HostGameInProgress({ onLogout }) {
   };
 
   const handleEnd = async () => {
+    const sessionId = session?.id || session?._id;
     try {
-      await sessionAPI.finish(session._id);
+      await sessionAPI.finish(sessionId);
     } catch {
       // ignore
     }
