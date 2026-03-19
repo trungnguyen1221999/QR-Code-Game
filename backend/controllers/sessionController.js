@@ -130,10 +130,19 @@ export const finishSession = async (req, res) => {
 export const getSessionPlayers = async (req, res) => {
   try {
     const players = await PlayerSession.find({ sessionId: req.params.id })
-      .populate('userId', 'username avatar')
-      .sort({ score: -1 });
+      .populate('userId', 'username avatar');
 
-    res.json(players);
+    const result = players.map(p => ({
+      _id: p._id,
+      userId: p.userId,
+      status: p.status,
+      score: p.score,
+      checkpointsCompleted: p.completedCheckpoints.length,
+      lastCheckpointAt: p.lastCheckpointAt,
+      joinedAt: p.joinedAt,
+    }));
+
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

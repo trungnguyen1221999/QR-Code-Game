@@ -51,6 +51,10 @@ const playerSessionSchema = new mongoose.Schema({
   finishedAt: {
     type: Date,
     default: null
+  },
+  lastCheckpointAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

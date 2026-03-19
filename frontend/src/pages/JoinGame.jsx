@@ -13,9 +13,10 @@ const DEFAULT_AVATAR = '/avatar/avatar1.png';
 export default function JoinGame({ onJoin }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [form, setForm] = useState({ username: '', gameCode: '' });
+  const existingPlayer = JSON.parse(localStorage.getItem('player') || 'null');
+  const [form, setForm] = useState({ username: existingPlayer?.username || '', gameCode: '' });
   const [loading, setLoading] = useState(false);
-  const avatar = location.state?.avatar || DEFAULT_AVATAR;
+  const avatar = existingPlayer?.avatar || location.state?.avatar || DEFAULT_AVATAR;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,29 +48,44 @@ export default function JoinGame({ onJoin }) {
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
-            {/* Avatar + change button */}
-            <div className="flex flex-col items-center gap-2">
-              <button
-                type="button"
-                onClick={() => navigate('/select-avatar', { state: { current: avatar } })}
-                className="relative"
-              >
-                <img
-                  src={avatar}
-                  alt="Your avatar"
-                  className="rounded-full object-cover"
-                  style={{ width: 80, height: 80, border: '3px solid var(--color-primary)' }}
+            {existingPlayer ? (
+              <p className="font-bold text-base" style={{ color: 'var(--color-primary)' }}>
+                👋 Hello, {existingPlayer.username}!
+              </p>
+            ) : (
+              /* Guest — pick avatar + enter name */
+              <>
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/select-avatar', { state: { current: avatar } })}
+                    className="relative"
+                  >
+                    <img
+                      src={avatar}
+                      alt="Your avatar"
+                      className="rounded-full object-cover"
+                      style={{ width: 80, height: 80, border: '3px solid var(--color-primary)' }}
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/select-avatar', { state: { current: avatar } })}
+                    className="text-xs font-semibold px-3 py-1 rounded-full"
+                    style={{ backgroundColor: 'var(--color-info-bg)', color: 'var(--color-primary)' }}
+                  >
+                    Change avatar
+                  </button>
+                </div>
+                <Input
+                  label="Your name"
+                  icon={<User size={14} />}
+                  placeholder="Enter your name"
+                  value={form.username}
+                  onChange={e => setForm({ ...form, username: e.target.value })}
                 />
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/select-avatar', { state: { current: avatar } })}
-                className="text-xs font-semibold px-3 py-1 rounded-full"
-                style={{ backgroundColor: 'var(--color-info-bg)', color: 'var(--color-primary)' }}
-              >
-                Change avatar
-              </button>
-            </div>
+              </>
+            )}
 
             <div>
               <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Join game</h2>
@@ -77,14 +93,6 @@ export default function JoinGame({ onJoin }) {
                 Enter the game code provided by the host
               </p>
             </div>
-
-            <Input
-              label="Your name"
-              icon={<User size={14} />}
-              placeholder="Enter your name"
-              value={form.username}
-              onChange={e => setForm({ ...form, username: e.target.value })}
-            />
 
             <Input
               label="Game code"

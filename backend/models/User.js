@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  // Aggregate stats across all sessions
+  // All-time aggregate
   totalScore: {
     type: Number,
     default: 0
@@ -25,7 +25,30 @@ const userSchema = new mongoose.Schema({
   bestRank: {
     type: Number,
     default: null
-  }
+  },
+  // Per-game score history
+  gameScores: [
+    {
+      sessionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'GameSession',
+        required: true
+      },
+      score: {
+        type: Number,
+        required: true,
+        default: 0
+      },
+      rank: {
+        type: Number,
+        default: null
+      },
+      playedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 }, {
   timestamps: true
 });

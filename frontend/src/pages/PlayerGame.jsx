@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Camera, Trophy, LogOut, ScanLine } from 'lucide-react';
+import { QrCode, Camera, Trophy, LogOut, ScanLine, Timer } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import IntroVideoModal from '../components/ui/IntroVideoModal';
+import { sessionAPI } from '../utils/api';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
@@ -52,9 +53,13 @@ export default function PlayerGame() {
   const location = useLocation();
   const player = JSON.parse(localStorage.getItem('player') || 'null');
 
+  const session = JSON.parse(localStorage.getItem('session') || 'null');
+
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
+  const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
+  const [hostEndedCountdown, setHostEndedCountdown] = useState(5);
   const [scanning, setScanning] = useState(false);
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('introPlayed'));
 
@@ -77,6 +82,32 @@ export default function PlayerGame() {
       setLife(v => Math.max(v - 1, 0));
     }
   }, []);
+
+  // Poll session status — detect if host ended the game early
+  useEffect(() => {
+    const sessionId = session?.id || session?._id;
+    if (!sessionId || showHostEndedPopup) return;
+    const interval = setInterval(async () => {
+      try {
+        const data = await sessionAPI.getById(sessionId);
+        if (data.status === 'finished') setShowHostEndedPopup(true);
+      } catch { /* ignore */ }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [session?.id, session?._id, showHostEndedPopup]);
+
+  // 5s countdown after host-ended popup
+  useEffect(() => {
+    if (!showHostEndedPopup) return;
+    setHostEndedCountdown(5);
+    const t = setInterval(() => {
+      setHostEndedCountdown(v => {
+        if (v <= 1) { clearInterval(t); navigate('/'); return 0; }
+        return v - 1;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, [showHostEndedPopup]);
 
   useEffect(() => {
     if (timeLeft <= 0) { navigate('/game-over'); return; }
@@ -240,6 +271,12 @@ export default function PlayerGame() {
             style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
             All checkpoint complete
           </button>
+          <button
+            onClick={() => navigate('/game-over')}
+            className="col-span-2 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold cursor-pointer"
+            style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}>
+            <Timer size={13} /> Test: Timeout
+          </button>
         </div>
 
 
@@ -258,6 +295,23 @@ export default function PlayerGame() {
           <div className="flex flex-col gap-2 w-full">
             <Button variant="green" onClick={() => navigate('/')}>Confirm</Button>
             <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
+          </div>
+        </div>
+      </Popup>
+
+      {/* Host ended game popup */}
+      <Popup open={showHostEndedPopup} onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-4 py-2">
+          <span className="text-5xl">🏁</span>
+          <h3 className="text-xl font-bold text-center" style={{ color: 'var(--color-text)' }}>
+            Host has ended the game
+          </h3>
+          <p className="text-sm text-center" style={{ color: 'var(--color-subtext)' }}>
+            Returning to home in
+          </p>
+          <div className="h-14 w-14 rounded-full flex items-center justify-center text-2xl font-black"
+            style={{ backgroundColor: '#FEF3E2', color: 'var(--color-primary)' }}>
+            {hostEndedCountdown}
           </div>
         </div>
       </Popup>

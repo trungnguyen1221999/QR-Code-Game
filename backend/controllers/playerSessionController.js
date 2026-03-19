@@ -93,6 +93,7 @@ export const updateCheckpoint = async (req, res) => {
       ps.completedCheckpoints.push(checkpointId);
       ps.currentCheckpointIndex += 1;
       ps.score += scoreEarned || 0;
+      ps.lastCheckpointAt = new Date();
     }
 
     await ps.save();
