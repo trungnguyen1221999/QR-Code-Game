@@ -15,7 +15,8 @@ const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 
 function getCheckpointRoute(checkpoint) {
   // if (checkpoint === 1) return '/memory-game';
-  if (checkpoint === 1) return '/tower-builder';
+  //if (checkpoint === 1) return '/tower-builder';
+  if (checkpoint === 1) return '/simon-game';
   if (checkpoint === 2) return '/whack-a-mole';
   if (checkpoint === 3) return '/combined-word-quiz';
   if (checkpoint === 4) return '/memory-game';
