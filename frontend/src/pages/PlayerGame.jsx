@@ -5,16 +5,81 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import IntroVideoModal from '../components/ui/IntroVideoModal';
-import { sessionAPI } from '../utils/api';
+import { playerAPI, sessionAPI } from '../utils/api';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
+const DEFAULT_LIFE = 3;
+const DEFAULT_COINS = 0;
+const PLAYER_PROGRESS_KEY = 'playerGameProgress';
+
+function getCheckpointRoute(checkpoint) {
+  // if (checkpoint === 1) return '/memory-game';
+  if (checkpoint === 1) return '/tower-builder';
+  if (checkpoint === 2) return '/whack-a-mole';
+  if (checkpoint === 3) return '/combined-word-quiz';
+  if (checkpoint === 4) return '/memory-game';
+  if (checkpoint === 5) return '/puzzle-game';
+  if (checkpoint === 6) return '/simon-game';
+  return '/memory-game';
+}
 
 function formatTime(secs) {
   const h = Math.floor(secs / 3600).toString().padStart(2, '0');
   const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
   const s = (secs % 60).toString().padStart(2, '0');
   return `${h}:${m}:${s}`;
+}
+
+function getRemainingSessionSeconds(expiresAt, fallback = TOTAL_SECONDS) {
+  if (!expiresAt) return fallback;
+
+  const remainingSeconds = Math.max(
+    0,
+    Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
+  );
+
+  return Number.isFinite(remainingSeconds) ? remainingSeconds : fallback;
+}
+
+function readSavedProgress() {
+  const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
+  if (!raw) {
+    return {
+      hasSavedProgress: false,
+      completed: 0,
+      current: 1,
+      life: DEFAULT_LIFE,
+      coins: DEFAULT_COINS,
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      hasSavedProgress: true,
+      completed: parsed.completed ?? 0,
+      current: parsed.current ?? 1,
+      life: parsed.life ?? DEFAULT_LIFE,
+      coins: parsed.coins ?? DEFAULT_COINS,
+    };
+  } catch {
+    return {
+      hasSavedProgress: false,
+      completed: 0,
+      current: 1,
+      life: DEFAULT_LIFE,
+      coins: DEFAULT_COINS,
+    };
+  }
+}
+
+function saveProgress(progress) {
+  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(progress));
+}
+
+function clearProgress() {
+  localStorage.removeItem(PLAYER_PROGRESS_KEY);
 }
 
 function ScanningOverlay() {
@@ -52,10 +117,12 @@ export default function PlayerGame() {
   const navigate = useNavigate();
   const location = useLocation();
   const player = JSON.parse(localStorage.getItem('player') || 'null');
-
+  const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
+  const initialProgress = readSavedProgress();
+  const shouldSkipProgressRefresh = !!(location.state?.justCompleted || location.state?.wrongAnswer);
 
-  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(() => getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS));
   const [showExitPopup, setShowExitPopup] = useState(false);
   const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
   const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
@@ -64,24 +131,88 @@ export default function PlayerGame() {
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('introPlayed'));
 
   // Track completed checkpoints; accept update from challenge page
-  const [completed, setCompleted] = useState(2);
-  const [current, setCurrent] = useState(3);
-  const [life, setLife] = useState(4);
-  const [coins, setCoins] = useState(2000);
+  const [completed, setCompleted] = useState(initialProgress.completed);
+  const [current, setCurrent] = useState(initialProgress.current);
+  const [life, setLife] = useState(initialProgress.life);
+  const [coins, setCoins] = useState(initialProgress.coins);
+
+  useEffect(() => {
+    saveProgress({ completed, current, life, coins });
+  }, [coins, completed, current, life]);
+
+  useEffect(() => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const sessionId = session?._id || session?.id;
+
+    const loadProgress = async () => {
+      try {
+        const [playerSessionData, sessionData] = await Promise.all([
+          playerSessionId ? playerAPI.getById(playerSessionId) : Promise.resolve(null),
+          sessionId ? sessionAPI.getById(sessionId) : Promise.resolve(null),
+        ]);
+
+        if (!shouldSkipProgressRefresh && playerSessionData && !initialProgress.hasSavedProgress) {
+          const completedCount = playerSessionData.completedCheckpoints?.length ?? 0;
+          setCompleted(completedCount);
+          setCurrent(Math.min(completedCount + 1, TOTAL_CHECKPOINTS + 1));
+          setLife(playerSessionData.lives ?? DEFAULT_LIFE);
+          setCoins(playerSessionData.money ?? DEFAULT_COINS);
+        }
+
+        const expiresAt = sessionData?.expiresAt || session?.expiresAt;
+        setTimeLeft(getRemainingSessionSeconds(expiresAt, TOTAL_SECONDS));
+      } catch {
+        setTimeLeft((currentValue) => {
+          if (currentValue !== TOTAL_SECONDS) return currentValue;
+          return getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS);
+        });
+      }
+    };
+
+    loadProgress();
+  }, [
+    initialProgress.hasSavedProgress,
+    playerSession?._id,
+    playerSession?.id,
+    session?._id,
+    session?.id,
+    session?.expiresAt,
+    shouldSkipProgressRefresh,
+  ]);
 
   // Apply result coming back from challenge page
   useEffect(() => {
     const state = location.state;
     if (!state) return;
+    if (state.resultId) {
+      const processedKey = `player-game-result:${state.resultId}`;
+      if (sessionStorage.getItem(processedKey)) return;
+      sessionStorage.setItem(processedKey, '1');
+    }
     if (state.justCompleted) {
-      setCompleted(v => Math.min(v + 1, TOTAL_CHECKPOINTS));
-      setCurrent(v => Math.min(v + 1, TOTAL_CHECKPOINTS + 1));
-      setCoins(v => v + 50);
+      setCompleted((value) => {
+        const nextCompleted = state.completedCheckpoint ?? (value + 1);
+        return Math.min(Math.max(value, nextCompleted), TOTAL_CHECKPOINTS);
+      });
+      setCurrent((value) => {
+        const nextCurrent = state.nextCheckpoint ?? (value + 1);
+        return Math.min(Math.max(value, nextCurrent), TOTAL_CHECKPOINTS + 1);
+      });
+      setCoins(v => v + (state.rewardCoins ?? 50));
     }
     if (state.wrongAnswer) {
-      setLife(v => Math.max(v - 1, 0));
+      const nextLife = life - 1;
+      if (nextLife > 0) {
+        setLife(nextLife);
+      } else {
+        setLife(DEFAULT_LIFE);
+        setCompleted(0);
+        setCurrent(1);
+        setCoins(DEFAULT_COINS);
+        clearProgress();
+      }
     }
-  }, []);
+  }, [life]);
 
   // Poll session status — detect if host ended the game early
   useEffect(() => {
@@ -121,7 +252,7 @@ export default function PlayerGame() {
     setScanning(true);
     setTimeout(() => {
       setScanning(false);
-      navigate('/challenge', { state: { checkpoint: current } });
+      navigate(getCheckpointRoute(current), { state: { checkpoint: current } });
     }, 3000);
   };
 
@@ -293,7 +424,7 @@ export default function PlayerGame() {
             Are you sure to exit game?
           </h3>
           <div className="flex flex-col gap-2 w-full">
-            <Button variant="green" onClick={() => navigate('/')}>Confirm</Button>
+            <Button variant="green" onClick={() => { clearProgress(); navigate('/'); }}>Confirm</Button>
             <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
           </div>
         </div>

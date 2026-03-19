@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
-
-const ALL_ITEMS = [
-  { id: 'time',       emoji: '⏱️', img: '/shop/x2time.png',   label: 'Time Boost',        desc: 'Add +10 seconds to your next game',       price: 50 },
-  { id: 'hint',       emoji: '💡', img: '/shop/hint.png',      label: 'Hint',               desc: 'Get a helpful hint in your next game',     price: 50 },
-  { id: 'life',       emoji: '❤️', img: null,                  label: 'Extra life',          desc: "One mistake won't count against you",      price: 50 },
-  { id: 'multiplier', emoji: '🪙', img: '/shop/x2money.png',   label: 'Coin Multiplier',     desc: '1.5x coin for your next game',            price: 50 },
-];
+import { SHOP_ITEMS } from '../utils/checkpointShop';
 
 const COINS_EARNED = 30;
 
@@ -20,7 +14,7 @@ export default function PlayerShop() {
   const baseCoins = state.coins ?? 1000;
 
   const [coins, setCoins] = useState(baseCoins + COINS_EARNED);
-  const [items, setItems] = useState(ALL_ITEMS);
+  const [items, setItems] = useState(SHOP_ITEMS);
   const [bought, setBought] = useState([]);
 
   const handleBuy = (item) => {
