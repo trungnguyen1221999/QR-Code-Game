@@ -79,6 +79,7 @@ export default function TowerBuilderGame() {
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
   const [canvasSize, setCanvasSize] = useState(() => getCanvasSize());
+  const [canvasVersion, setCanvasVersion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'tower-builder', location.key));
   const [floors, setFloors] = useState(0);
   const [score, setScore] = useState(0);
@@ -93,6 +94,19 @@ export default function TowerBuilderGame() {
   const endedRef = useRef(false);
   const pausedByOverlayRef = useRef(false);
   const initializingRef = useRef(false);
+  const resetTimeOnNextInitRef = useRef(false);
+  const activeGameInstanceRef = useRef(0);
+  const busyRef = useRef(false);
+  const showLoseRef = useRef(false);
+  const canvasDomId = `${CANVAS_ID}-${canvasVersion}`;
+
+  useEffect(() => {
+    busyRef.current = busy;
+  }, [busy]);
+
+  useEffect(() => {
+    showLoseRef.current = showLose;
+  }, [showLose]);
 
   useEffect(() => {
     const handleResize = () => setCanvasSize(getCanvasSize());
@@ -127,8 +141,8 @@ export default function TowerBuilderGame() {
     };
   }, []);
 
-  const stopGame = () => {
-    const game = towerGameRef.current;
+  const stopGame = (gameOverride = null) => {
+    const game = gameOverride ?? towerGameRef.current;
     if (!game) return;
 
     game.setVariable?.('GAME_START_NOW', false);
@@ -141,29 +155,26 @@ export default function TowerBuilderGame() {
     game.pauseBgm?.();
   };
 
-  const registerLifeLoss = async () => {
+  const registerLifeLoss = () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const summary = applyLossToStoredProgress();
 
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
+    if (playerSessionId) {
+      playerAPI.loseLife(playerSessionId).catch((error) => {
+        toast.error(error.message);
+      });
     }
 
     return summary;
   };
 
-  const handleLoss = async () => {
-    if (busy || showLose) return;
+  const handleLoss = async (instanceId = activeGameInstanceRef.current) => {
+    if (instanceId !== activeGameInstanceRef.current) return;
+    if (busyRef.current || showLoseRef.current) return;
     endedRef.current = true;
     stopGame();
-    setBusy(true);
-    const summary = await registerLifeLoss();
+    const summary = registerLifeLoss();
     setLoseState(summary);
-    setBusy(false);
     setShowLose(true);
   };
 
@@ -176,9 +187,20 @@ export default function TowerBuilderGame() {
     });
   };
 
-  const initializeGame = async (resetTime = false) => {
+  const initializeGame = async (resetTime = false, remountCanvas = false) => {
+    if (remountCanvas) {
+      stopGame();
+      towerGameRef.current = null;
+      activeGameInstanceRef.current += 1;
+      resetTimeOnNextInitRef.current = resetTime;
+      setCanvasVersion((value) => value + 1);
+      return;
+    }
+
     if (initializingRef.current) return;
     initializingRef.current = true;
+    const shouldResetTime = resetTime || resetTimeOnNextInitRef.current;
+    resetTimeOnNextInitRef.current = false;
     endedRef.current = false;
     setShowWin(false);
     setShowLose(false);
@@ -187,7 +209,7 @@ export default function TowerBuilderGame() {
     setFloors(0);
     setScore(0);
     setBusy(false);
-    if (resetTime) {
+    if (shouldResetTime) {
       setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
     }
 
@@ -198,23 +220,31 @@ export default function TowerBuilderGame() {
         towerGameRef.current.pauseBgm();
       }
 
+      const instanceId = activeGameInstanceRef.current + 1;
+      activeGameInstanceRef.current = instanceId;
+
       const game = window.TowerGame({
         width: canvasSize.width,
         height: canvasSize.height,
-        canvasId: CANVAS_ID,
+        canvasId: canvasDomId,
         soundOn: false,
-        setGameScore: (nextScore) => setScore(nextScore),
+        setGameScore: (nextScore) => {
+          if (instanceId !== activeGameInstanceRef.current) return;
+          setScore(nextScore);
+        },
         setGameSuccess: (successCount) => {
+          if (instanceId !== activeGameInstanceRef.current) return;
           setFloors(successCount);
           if (successCount >= TARGET_FLOORS && !endedRef.current) {
             endedRef.current = true;
-            stopGame();
+            stopGame(game);
             setShowWin(true);
           }
         },
         setGameFailed: (failedCount) => {
+          if (instanceId !== activeGameInstanceRef.current) return;
           if (failedCount >= 3 && !endedRef.current) {
-            void handleLoss();
+            void handleLoss(instanceId);
           }
         },
       });
@@ -235,7 +265,7 @@ export default function TowerBuilderGame() {
 
   useEffect(() => {
     void initializeGame(false);
-  }, [canvasSize.height, canvasSize.width]);
+  }, [canvasDomId, canvasSize.height, canvasSize.width]);
 
   const handleLoseExit = () => {
     if (loseState.needsLifePurchase) {
@@ -254,12 +284,12 @@ export default function TowerBuilderGame() {
       return;
     }
 
-    void initializeGame(true);
+    void initializeGame(true, true);
   };
 
   const handleBackExit = async () => {
     setBusy(true);
-    const summary = await registerLifeLoss();
+    const summary = registerLifeLoss();
     if (summary.needsLifePurchase) {
       resetProgressToCheckpointOne();
     }
@@ -355,7 +385,8 @@ export default function TowerBuilderGame() {
           style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
         >
           <canvas
-            id={CANVAS_ID}
+            key={canvasDomId}
+            id={canvasDomId}
             className="rounded-2xl"
             style={{
               width: canvasSize.width,
