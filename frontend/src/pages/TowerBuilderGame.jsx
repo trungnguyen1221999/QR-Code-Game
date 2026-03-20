@@ -86,6 +86,7 @@ export default function TowerBuilderGame() {
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
+  const earnedCoins = Math.max(0, timeLeft * 2);
   const towerGameRef = useRef(null);
   const endedRef = useRef(false);
   const pausedByOverlayRef = useRef(false);
@@ -269,7 +270,7 @@ export default function TowerBuilderGame() {
 
     try {
       if (playerSessionId) {
-        await playerAPI.checkpoint(playerSessionId, { level: checkpoint });
+        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
       }
     } catch (error) {
       toast.error(error.message);
@@ -280,7 +281,7 @@ export default function TowerBuilderGame() {
           justCompleted: true,
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
-          rewardCoins: 0,
+          rewardCoins: earnedCoins,
           resultId,
         },
       });
@@ -371,7 +372,7 @@ export default function TowerBuilderGame() {
               You cleared the tower game!
             </p>
           </div>
-          <CheckpointShopPanel isOpen={showWin} />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>

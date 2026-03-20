@@ -14,10 +14,11 @@ import {
   getPlayerProgress,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import Card from '../components/ui/card';
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
-const PUZZLE_TIME_LIMIT = 30;
+const PUZZLE_TIME_LIMIT = 300;
 const COINS_PER_SECOND = 2;
 const SNAP_DISTANCE = 90;
 
@@ -350,8 +351,8 @@ export default function PuzzlePlacementGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-2xl p-2.5" style={{ backgroundColor: '#EFF6FF' }}>
+        <div className="grid grid-cols-2 gap-2">
+          <Card>
             <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={12} />
               Time left
@@ -359,34 +360,21 @@ export default function PuzzlePlacementGame() {
             <p className="text-base font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-2.5" style={{ backgroundColor: '#FEF3E2' }}>
+          <Card>
             <p className="text-[11px] font-semibold" style={{ color: '#C2410C' }}>
               Placed
             </p>
             <p className="text-base font-bold mt-1" style={{ color: '#9A3412' }}>
               {completedCount}/{TOTAL_PIECES}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-2.5" style={{ backgroundColor: '#DCFCE7' }}>
-            <p className="text-[11px] font-semibold" style={{ color: '#15803D' }}>
-              Selected
-            </p>
-            <p className="text-xs font-bold mt-1" style={{ color: '#166534' }}>
-              {selectedPiece ? 'Ready' : 'None'}
-            </p>
-          </div>
+        
         </div>
 
-        <div
-          className="rounded-3xl p-3"
-          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
-        >
-          <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-            Placement Area
-          </p>
+       
 
           <div
             className="grid grid-cols-3 gap-[2px] relative rounded-2xl p-1 overflow-hidden"
@@ -428,12 +416,8 @@ export default function PuzzlePlacementGame() {
               </div>
             ))}
           </div>
-        </div>
 
-        <div
-          className="rounded-3xl p-3"
-          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
-        >
+        <Card>
           <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
             Puzzle Pieces
           </p>
@@ -474,7 +458,7 @@ export default function PuzzlePlacementGame() {
               );
             })}
           </div>
-        </div>
+        </Card>
 
         <div className="grid grid-cols-1 gap-3">
           <Button

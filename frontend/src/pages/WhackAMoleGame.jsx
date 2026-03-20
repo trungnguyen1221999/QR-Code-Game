@@ -15,8 +15,9 @@ import {
   getReplayGameTime,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import Card from '../components/ui/card';
 
-const GAME_TIME_LIMIT = 30;
+const GAME_TIME_LIMIT = 300;
 const WINNING_SCORE = 2;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
@@ -407,18 +408,19 @@ export default function WhackAMoleGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
+        <div className="grid grid-cols-2 gap-3">
+          <Card>
+            
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
-              <Clock size={14} />
+              <Clock size={14}/>
               Time left
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
+          <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#C2410C' }}>
               <Target size={14} />
               Score
@@ -426,26 +428,17 @@ export default function WhackAMoleGame() {
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {score}/{WINNING_SCORE}
             </p>
-          </div>
-
-          <div className="rounded-2xl p-3" style={{ backgroundColor: targetAnimal.shell }}>
-            <p className="text-xs font-semibold" style={{ color: targetAnimal.accent }}>
-              Hit this animal
-            </p>
-            <div className="mt-1 flex items-center gap-2">
-              <div
-                className="h-11 w-11 rounded-2xl border-2 p-1.5 shrink-0"
-                style={{ backgroundColor: 'white', borderColor: targetAnimal.rim }}
-              >
-                <img src={targetAnimal.image} alt={targetAnimal.label} className="w-full h-full object-contain" />
-              </div>
-              <span className="text-sm font-bold" style={{ color: targetAnimal.accent }}>
-                {targetAnimal.label}
-              </span>
-            </div>
-          </div>
+          </Card>
         </div>
-
+      <Card style={{ backgroundColor: targetAnimal.shell }}>
+            <p className="font-semibold" style={{ color: targetAnimal.accent }}>
+              Hit this animal 
+            </p>
+            <div className="mt-1 flex items-center justify-center">
+                <img src={targetAnimal.image} alt={targetAnimal.label} className="w-20 object-contain" />
+                <p className='text-primary text-2xl font-bold'>{targetAnimal.label}</p>
+            </div>
+          </Card>
         <div
           ref={boardRef}
           className="relative select-none"

@@ -15,8 +15,9 @@ import {
   getReplayGameTime,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import Card from '../components/ui/card';
 
-const MEMORY_TIME_LIMIT = 30;
+const MEMORY_TIME_LIMIT = 300;
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
 function shuffleCards() {
   return [...CARD_EMOJIS, ...CARD_EMOJIS]
@@ -42,7 +43,6 @@ export default function MemoryCardGame() {
 
   const [cards, setCards] = useState(() => shuffleCards());
   const [flippedIds, setFlippedIds] = useState([]);
-  const [moves, setMoves] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(MEMORY_TIME_LIMIT, 'memory', location.key));
   const [busy, setBusy] = useState(false);
   const [showLose, setShowLose] = useState(false);
@@ -113,13 +113,11 @@ export default function MemoryCardGame() {
     if (!card || card.matched || flippedIds.includes(cardId) || flippedIds.length === 2) return;
 
     setFlippedIds((current) => [...current, cardId]);
-    setMoves((value) => value + 1);
   };
 
   const handleRetry = () => {
     setCards(shuffleCards());
     setFlippedIds([]);
-    setMoves(0);
     setTimeLeft(getReplayGameTime(MEMORY_TIME_LIMIT));
     setShowLose(false);
     setShowWin(false);
@@ -236,28 +234,21 @@ export default function MemoryCardGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
-            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
-              <Clock size={14} />
-              Time left
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
-              {formatTime(timeLeft)}
-            </p>
-          </div>
+          <Card>
+           <div className='flex justify-between items-center' > 
+              <p className="text font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
+                <Clock size={16} />
+                Time left
+              </p>
+              <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
+                {formatTime(timeLeft)}
+              </p>
+           </div>
+          </Card>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
-            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Moves
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
-              {moves}
-            </p>
-          </div>
-        </div>
+         
 
-        <div className="rounded-3xl p-4" style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}>
+        <div className="rounded-2xl">
           <div className="grid grid-cols-3 gap-3">
             {cards.map((card) => {
               const isOpen = card.matched || flippedIds.includes(card.id);
@@ -285,14 +276,14 @@ export default function MemoryCardGame() {
           </div>
         </div>
 
-        <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+        <Card>
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
             How to win
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
             Tap two cards to reveal them. If they match, they stay open. Match all 6 pairs before time runs out.
           </p>
-        </div>
+        </Card>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>

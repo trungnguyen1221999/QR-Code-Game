@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, HelpCircle, Trophy } from 'lucide-react';
+import { Clock, Target, Trophy } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
@@ -16,8 +16,9 @@ import {
   getReplayGameTime,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import Card from '../components/ui/card';
 
-const QUIZ_TIME_LIMIT = 30;
+const QUIZ_TIME_LIMIT = 300;
 const PASS_SCORE = 2;
 const TOTAL_QUESTIONS = 10;
 
@@ -308,8 +309,8 @@ export default function CombinedWordQuizGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
+        <div className="grid grid-cols-2 gap-3">
+          <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
               {COPY.timeLeft}
@@ -317,38 +318,33 @@ export default function CombinedWordQuizGame() {
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
+          <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#C2410C' }}>
-              <Trophy size={14} />
+              <Target size={14} />
               {COPY.score}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {score}/{PASS_SCORE}
             </p>
-          </div>
-
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#ECFCCB' }}>
-            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#3F6212' }}>
-              <HelpCircle size={14} />
-              {COPY.question}
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#365314' }}>
-              {Math.min(currentIndex + 1, TOTAL_QUESTIONS)}/{TOTAL_QUESTIONS}
-            </p>
-          </div>
+          </Card>
         </div>
 
         {currentQuestion && (
-          <div className="rounded-3xl p-5" style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}>
+          <Card>
+            {/* Question counter */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{COPY.question}</p>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ECFCCB', color: '#365314' }}>
+                {Math.min(currentIndex + 1, TOTAL_QUESTIONS)}/{TOTAL_QUESTIONS}
+              </span>
+            </div>
+
             <div className="flex items-center justify-center gap-4 text-5xl mb-4">
               {currentQuestion.pictures.map((picture, index) => (
                 <div
-                  key={`${currentQuestion.id}-${index}`}
-                  className="h-20 w-20 rounded-2xl flex items-center justify-center"
-                  style={{ backgroundColor: '#FEF3E2' }}
-                >
+                  key={`${currentQuestion.id}-${index}`}                >
                   {picture}
                 </div>
               ))}
@@ -364,29 +360,28 @@ export default function CombinedWordQuizGame() {
               value={answer}
               onChange={(event) => setAnswer(event.target.value)}
             />
-          </div>
+          </Card>
         )}
 
         {feedback && (
-          <div
-            className="rounded-2xl px-4 py-3 text-sm font-bold text-center"
+          <Card
             style={{
               backgroundColor: feedback.type === 'good' ? '#DCFCE7' : '#FEE2E2',
               color: feedback.type === 'good' ? '#166534' : '#B91C1C',
             }}
           >
             {feedback.text}
-          </div>
+          </Card>
         )}
 
-        <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+        <Card>
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
             {COPY.howToWin}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
             {COPY.howToWinText}
           </p>
-        </div>
+        </Card>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>

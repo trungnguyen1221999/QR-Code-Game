@@ -5,6 +5,8 @@ import {
   getPlayerProgress,
   SHOP_ITEMS,
 } from '../../utils/checkpointShop';
+import Button from './Button';
+import Card from './card';
 
 export default function CheckpointShopPanel({
   earnedCoins = 0,
@@ -81,10 +83,10 @@ export default function CheckpointShopPanel({
 
       <div className="flex flex-col gap-3 mt-4">
         {SHOP_ITEMS.map((item) => (
-          <div
+          <Card
             key={item.id}
             className="flex items-center gap-3 rounded-2xl px-4 py-3"
-            style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+     
           >
             <div className="shrink-0 flex items-center justify-center" style={{ width: 40, height: 40 }}>
               {item.img
@@ -107,7 +109,7 @@ export default function CheckpointShopPanel({
             >
               {purchasedItems[item.id] ? 'Purchased' : 'Buy'}
             </button>
-          </div>
+          </Card>
         ))}
       </div>
 
