@@ -212,8 +212,8 @@ export default function CombinedWordQuizGame() {
     resetGame();
   };
 
-  const registerLifeLoss = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
+    const registerLifeLoss = async () => {
+    const playerSessionId =  playerSession?.id; 
     const summary = applyLossToStoredProgress();
 
     try {

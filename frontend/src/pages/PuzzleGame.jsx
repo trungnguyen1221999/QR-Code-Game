@@ -18,7 +18,7 @@ import Card from '../components/ui/card';
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
-const PUZZLE_TIME_LIMIT = 300;
+const PUZZLE_TIME_LIMIT = 100;
 const COINS_PER_SECOND = 2;
 const SNAP_DISTANCE = 90;
 
