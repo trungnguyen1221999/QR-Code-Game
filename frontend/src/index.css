@@ -1,6 +1,20 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap');
 
+/* ─── Theme tokens (Tailwind v4 – enables text-primary, bg-green, etc.) ─── */
+@theme {
+  --color-primary:      #E8730A;
+  --color-primary-dark: #C05A00;
+  --color-green:        #3BAD5A;
+  --color-red:          #EF4444;
+  --color-orange:       #F97316;
+  --color-blue:         #3B82F6;
+  --color-yellow:       #FCD34D;
+  --color-text:         #1E3A0F;
+  --color-subtext:      #5A7A40;
+  --color-border:       #C8E6A0;
+}
+
 /* ─── Theme colors ─────────────────────────────────────────── */
 :root {
   --color-bg:           #F2F9EC;

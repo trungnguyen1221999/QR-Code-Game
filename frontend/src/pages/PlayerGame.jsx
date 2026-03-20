@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import IntroVideoModal from '../components/ui/IntroVideoModal';
 import { playerAPI, sessionAPI } from '../utils/api';
+import Card from '../components/ui/card';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
@@ -311,7 +312,7 @@ export default function PlayerGame() {
         </div>
 
         {/* Progress */}
-        <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+        <Card>
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Your progress</span>
             <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
@@ -329,7 +330,7 @@ export default function PlayerGame() {
               Current checkpoint: <span className="font-bold" style={{ color: 'var(--color-text)' }}>{current}</span>
             </p>
           )}
-        </div>
+        </Card>
 
         {completed >= TOTAL_CHECKPOINTS ? (
           <>
@@ -353,13 +354,13 @@ export default function PlayerGame() {
         ) : (
           <>
             {/* QR Scanner area */}
-            <div className="relative rounded-2xl flex flex-col items-center justify-center gap-3"
-              style={{ backgroundColor: '#E5E7EB', minHeight: 260 }}>
+            <Card className="relative rounded-2xl flex flex-col items-center justify-center gap-3"
+              style={{ minHeight: 260 }}>
               <Camera size={64} style={{ color: '#9CA3AF' }} />
               <p className="text-base font-semibold" style={{ color: '#6B7280' }}>Camera / QR scanner</p>
               <p className="text-xs" style={{ color: '#9CA3AF' }}>Tap "Scan QR" to start</p>
               {scanning && <ScanningOverlay />}
-            </div>
+            </Card>
 
             {/* Scan button */}
             <Button variant="green" onClick={handleScan} disabled={scanning}>
@@ -370,30 +371,29 @@ export default function PlayerGame() {
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl p-3 flex flex-col items-center gap-1"
-            style={{ backgroundColor: '#EFF6FF' }}>
+          <Card className="rounded-xl p-3 flex flex-col items-center gap-1"
+           >
             <span className="text-xs" style={{ color: '#3B82F6' }}>Time left</span>
             <span className="text-xs font-bold" style={{ color: '#3B82F6' }}>{formatTime(timeLeft)}</span>
-          </div>
-          <div className="rounded-xl p-3 flex flex-col items-center gap-1"
-            style={{ backgroundColor: '#FEE2E2' }}>
+          </Card>
+          <Card className="rounded-xl p-3 flex flex-col items-center gap-1"
+           >
             <span className="text-xs" style={{ color: '#DC2626' }}>Life</span>
             <span className="text-lg font-bold" style={{ color: '#DC2626' }}>❤️ {life}</span>
-          </div>
-          <div className="rounded-xl p-3 flex flex-col items-center gap-1"
-            style={{ backgroundColor: '#FEF9C3' }}>
+          </Card>
+          <Card className="rounded-xl p-3 flex flex-col items-center gap-1"
+            >
             <span className="text-xs" style={{ color: '#CA8A04' }}>Coins</span>
             <span className="text-lg font-bold" style={{ color: '#CA8A04' }}>🪙 {coins}</span>
-          </div>
+          </Card>
         </div>
 
         {/* Trophy shortcut */}
-        <button
+        <Button
           onClick={() => navigate('/leaderboard')}
-          className="rounded-xl p-4 flex items-center justify-center cursor-pointer"
-          style={{ backgroundColor: 'var(--color-info-bg)' }}>
-          <Trophy size={28} style={{ color: 'var(--color-primary)' }} />
-        </button>
+          >
+          <Trophy size={25}  />
+        </Button>
 
         {/* Secondary actions */}
         <div className="grid grid-cols-2 gap-2">

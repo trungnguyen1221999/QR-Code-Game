@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { User, Gamepad2, LayoutGrid, LogOut, RotateCcw, X, ChevronDown, Trophy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
-import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { sessionAPI } from '../utils/api';
+import Card from '../components/ui/card';
 
 const MOCK_LB = [
   { rank: 1, name: 'Shun',    avatar: '/avatar/avatar1.png', score: 2000 },
@@ -132,7 +132,7 @@ export default function LandingPage({ onLogout }) {
         )}
 
         {/* Host game */}
-        <Card style={{ border: '2px solid var(--color-border)' }}>
+        <Card>
           <div className="flex items-center gap-3 mb-3">
             <User size={22} style={{ color: 'var(--color-primary)' }} />
             <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>Host game</h2>
@@ -144,7 +144,7 @@ export default function LandingPage({ onLogout }) {
         </Card>
 
         {/* Join game */}
-        <Card style={{ border: '2px solid var(--color-border)' }}>
+        <Card>
           <div className="flex items-center gap-3 mb-3">
             <Gamepad2 size={22} style={{ color: 'var(--color-primary)' }} />
             <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>Join game</h2>
@@ -156,7 +156,7 @@ export default function LandingPage({ onLogout }) {
         </Card>
 
         {/* All Time Ranking */}
-        <Card style={{ border: '2px solid var(--color-border)' }}>
+        <Card>
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
             <Trophy size={22} style={{ color: 'var(--color-primary)' }} />
@@ -193,8 +193,8 @@ export default function LandingPage({ onLogout }) {
 
           {/* Expand button */}
           <button onClick={() => setLbOpen(v => !v)}
-            className="w-full flex items-center justify-center gap-1 mt-3 py-1.5 rounded-xl text-xs font-semibold"
-            style={{ color: 'var(--color-subtext)', backgroundColor: '#F9F5F0' }}>
+            className="w-full flex items-center justify-center gap-1 mt-3 font-semibold text-xs text-primary"
+    >
             {lbOpen ? 'Show less' : 'Show all'}
             <ChevronDown size={14} style={{
               transform: lbOpen ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -225,7 +225,7 @@ export default function LandingPage({ onLogout }) {
         </Card>
 
         {/* How to play */}
-        <Card style={{ border: '2px solid var(--color-border)' }}>
+        <Card>
           <button
             onClick={() => setHowToOpen(v => !v)}
             className="w-full flex items-center justify-between"

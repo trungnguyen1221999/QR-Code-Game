@@ -6,10 +6,9 @@
 export default function Card({ children, className = '', noPadding = false, ...props }) {
   return (
     <div
-      className={`bg-white rounded-2xl ${noPadding ? '' : 'p-5'} ${className}`}
+      className={`bg-white/60 rounded-2xl ${noPadding ? '' : 'p-5'} ${className}`}
       style={{
-        boxShadow: 'var(--shadow-card)',
-        border: '1px solid #FFE8CC',
+        boxShadow: 'var(--shadow-card)'
       }}
       {...props}
     >

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
@@ -15,6 +15,7 @@ import {
   getReplayGameTime,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import Card from '../components/ui/card';
 
 const GAME_TIME_LIMIT = 180;
 const TARGET_FLOORS = 12;
@@ -80,14 +81,11 @@ export default function TowerBuilderGame() {
   const [canvasSize, setCanvasSize] = useState(() => getCanvasSize());
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'tower-builder', location.key));
   const [floors, setFloors] = useState(0);
-  const [score, setScore] = useState(0);
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
-  const earnedCoins = Math.max(0, timeLeft * 2);
-
   const towerGameRef = useRef(null);
   const endedRef = useRef(false);
   const pausedByOverlayRef = useRef(false);
@@ -184,7 +182,6 @@ export default function TowerBuilderGame() {
     setShowBackConfirm(false);
     setLoseState({ remainingLives: null, needsLifePurchase: false });
     setFloors(0);
-    setScore(0);
     setBusy(false);
     if (resetTime) {
       setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
@@ -202,7 +199,6 @@ export default function TowerBuilderGame() {
         height: canvasSize.height,
         canvasId: CANVAS_ID,
         soundOn: false,
-        setGameScore: (nextScore) => setScore(nextScore),
         setGameSuccess: (successCount) => {
           setFloors(successCount);
           if (successCount >= TARGET_FLOORS && !endedRef.current) {
@@ -273,7 +269,7 @@ export default function TowerBuilderGame() {
 
     try {
       if (playerSessionId) {
-        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
+        await playerAPI.checkpoint(playerSessionId, { level: checkpoint });
       }
     } catch (error) {
       toast.error(error.message);
@@ -309,39 +305,28 @@ export default function TowerBuilderGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="rounded-2xl p-3">
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
-              <Clock size={14} />
               Time left
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
+          <Card className="rounded-2xl p-3" >
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
               Floors
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {floors}/{TARGET_FLOORS}
             </p>
-          </div>
-
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#DCFCE7' }}>
-            <p className="text-xs font-semibold" style={{ color: '#15803D' }}>
-              Score
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#166534' }}>
-              {score}
-            </p>
-          </div>
+          </Card>
         </div>
 
         <div
-          className="rounded-3xl p-3 flex flex-col items-center"
-          style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}
+          className="rounded-3xl  flex flex-col items-center"
         >
           <canvas
             id={CANVAS_ID}
@@ -356,14 +341,14 @@ export default function TowerBuilderGame() {
           />
         </div>
 
-        <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+        <Card className="rounded-2xl p-4">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
             How to win
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
             Tap the game area to release the hanging block. Build {TARGET_FLOORS} successful floors to clear checkpoint 4.
           </p>
-        </div>
+        </Card>
 
         <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
           Back
@@ -383,10 +368,10 @@ export default function TowerBuilderGame() {
               Tower completed!
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You cleared the uploaded tower game and earned {earnedCoins} coins.
+              You cleared the tower game!
             </p>
           </div>
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
+          <CheckpointShopPanel isOpen={showWin} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
