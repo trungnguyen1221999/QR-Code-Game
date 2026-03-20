@@ -134,13 +134,6 @@ function CloudIcon({ r = 50 }) {
   );
 }
 
-/* ── Wind sweeps ─────────────────────────────────────────── */
-const WIND_SWEEPS = [
-  { id: 'ws1', top: '40%', dur: 5,   delay: -1.5, width: 90, opacity: 0.18 },
-  { id: 'ws2', top: '65%', dur: 6.5, delay: -4,   width: 70, opacity: 0.14 },
-  { id: 'ws3', top: '82%', dur: 4.5, delay: -2.5, width: 80, opacity: 0.16 },
-];
-
 /* ── Per-butterfly wing flap keyframes ───────────────────── */
 const flapKeyframes = CREATURES
   .filter(c => c.type === 'butterfly')
@@ -208,26 +201,7 @@ const KEYFRAMES = `
     to   { left: calc(-1 * var(--cw)); }
   }
 
-  /* Wind sweep lines */
-  @keyframes windSweep {
-    0%   { transform: translateX(-140px) scaleX(0.4); opacity: 0; }
-    18%  { opacity: var(--wop); transform: translateX(0px) scaleX(1); }
-    75%  { opacity: calc(var(--wop) * 0.7); }
-    100% { transform: translateX(calc(100vw + 140px)) scaleX(0.6); opacity: 0; }
-  }
 `;
-
-function WindSweepIcon({ width = 80 }) {
-  const w = width;
-  return (
-    <svg width={w} height={22} viewBox={`0 0 ${w} 22`} fill="none">
-      <path d={`M0 8 Q${w*0.25} 3 ${w*0.5} 9 Q${w*0.75} 15 ${w} 7`}
-        stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.9"/>
-      <path d={`M${w*0.1} 16 Q${w*0.4} 11 ${w*0.7} 17`}
-        stroke="white" strokeWidth="1.2" strokeLinecap="round" opacity="0.6"/>
-    </svg>
-  );
-}
 
 export default function PageLayout({ children, back, className = '' }) {
   return (
@@ -271,19 +245,6 @@ export default function PageLayout({ children, back, className = '' }) {
             filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.12))',
           }}>
           <LeafIcon size={lf.size} color={lf.color} />
-        </div>
-      ))}
-
-      {/* Wind sweeps */}
-      {WIND_SWEEPS.map(ws => (
-        <div key={ws.id} className="absolute pointer-events-none select-none"
-          style={{
-            top: ws.top, left: 0,
-            '--wop': ws.opacity,
-            animation: `windSweep ${ws.dur}s ease-in-out ${ws.delay}s infinite`,
-            zIndex: 2,
-          }}>
-          <WindSweepIcon width={ws.width} />
         </div>
       ))}
 
