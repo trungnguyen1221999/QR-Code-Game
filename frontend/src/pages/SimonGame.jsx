@@ -337,6 +337,31 @@ export default function SimonGame() {
     }
   };
 
+const handleWinContinue = async () => {
+    const playerSessionId = playerSession?._id || playerSession?.id;
+    const resultId = `quiz-win-${Date.now()}`;
+
+    setBusy(true);
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      clearUnusedExtraLife();
+      navigate('/game', {
+        state: {
+          justCompleted: true,
+          completedCheckpoint: checkpoint,
+          nextCheckpoint: checkpoint + 1,
+          rewardCoins: 0,
+          resultId,
+        },
+      });
+    }
+  };
   const handleLoseContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const resultId = `simon-lose-${Date.now()}`;
@@ -554,6 +579,22 @@ export default function SimonGame() {
           </div>
         </div>
       </Popup>
+      <Popup open={showWin} onClose={() => {}} showClose={false}>
+              <div className="flex flex-col items-center gap-4 text-center">
+                <div
+                  className="h-16 w-16 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: '#DCFCE7' }}
+                >
+                  <Trophy size={28} style={{ color: '#16A34A' }} />
+                </div>
+                <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+                  You win
+                </h3>
+                <Button variant="green" onClick={handleWinContinue} disabled={busy}>
+                  Continue
+                </Button>
+              </div>
+            </Popup>
 
       <Popup open={showLose} onClose={() => { }} showClose={false}>
         <div className="flex flex-col items-center gap-3 py-2">

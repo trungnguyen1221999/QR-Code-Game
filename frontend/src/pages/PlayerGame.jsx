@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Camera, Trophy, LogOut, ScanLine, Timer, Clock } from 'lucide-react';
+import { QrCode, Camera, Trophy, LogOut, ScanLine, Clock } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
@@ -124,8 +124,7 @@ export default function PlayerGame() {
 
   const [timeLeft, setTimeLeft] = useState(() => getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS));
   const [showExitPopup, setShowExitPopup] = useState(false);
-  const [showTimeUpPopup, setShowTimeUpPopup] = useState(false);
-  const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
+const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [hostEndedCountdown, setHostEndedCountdown] = useState(5);
   const [scanning, setScanning] = useState(false);
   const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('introPlayed'));
@@ -392,27 +391,6 @@ export default function PlayerGame() {
           <Trophy size={25}  />
         </Button>
 
-        {/* Secondary actions */}
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setShowTimeUpPopup(true)}
-            className="rounded-xl py-3 text-sm font-semibold cursor-pointer"
-            style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
-            In-completed game
-          </button>
-          <button
-            onClick={() => { setCompleted(TOTAL_CHECKPOINTS); setCurrent(TOTAL_CHECKPOINTS + 1); }}
-            className="rounded-xl py-3 text-sm font-semibold cursor-pointer"
-            style={{ backgroundColor: '#E5E7EB', color: 'var(--color-text)' }}>
-            All checkpoint complete
-          </button>
-          <button
-            onClick={() => navigate('/game-over')}
-            className="col-span-2 flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-semibold cursor-pointer"
-            style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}>
-            <Timer size={13} /> Test: Timeout
-          </button>
-        </div>
 
 
       </div>
@@ -452,18 +430,6 @@ export default function PlayerGame() {
             style={{ backgroundColor: '#FEF3E2', color: 'var(--color-primary)' }}>
             {hostEndedCountdown}
           </div>
-        </div>
-      </Popup>
-
-      {/* Time up popup */}
-      <Popup open={showTimeUpPopup} onClose={() => {}} showClose={false}>
-        <div className="flex flex-col items-center gap-3 py-2">
-          <span className="text-5xl">⏰</span>
-          <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>Time up!</h3>
-          <p className="text-sm font-bold text-center" style={{ color: 'var(--color-red)' }}>
-            You cannot continue the checkpoint anymore.
-          </p>
-          <Button onClick={() => navigate('/game-over')}>Got it</Button>
         </div>
       </Popup>
 

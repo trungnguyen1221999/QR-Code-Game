@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, X, Copy, Check, MapPin, Timer } from 'lucide-react';
+import { Users, X, Copy, Check, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
@@ -106,10 +106,6 @@ export default function HostGameInProgress({ onLogout }) {
     return () => clearInterval(t);
   }, [showTimeUpPopup]);
 
-  const handleTimeUp = () => {
-    setShowTimeUpPopup(true);
-  };
-
   const handleEnd = async () => {
     try {
       await sessionAPI.finish(sessionId);
@@ -144,7 +140,16 @@ export default function HostGameInProgress({ onLogout }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>Game in progress...</h2>
+          <h2 className="text-xl flex items-center gap-0.5" style={{ color: 'var(--color-text)' }}>
+            Game in progress
+            <style>{`
+              @keyframes dot-blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+              .dot1{animation:dot-blink 1.4s infinite 0s}
+              .dot2{animation:dot-blink 1.4s infinite 0.2s}
+              .dot3{animation:dot-blink 1.4s infinite 0.4s}
+            `}</style>
+            <span className="dot1">.</span><span className="dot2">.</span><span className="dot3">.</span>
+          </h2>
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 font-bold text-lg tracking-widest px-3 py-1 rounded-xl"
@@ -161,16 +166,7 @@ export default function HostGameInProgress({ onLogout }) {
         {/* Timer box */}
         <Card className="rounded-2xl p-5 flex flex-col items-center gap-2"
         >
-          <div className="flex items-center gap-2 w-full justify-between">
-            <p className="text-sm" style={{ color: 'var(--color-primary)' }}>Time left</p>
-            <button
-              onClick={handleTimeUp}
-              className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold"
-              style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
-            >
-              <Timer size={12} /> Test: Time Up
-            </button>
-          </div>
+          <p className="text-sm" style={{ color: 'var(--color-primary)' }}>Time left</p>
           <p className="text-4xl font-bold" style={{ color: 'var(--color-primary)' }}>
             {timeLeft !== null ? formatTime(timeLeft) : '--:--:--'}
           </p>
