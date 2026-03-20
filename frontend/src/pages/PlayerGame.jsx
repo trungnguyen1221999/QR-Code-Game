@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Camera, Trophy, LogOut, ScanLine, Timer } from 'lucide-react';
+import { QrCode, Camera, Trophy, LogOut, ScanLine, Timer, Clock } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
@@ -26,10 +26,9 @@ function getCheckpointRoute(checkpoint) {
 }
 
 function formatTime(secs) {
-  const h = Math.floor(secs / 3600).toString().padStart(2, '0');
-  const m = Math.floor((secs % 3600) / 60).toString().padStart(2, '0');
+  const m = Math.floor(secs / 60).toString().padStart(2, '0');
   const s = (secs % 60).toString().padStart(2, '0');
-  return `${h}:${m}:${s}`;
+  return `${m}:${s}`;
 }
 
 function getRemainingSessionSeconds(expiresAt, fallback = TOTAL_SECONDS) {
@@ -371,21 +370,19 @@ export default function PlayerGame() {
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2">
-          <Card className="rounded-xl p-3 flex flex-col items-center gap-1"
-           >
-            <span className="text-xs" style={{ color: '#3B82F6' }}>Time left</span>
-            <span className="text-xs font-bold" style={{ color: '#3B82F6' }}>{formatTime(timeLeft)}</span>
-          </Card>
-          <Card className="rounded-xl p-3 flex flex-col items-center gap-1"
-           >
-            <span className="text-xs" style={{ color: '#DC2626' }}>Life</span>
-            <span className="text-lg font-bold" style={{ color: '#DC2626' }}>❤️ {life}</span>
-          </Card>
-          <Card className="rounded-xl p-3 flex flex-col items-center gap-1"
-            >
-            <span className="text-xs" style={{ color: '#CA8A04' }}>Coins</span>
-            <span className="text-lg font-bold" style={{ color: '#CA8A04' }}>🪙 {coins}</span>
-          </Card>
+          {[
+            { label: 'Time left', value: formatTime(timeLeft), color: '#3B82F6', icon: <Clock size={14} /> },
+            { label: 'Life',      value: `❤️ ${life}`,         color: '#DC2626', icon: null },
+            { label: 'Coins',     value: `🪙 ${coins}`,        color: '#CA8A04', icon: null },
+          ].map(({ label, value, color, icon }) => (
+            <Card key={label} className="rounded-xl p-3 flex flex-col items-center gap-1">
+              <span className="text-xs font-medium" style={{ color }}>{label}</span>
+              <div className="flex items-center gap-1">
+                {icon && <span style={{ color }}>{icon}</span>}
+                <span className="text-sm font-bold" style={{ color }}>{value}</span>
+              </div>
+            </Card>
+          ))}
         </div>
 
         {/* Trophy shortcut */}

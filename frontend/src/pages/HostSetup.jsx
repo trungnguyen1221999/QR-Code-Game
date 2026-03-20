@@ -118,8 +118,7 @@ export default function HostSetup({ onLogout }) {
                 '6 QR Checkpoints to discover',
                 '3 Mini games',
                 '3 Quiz',
-                '1 Final game (Fruit Slicer)',
-                'Time-based coin system',
+                '1 Final game',
               ].map(item => (
                 <p key={item} className="text-sm" style={{ color: 'var(--color-subtext)' }}>• {item}</p>
               ))}

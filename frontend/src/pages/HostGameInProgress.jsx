@@ -159,8 +159,8 @@ export default function HostGameInProgress({ onLogout }) {
         </div>
 
         {/* Timer box */}
-        <div className="rounded-2xl p-5 flex flex-col items-center gap-2"
-          style={{ backgroundColor: '#FEF3E2' }}>
+        <Card className="rounded-2xl p-5 flex flex-col items-center gap-2"
+        >
           <div className="flex items-center gap-2 w-full justify-between">
             <p className="text-sm" style={{ color: 'var(--color-primary)' }}>Time left</p>
             <button
@@ -185,7 +185,7 @@ export default function HostGameInProgress({ onLogout }) {
               <p className="text-2xl font-bold" style={{ color: 'var(--color-primary)' }}>{inGameCount}</p>
             </div>
           </div>
-        </div>
+        </Card>
 
         {/* Live Ranking by checkpoint */}
         <Card>
@@ -268,13 +268,13 @@ export default function HostGameInProgress({ onLogout }) {
         </Card>
 
         {/* Game settings */}
-        <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+        <Card className="rounded-xl p-4" >
           <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>Game Settings:</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• 6 QR Checkpoints to discover</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
             • Total play time is {sessionData?.totalTime || 30} minutes.
           </p>
-        </div>
+        </Card>
 
         {/* End game */}
         <Button variant="red" onClick={() => setShowEndPopup(true)}>
