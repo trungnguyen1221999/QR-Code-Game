@@ -108,6 +108,32 @@ const LEAVES = [
   { id: 'lf6', left: '70%', size: 17, dur: 12, delay: -9.5, wx: -170, color: '#16a34a' },
 ];
 
+/* ── Clouds (drift right → left) ────────────────────────── */
+const CLOUDS = [
+  { id: 'ck1', base: 0.05, yRatio: 0.06, r: 50, dur: 27,  delay: -1  },
+  { id: 'ck2', base: 0.30, yRatio: 0.11, r: 37, dur: 38,  delay: -11 },
+  { id: 'ck3', base: 0.54, yRatio: 0.04, r: 60, dur: 35,  delay: -19 },
+  { id: 'ck4', base: 0.74, yRatio: 0.09, r: 44, dur: 24,  delay: -18 },
+  { id: 'ck5', base: 0.88, yRatio: 0.14, r: 34, dur: 32,  delay: -28 },
+  { id: 'ck6', base: 0.18, yRatio: 0.17, r: 30, dur: 24,  delay: -4  },
+];
+
+function CloudIcon({ r = 50 }) {
+  return (
+    <svg
+      width={3.3 * r}
+      height={2.38 * r}
+      viewBox={`${-1.35 * r} ${-0.88 * r} ${3.3 * r} ${2.38 * r}`}
+      fill="rgba(255,255,255,0.93)"
+    >
+      <circle cx={0}          cy={0.4 * r}  r={r}          />
+      <circle cx={0.7 * r}    cy={0}         r={0.78 * r}   />
+      <circle cx={-0.6 * r}   cy={0.2 * r}  r={0.65 * r}   />
+      <circle cx={1.3 * r}    cy={0.3 * r}  r={0.55 * r}   />
+    </svg>
+  );
+}
+
 /* ── Wind sweeps ─────────────────────────────────────────── */
 const WIND_SWEEPS = [
   { id: 'ws1', top: '40%', dur: 5,   delay: -1.5, width: 90, opacity: 0.18 },
@@ -176,6 +202,12 @@ const KEYFRAMES = `
     100% { transform: translate(var(--wx), 115vh) rotate(175deg); opacity: 0; }
   }
 
+  /* Cloud drift right → left */
+  @keyframes cloudDrift {
+    from { left: 100%; }
+    to   { left: calc(-1 * var(--cw)); }
+  }
+
   /* Wind sweep lines */
   @keyframes windSweep {
     0%   { transform: translateX(-140px) scaleX(0.4); opacity: 0; }
@@ -213,6 +245,20 @@ export default function PageLayout({ children, back, className = '' }) {
       {/* Overlay */}
       <div className="absolute inset-0"
         style={{ backgroundColor: 'rgba(240, 255, 230, 0.1)' }} />
+
+      {/* Clouds */}
+      {CLOUDS.map(c => (
+        <div key={c.id} className="absolute pointer-events-none select-none"
+          style={{
+            top: `${c.yRatio * 100}%`,
+            '--cw': `${3.3 * c.r}px`,
+            animation: `cloudDrift ${c.dur}s linear ${c.delay}s infinite`,
+            zIndex: 1,
+            filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.10))',
+          }}>
+          <CloudIcon r={c.r} />
+        </div>
+      ))}
 
       {/* Falling leaves (diagonal) */}
       {LEAVES.map(lf => (
