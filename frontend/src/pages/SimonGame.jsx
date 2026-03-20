@@ -14,8 +14,9 @@ import {
   getPlayerProgress,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import Card from '../components/ui/card';
 
-const SIMON_TIME_LIMIT = 30;
+const SIMON_TIME_LIMIT = 300;
 const COINS_PER_SECOND = 2;
 
 const COLORS = [
@@ -47,7 +48,6 @@ export default function SimonGame() {
   const [gameStarted, setGameStarted] = useState(false);
   const [backEnabled, setBackEnabled] = useState(false);
   const [round, setRound] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
   const [status, setStatus] = useState('Press Start to begin.');
   const [timeLeft, setTimeLeft] = useState(() =>
     getInitialGameTime(SIMON_TIME_LIMIT, 'simon', location.key)
@@ -258,7 +258,6 @@ export default function SimonGame() {
   const backWillResetToStart = currentLives <= 1;
 
   const handleWrongInput = async () => {
-    setBestScore((prev) => Math.max(prev, round));
     setStatus('Wrong pattern!');
     setFlashWrong(true);
     await playWrongSound();
@@ -294,7 +293,6 @@ export default function SimonGame() {
 
     if (nextPlayerSequence.length === sequence.length) {
       if (round >= targetRound) {
-        setBestScore((prev) => Math.max(prev, round));
         setGameStarted(false);
         setShowWin(true);
         setStatus('Great job! You completed the Simon game.');
@@ -302,7 +300,6 @@ export default function SimonGame() {
       }
 
       const nextSequence = buildNextSequence(sequence);
-      setBestScore((prev) => Math.max(prev, round));
       setStatus('Correct! Next round...');
       setRound((prev) => prev + 1);
       setSequence(nextSequence);
@@ -404,8 +401,8 @@ export default function SimonGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#EFF6FF' }}>
+        <div className="grid grid-cols-2 gap-3">
+          <Card >
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
               Time left
@@ -413,44 +410,33 @@ export default function SimonGame() {
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#FEF3E2' }}>
+          <Card>
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
               Round
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {round}/{targetRound}
             </p>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl p-3" style={{ backgroundColor: '#F0FDF4' }}>
-            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#15803D' }}>
-              <Trophy size={14} />
-              Best
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#166534' }}>
-              {bestScore}
-            </p>
-          </div>
+      
         </div>
 
-        <div
-          className="rounded-2xl p-3 text-center"
-          style={{
-            backgroundColor: flashWrong ? '#FEE2E2' : '#FFFFFF',
-            border: `1px solid ${flashWrong ? '#FCA5A5' : 'var(--color-border)'}`,
-          }}
+        <Card
+          className="text-center"
+          style={{ backgroundColor: flashWrong ? '#FEE2E2' : '' }}
         >
           <p className="text-sm font-semibold" style={{ color: flashWrong ? '#DC2626' : 'var(--color-text)' }}>
             {status}
           </p>
-        </div>
+        </Card>
 
         <div
-          className="rounded-3xl p-4"
+          className="rounded-2xl"
           style={{
-            backgroundColor: flashWrong ? '#FCA5A5' : '#111827',
+            backgroundColor: flashWrong ? '#FCA5A5' : '',
             transition: 'background-color 0.25s ease',
           }}
         >
@@ -514,14 +500,10 @@ export default function SimonGame() {
           )}
         </div>
 
-        <button
-          type="button"
+        <Card
           onClick={() => setShowHowToPlay(true)}
-          className="rounded-2xl p-4 text-left"
-          style={{ backgroundColor: '#FFFFFF', border: '1px solid var(--color-border)' }}
         >
           <div className="flex items-center gap-2 mb-2">
-            <Volume2 size={16} style={{ color: 'var(--color-primary)' }} />
             <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
               How to play
             </p>
@@ -529,7 +511,7 @@ export default function SimonGame() {
           <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>
             Tap to view instructions and game rules.
           </p>
-        </button>
+        </Card>
       </div>
 
       <Popup open={showHowToPlay} onClose={() => setShowHowToPlay(false)} title="How to play">
@@ -544,24 +526,6 @@ export default function SimonGame() {
           </div>
 
           <Button onClick={() => setShowHowToPlay(false)}>Got it</Button>
-        </div>
-      </Popup>
-
-      <Popup open={showWin} onClose={() => { }} showClose={false}>
-        <div className="flex flex-col items-center gap-3 py-2">
-          <span className="text-5xl">🎉</span>
-          <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-            You win!
-          </h3>
-          <p className="text-sm text-center" style={{ color: 'var(--color-subtext)' }}>
-            You completed the Simon pattern challenge and earned {earnedCoins} coins from the time left.
-          </p>
-
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
-
-          <Button onClick={handleBackToGame} disabled={busy}>
-            Back to game
-          </Button>
         </div>
       </Popup>
 
