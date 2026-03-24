@@ -31,6 +31,7 @@ export default function LandingPage({ onLogout }) {
         name: u.name || u.username,
         avatar: u.avatar || `/avatar/avatar${(i % 4) + 1}.png`,
         score: u.totalScore ?? 0,
+        checkpoint: u.currentCheckpointIndex ?? 0,
       }));
       setLeaderboard(lb);
     }).catch(() => {});
@@ -185,7 +186,9 @@ export default function LandingPage({ onLogout }) {
                   <p className="text-xs font-bold text-center mb-1 leading-tight"
                     style={{ color: 'var(--color-text)', maxWidth: 68 }}>{p.name}</p>
                   <div className="px-2 py-0.5 rounded-full mb-2 text-xs font-bold text-white"
-                    style={{ backgroundColor: cfg.color }}>{p.score}</div>
+                    style={{ backgroundColor: cfg.color }}>
+                    {p.score > 0 ? p.score : p.checkpoint > 0 ? `CP${p.checkpoint}` : 0}
+                  </div>
                   <div className="w-full rounded-t-xl flex items-center justify-center"
                     style={{ height: cfg.h, background: `linear-gradient(180deg, ${cfg.ring}BB 0%, ${cfg.color}99 100%)`,
                       borderTop: `3px solid ${cfg.ring}` }}>
@@ -222,7 +225,9 @@ export default function LandingPage({ onLogout }) {
                     style={{ color: 'var(--color-subtext)' }}>{p.rank}</span>
                   <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
                   <span className="flex-1 text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{p.name}</span>
-                  <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>{p.score}</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+                    {p.score > 0 ? p.score : p.checkpoint > 0 ? `CP${p.checkpoint}` : 0}
+                  </span>
                 </div>
               ))}
             </div>

@@ -112,6 +112,7 @@ export const uploadUserAvatar = async (req, res) => {
   }
 };
 import User from '../models/User.js';
+import PlayerSession from '../models/PlayerSession.js';
 import cloudinary from '../config/cloudinary.js';
 import { validationResult } from 'express-validator';
 
@@ -215,12 +216,56 @@ export const deleteUser = async (req, res) => {
 // Get leaderboard
 export const getLeaderboard = async (req, res) => {
   try {
-    const users = await User.find()
-      .sort({ totalScore: -1 })
-      .limit(10)
-      .select('username name avatar totalScore gamesPlayed');
+    const sessions = await PlayerSession.find()
+      .populate('userId', 'username name avatar')
+      .lean();
 
-    res.json(users);
+    // Group by userId, keep best record per user
+    const userMap = new Map();
+    for (const s of sessions) {
+      if (!s.userId) continue;
+      const uid = s.userId._id.toString();
+      const existing = userMap.get(uid);
+      if (!existing) {
+        userMap.set(uid, s);
+        continue;
+      }
+      // Keep the record with higher score; if equal score, higher checkpoint; if equal checkpoint, earlier lastCheckpointAt
+      const betterScore = s.score > existing.score;
+      const sameScore = s.score === existing.score;
+      const betterCheckpoint = sameScore && s.currentCheckpointIndex > existing.currentCheckpointIndex;
+      const sameCheckpoint = sameScore && s.currentCheckpointIndex === existing.currentCheckpointIndex;
+      const betterTime = sameCheckpoint && s.lastCheckpointAt && (!existing.lastCheckpointAt || s.lastCheckpointAt < existing.lastCheckpointAt);
+      if (betterScore || betterCheckpoint || betterTime) {
+        userMap.set(uid, s);
+      }
+    }
+
+    const entries = Array.from(userMap.values());
+
+    // Sort: score > 0 → score DESC; else checkpoint DESC, then lastCheckpointAt ASC
+    entries.sort((a, b) => {
+      if (a.score > 0 || b.score > 0) {
+        if (b.score !== a.score) return b.score - a.score;
+      }
+      if (b.currentCheckpointIndex !== a.currentCheckpointIndex) {
+        return b.currentCheckpointIndex - a.currentCheckpointIndex;
+      }
+      const ta = a.lastCheckpointAt ? new Date(a.lastCheckpointAt).getTime() : Infinity;
+      const tb = b.lastCheckpointAt ? new Date(b.lastCheckpointAt).getTime() : Infinity;
+      return ta - tb;
+    });
+
+    const result = entries.slice(0, 10).map(s => ({
+      _id: s.userId._id,
+      username: s.userId.username,
+      name: s.userId.name,
+      avatar: s.userId.avatar,
+      totalScore: s.score,
+      currentCheckpointIndex: s.currentCheckpointIndex,
+    }));
+
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
