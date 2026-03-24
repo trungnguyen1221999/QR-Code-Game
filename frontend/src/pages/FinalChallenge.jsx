@@ -524,14 +524,14 @@ export default function FinalChallenge() {
       </div>
 
       {/* Perfect message */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
-        style={{ opacity: perfectMsg ? 1 : 0, transition: 'opacity 1.2s' }}>
+      <div className="absolute inset-x-0 flex flex-col items-center pointer-events-none"
+        style={{ top: '20%', opacity: perfectMsg ? 1 : 0, transition: 'opacity 1.2s' }}>
         {perfectMsg && <p className="text-2xl font-black" style={{ color: '#E8730A' }}>PERFECT!</p>}
       </div>
 
       {/* Score popup */}
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
-        style={{ paddingBottom: 60, opacity: scoreVisible ? 1 : 0, transition: 'opacity 0.5s ease-out' }}>
+        style={{ paddingBottom: 120, opacity: scoreVisible ? 1 : 0, transition: 'opacity 0.5s ease-out' }}>
         {scorePopup && (<>
           {scorePopup.base > 1 && (
             <div className="flex flex-wrap justify-center gap-1 px-2 max-w-xs">
@@ -576,8 +576,8 @@ export default function FinalChallenge() {
       </div>
 
       {/* Buddy helped overlay */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none"
-        style={{ opacity: showBuddy ? 1 : 0, transition: 'opacity 1s' }}>
+      <div className="absolute inset-x-0 flex flex-col items-center pointer-events-none"
+        style={{ bottom: '25%', opacity: showBuddy ? 1 : 0, transition: 'opacity 1s' }}>
         <p className="text-xl font-black" style={{ color: 'red', textShadow: '0 0 8px rgba(255,255,255,0.8)' }}>
           🌉 Buddy saves you!
         </p>

@@ -22,7 +22,7 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
-const MEMORY_TIME_LIMIT = 300;
+const MEMORY_TIME_LIMIT = 120;
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
 function shuffleCards() {
   return [...CARD_EMOJIS, ...CARD_EMOJIS]

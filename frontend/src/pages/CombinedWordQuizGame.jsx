@@ -24,7 +24,7 @@ import {
 import Card from '../components/ui/card';
 
 const QUIZ_TIME_LIMIT = 300;
-const PASS_SCORE = 2;
+const PASS_SCORE = 7;
 const TOTAL_QUESTIONS = 10;
 
 const COPY = {
@@ -332,9 +332,6 @@ export default function CombinedWordQuizGame() {
               ))}
             </div>
 
-            <p className="text-sm text-center mb-4" style={{ color: 'var(--color-subtext)' }}>
-              {COPY.hint}: {currentQuestion.hint}
-            </p>
 
             <Input
               label={COPY.answerLabel}

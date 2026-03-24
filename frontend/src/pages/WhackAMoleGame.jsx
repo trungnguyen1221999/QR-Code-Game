@@ -22,8 +22,8 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
-const GAME_TIME_LIMIT = 300;
-const WINNING_SCORE = 2;
+const GAME_TIME_LIMIT = 120;
+const WINNING_SCORE = 10;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMAL_SPAWN_INTERVAL = 1300;

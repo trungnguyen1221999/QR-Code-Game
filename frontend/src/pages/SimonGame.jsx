@@ -22,7 +22,7 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
-const SIMON_TIME_LIMIT = 300;
+const SIMON_TIME_LIMIT = 120;
 const COINS_PER_SECOND = 2;
 
 const COLORS = [
