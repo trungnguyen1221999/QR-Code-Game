@@ -54,7 +54,7 @@ export default function FinalShop() {
 
         {/* Seller */}
         <div className="flex justify-center">
-          <img src="/shop/seller.gif" alt="Shop seller" style={{ height: '80px', objectFit: 'contain' }} />
+          <img src="/shop/capybara_item.png" alt="Shop seller" style={{ height: '80px', objectFit: 'contain' }} />
         </div>
 
         <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
