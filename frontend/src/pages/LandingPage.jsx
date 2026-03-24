@@ -4,17 +4,9 @@ import { User, Gamepad2, LayoutGrid, LogOut, RotateCcw, X, ChevronDown, Trophy }
 import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
-import { sessionAPI } from '../utils/api';
+import { sessionAPI, userAPI } from '../utils/api';
 import Card from '../components/ui/card';
 
-const MOCK_LB = [
-  { rank: 1, name: 'Shun',    avatar: '/avatar/avatar1.png', score: 2000 },
-  { rank: 2, name: 'Trung',   avatar: '/avatar/avatar2.png', score: 1800 },
-  { rank: 3, name: 'Yan',     avatar: '/avatar/avatar3.png', score: 1750 },
-  { rank: 4, name: 'Helen',   avatar: '/avatar/avatar4.png', score: 1510 },
-  { rank: 5, name: 'Stev',    avatar: '/avatar/avatar1.png', score: 1510 },
-  { rank: 6, name: 'Micheal', avatar: '/avatar/avatar2.png', score: 1501 },
-];
 
 const PODIUM = {
   1: { h: 68, size: 60, badge: '🥇', color: '#F59E0B', ring: '#FCD34D' },
@@ -30,6 +22,19 @@ export default function LandingPage({ onLogout }) {
   const [inGame, setInGame] = useState(!!playerSession);
   const [howToOpen, setHowToOpen] = useState(false);
   const [lbOpen, setLbOpen] = useState(false);
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  useEffect(() => {
+    userAPI.leaderboard().then(data => {
+      const lb = data.map((u, i) => ({
+        rank: i + 1,
+        name: u.name || u.username,
+        avatar: u.avatar || `/avatar/avatar${(i % 4) + 1}.png`,
+        score: u.finalScore ?? 0,
+      }));
+      setLeaderboard(lb);
+    }).catch(() => {});
+  }, []);
 
   // Hide rejoin banner if host already ended the game
   useEffect(() => {
@@ -166,7 +171,7 @@ export default function LandingPage({ onLogout }) {
           {/* Podium top 3 */}
           <div className="flex items-end gap-1.5">
             {[2, 1, 3].map(rank => {
-              const p = MOCK_LB.find(x => x.rank === rank);
+              const p = leaderboard.find(x => x.rank === rank);
               const cfg = PODIUM[rank];
               if (!p) return null;
               return (
@@ -210,7 +215,7 @@ export default function LandingPage({ onLogout }) {
             transition: 'max-height 0.35s ease, opacity 0.25s ease',
           }}>
             <div className="flex flex-col gap-1 mt-3">
-              {MOCK_LB.filter(p => p.rank > 3).map(p => (
+              {leaderboard.filter(p => p.rank > 3).map(p => (
                 <div key={p.rank} className="flex items-center gap-3 px-2 py-2 rounded-xl"
                   style={{ backgroundColor: '#F9F5F0' }}>
                   <span className="w-6 text-center text-sm font-bold"

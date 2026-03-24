@@ -46,7 +46,7 @@ export default function Leaderboard() {
   const location  = useLocation();
   const timeUp    = location.state?.timeUp ?? false;
   const session   = JSON.parse(localStorage.getItem('session') || 'null');
-  const sessionId = session?.id || session?._id;
+  const sessionId = location.state?.sessionId || session?.id || session?._id;
 
   const [players, setPlayers] = useState([]);
 
@@ -88,7 +88,7 @@ export default function Leaderboard() {
           : <p className="text-center text-sm py-8" style={{ color: 'var(--color-subtext)' }}>Loading...</p>
         }
 
-        {timeUp && <Button onClick={() => navigate('/')}>Done</Button>}
+        {timeUp && <Button onClick={() => navigate('/', { replace: true })}>Done</Button>}
 
       </div>
     </PageLayout>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
-import { SHOP_ITEMS } from '../utils/checkpointShop';
+import { SHOP_ITEMS, getItemPrice } from '../utils/checkpointShop';
 
 const COINS_EARNED = 30;
 
@@ -18,8 +18,9 @@ export default function PlayerShop() {
   const [bought, setBought] = useState([]);
 
   const handleBuy = (item) => {
-    if (coins < item.price) return;
-    setCoins(v => v - item.price);
+    const price = getItemPrice(item, checkpoint);
+    if (coins < price) return;
+    setCoins(v => v - price);
     setBought(v => [...v, item.id]);
     setItems(v => v.filter(i => i.id !== item.id));
   };
@@ -72,11 +73,11 @@ export default function PlayerShop() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
                 <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{item.desc}</p>
-                <p className="text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>🪙 {item.price}</p>
+                <p className="text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>🪙 {getItemPrice(item, checkpoint)}</p>
               </div>
               <button
                 onClick={() => handleBuy(item)}
-                disabled={coins < item.price}
+                disabled={coins < getItemPrice(item, checkpoint)}
                 className="rounded-xl px-4 py-2 text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}
               >

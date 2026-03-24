@@ -65,6 +65,11 @@ export const itemAPI = {
   getById: (id) => api.get(`/items/${id}`),
 };
 
+// ─── User ─────────────────────────────────────────────────────────────────────
+export const userAPI = {
+  leaderboard: () => api.get('/users/leaderboard'),
+};
+
 // ─── Minigame ─────────────────────────────────────────────────────────────────
 export const minigameAPI = {
   getById:   (id) => api.get(`/minigames/${id}`),

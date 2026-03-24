@@ -218,7 +218,7 @@ export const getLeaderboard = async (req, res) => {
     const users = await User.find()
       .sort({ finalScore: -1 })
       .limit(10)
-      .select('username name finalScore currentCheckpoint');
+      .select('username name avatar finalScore currentCheckpoint');
 
     res.json(users);
   } catch (error) {

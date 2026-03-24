@@ -97,7 +97,7 @@ export default function HostGameInProgress({ onLogout }) {
       setTimeUpCountdown(v => {
         if (v <= 1) {
           clearInterval(t);
-          navigate('/leaderboard', { state: { timeUp: true } });
+          navigate('/leaderboard', { state: { timeUp: true, sessionId } });
           return 0;
         }
         return v - 1;
@@ -112,8 +112,8 @@ export default function HostGameInProgress({ onLogout }) {
     } catch {
       // ignore
     }
+    navigate('/leaderboard', { state: { timeUp: true, sessionId } });
     localStorage.removeItem('session');
-    navigate('/leaderboard', { state: { timeUp: true } });
   };
 
   return (
