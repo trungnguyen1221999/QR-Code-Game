@@ -216,9 +216,9 @@ export const deleteUser = async (req, res) => {
 export const getLeaderboard = async (req, res) => {
   try {
     const users = await User.find()
-      .sort({ finalScore: -1 })
+      .sort({ totalScore: -1 })
       .limit(10)
-      .select('username name avatar finalScore currentCheckpoint');
+      .select('username name avatar totalScore gamesPlayed');
 
     res.json(users);
   } catch (error) {

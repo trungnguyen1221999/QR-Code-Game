@@ -30,7 +30,7 @@ export default function LandingPage({ onLogout }) {
         rank: i + 1,
         name: u.name || u.username,
         avatar: u.avatar || `/avatar/avatar${(i % 4) + 1}.png`,
-        score: u.finalScore ?? 0,
+        score: u.totalScore ?? 0,
       }));
       setLeaderboard(lb);
     }).catch(() => {});
