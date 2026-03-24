@@ -11,6 +11,7 @@ import {
   applyLossToStoredProgress,
   clearUnusedExtraLife,
   getInitialGameTime,
+  getReplayGameTime,
   getPlayerProgress,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
@@ -77,10 +78,11 @@ export default function PuzzlePlacementGame() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const checkpoint = location.state?.checkpoint ?? 4;
+  const checkpoint = location.state?.checkpoint ?? 5;
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
 
   const slotRefs = useRef([]);
+  const lossHandledRef = useRef(false);
 
   const [selectedImage, setSelectedImage] = useState(() => pickRandomImage());
   const [placedPieces, setPlacedPieces] = useState(Array(TOTAL_PIECES).fill(null));
@@ -96,6 +98,7 @@ export default function PuzzlePlacementGame() {
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
+  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
 
   const earnedCoins = Math.max(0, timeLeft * COINS_PER_SECOND);
 
@@ -107,10 +110,10 @@ export default function PuzzlePlacementGame() {
   const selectedPiece = trayPieces.find((piece) => piece.id === selectedPieceId) || null;
 
   useEffect(() => {
-    if (showWin || showLose) return;
+    if (showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
-      setShowLose(true);
+      void handleLoss();
       return;
     }
 
@@ -119,7 +122,7 @@ export default function PuzzlePlacementGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showWin, showLose, timeLeft]);
+  }, [showBackConfirm, showWin, showLose, timeLeft]);
 
   useEffect(() => {
     const isComplete = placedPieces.every(
@@ -239,9 +242,12 @@ export default function PuzzlePlacementGame() {
     setSelectedPieceId(null);
     setDragState(null);
     setShakeSlotIndex(null);
-    setTimeLeft(PUZZLE_TIME_LIMIT);
+    setTimeLeft(getReplayGameTime(PUZZLE_TIME_LIMIT));
     setShowWin(false);
     setShowLose(false);
+    setShowBackConfirm(false);
+    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    lossHandledRef.current = false;
   };
 
   const registerLifeLoss = async () => {
@@ -259,6 +265,17 @@ export default function PuzzlePlacementGame() {
     return summary;
   };
 
+  const handleLoss = async () => {
+    if (lossHandledRef.current) return;
+    lossHandledRef.current = true;
+    setBusy(true);
+
+    const summary = await registerLifeLoss();
+    setLoseState(summary);
+    setBusy(false);
+    setShowLose(true);
+  };
+
   const handleBackExit = async () => {
     setBusy(true);
     const summary = await registerLifeLoss();
@@ -272,6 +289,35 @@ export default function PuzzlePlacementGame() {
 
   const currentLives = getPlayerProgress().life ?? 0;
   const backWillResetToStart = currentLives <= 1;
+
+  const handleLoseShopPurchase = (result) => {
+    if (result.item?.id !== 'life') return;
+
+    setLoseState({
+      remainingLives: result.progress?.life ?? 1,
+      needsLifePurchase: false,
+    });
+  };
+
+  const handleLosePrimaryAction = () => {
+    if (loseState.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+      navigate('/game');
+      return;
+    }
+
+    handleRetry();
+  };
+
+  const handleLoseExit = () => {
+    if (loseState.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+    } else {
+      clearUnusedExtraLife();
+    }
+
+    navigate('/game');
+  };
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
@@ -293,28 +339,6 @@ export default function PuzzlePlacementGame() {
           completedCheckpoint: checkpoint,
           nextCheckpoint: checkpoint + 1,
           rewardCoins: 0,
-          resultId,
-        },
-      });
-    }
-  };
-
-  const handleLoseContinue = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `puzzle-placement-timeout-${Date.now()}`;
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      navigate('/game', {
-        state: {
-          wrongAnswer: true,
           resultId,
         },
       });
@@ -549,16 +573,28 @@ export default function PuzzlePlacementGame() {
               Time is up
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You did not finish the puzzle in time. One life will be removed.
+              {loseState.needsLifePurchase
+                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
+                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
             </p>
           </div>
 
+          <CheckpointShopPanel
+            isOpen={showLose}
+            warningMessage={
+              loseState.needsLifePurchase
+                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                : ''
+            }
+            onPurchase={handleLoseShopPurchase}
+          />
+
           <div className="grid grid-cols-2 gap-2 w-full">
-            <Button variant="red" onClick={handleRetry} disabled={busy}>
-              Retry
+            <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
+              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
             </Button>
-            <Button variant="green" onClick={handleLoseContinue} disabled={busy}>
-              Continue
+            <Button variant="green" onClick={handleLoseExit} disabled={busy}>
+              Exit game
             </Button>
           </div>
         </div>

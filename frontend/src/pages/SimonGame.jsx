@@ -11,6 +11,7 @@ import {
   applyLossToStoredProgress,
   clearUnusedExtraLife,
   getInitialGameTime,
+  getReplayGameTime,
   getPlayerProgress,
   resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
@@ -38,7 +39,7 @@ export default function SimonGame() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const checkpoint = location.state?.checkpoint ?? 3;
+  const checkpoint = location.state?.checkpoint ?? 6;
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
 
   const [sequence, setSequence] = useState([]);
@@ -58,9 +59,11 @@ export default function SimonGame() {
   const [showWin, setShowWin] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
 
   const audioContextRef = useRef(null);
   const mountedRef = useRef(true);
+  const lossHandledRef = useRef(false);
   const soundsRef = useRef({
     green: typeof Audio !== 'undefined' ? new Audio('/sounds/green.mp3') : null,
     red: typeof Audio !== 'undefined' ? new Audio('/sounds/red.mp3') : null,
@@ -83,10 +86,9 @@ export default function SimonGame() {
   }, []);
 
   useEffect(() => {
-    if (!gameStarted || showWin || showLose) return;
+    if (!gameStarted || showWin || showLose || showBackConfirm) return;
     if (timeLeft <= 0) {
-      setShowLose(true);
-      setGameStarted(false);
+      void handleLoss();
       return;
     }
 
@@ -95,7 +97,7 @@ export default function SimonGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStarted, showWin, showLose, timeLeft]);
+  }, [gameStarted, showBackConfirm, showWin, showLose, timeLeft]);
 
   const canPlayerInput =
     gameStarted && !isPlayingSequence && sequence.length > 0 && !showWin && !showLose;
@@ -208,6 +210,8 @@ export default function SimonGame() {
     setBackEnabled(true);
     setShowLose(false);
     setShowWin(false);
+    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    lossHandledRef.current = false;
     setFlashWrong(false);
     setStatus('Watch the pattern carefully...');
     await playSequence(firstSequence);
@@ -221,11 +225,13 @@ export default function SimonGame() {
     setGameStarted(false);
     setBackEnabled(false);
     setRound(0);
-    setTimeLeft(SIMON_TIME_LIMIT);
+    setTimeLeft(getReplayGameTime(SIMON_TIME_LIMIT));
     setFlashWrong(false);
     setStatus('Press Start to begin.');
     setShowLose(false);
     setShowWin(false);
+    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    lossHandledRef.current = false;
   };
 
   const registerLifeLoss = async () => {
@@ -243,6 +249,18 @@ export default function SimonGame() {
     return summary;
   };
 
+  const handleLoss = async () => {
+    if (lossHandledRef.current) return;
+    lossHandledRef.current = true;
+    setBusy(true);
+    setGameStarted(false);
+
+    const summary = await registerLifeLoss();
+    setLoseState(summary);
+    setBusy(false);
+    setShowLose(true);
+  };
+
   const handleBackExit = async () => {
     setBusy(true);
     const summary = await registerLifeLoss();
@@ -257,6 +275,35 @@ export default function SimonGame() {
   const currentLives = getPlayerProgress().life ?? 0;
   const backWillResetToStart = currentLives <= 1;
 
+  const handleLoseShopPurchase = (result) => {
+    if (result.item?.id !== 'life') return;
+
+    setLoseState({
+      remainingLives: result.progress?.life ?? 1,
+      needsLifePurchase: false,
+    });
+  };
+
+  const handleLosePrimaryAction = () => {
+    if (loseState.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+      navigate('/game');
+      return;
+    }
+
+    handleReset();
+  };
+
+  const handleLoseExit = () => {
+    if (loseState.needsLifePurchase) {
+      resetProgressToCheckpointOne();
+    } else {
+      clearUnusedExtraLife();
+    }
+
+    navigate('/game');
+  };
+
   const handleWrongInput = async () => {
     setStatus('Wrong pattern!');
     setFlashWrong(true);
@@ -266,8 +313,7 @@ export default function SimonGame() {
     if (!mountedRef.current) return;
 
     setFlashWrong(false);
-    setGameStarted(false);
-    setShowLose(true);
+    await handleLoss();
   };
 
   const handleButtonClick = async (colorId) => {
@@ -337,7 +383,7 @@ export default function SimonGame() {
     }
   };
 
-const handleWinContinue = async () => {
+  const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const resultId = `quiz-win-${Date.now()}`;
 
@@ -361,52 +407,6 @@ const handleWinContinue = async () => {
         },
       });
     }
-  };
-  const handleLoseContinue = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `simon-lose-${Date.now()}`;
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      navigate('/game', { state: { wrongAnswer: true, resultId } });
-    }
-  };
-
-  const handleTryAgainHere = async () => {
-    const currentLives = getPlayerProgress().life ?? 0;
-
-    if (currentLives <= 1) {
-      await handleLoseContinue();
-      return;
-    }
-
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const summary = applyLossToStoredProgress();
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
-
-    if (summary.needsLifePurchase) {
-      await handleLoseContinue();
-      return;
-    }
-
-    handleReset();
-    setBusy(false);
   };
   return (
     <PageLayout className="pb-6">
@@ -600,17 +600,28 @@ const handleWinContinue = async () => {
         <div className="flex flex-col items-center gap-3 py-2">
           <span className="text-5xl">❌</span>
           <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-            Wrong pattern
+            Game over
           </h3>
           <p className="text-sm text-center" style={{ color: 'var(--color-subtext)' }}>
-            The sequence was not correct. You will lose one life and return to the main game.
+            {loseState.needsLifePurchase
+              ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
+              : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
           </p>
-          <div className="flex flex-col gap-2 w-full">
-            <Button onClick={handleLoseContinue} disabled={busy}>
-              Continue
+          <CheckpointShopPanel
+            isOpen={showLose}
+            warningMessage={
+              loseState.needsLifePurchase
+                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                : ''
+            }
+            onPurchase={handleLoseShopPurchase}
+          />
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
+              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
             </Button>
-            <Button variant="ghost" onClick={handleTryAgainHere} disabled={busy}>
-              Try again here
+            <Button variant="green" onClick={handleLoseExit} disabled={busy}>
+              Exit game
             </Button>
           </div>
         </div>

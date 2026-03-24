@@ -70,10 +70,10 @@ export default function CheckpointShopPanel({
           {warningMessage}
         </p>
       )}
-      <p className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+      <p className="text-sm font-bold text-center" style={{ color: 'var(--color-primary)' }}>
         Your coins
       </p>
-      <p className="text-2xl font-bold mt-1" style={{ color: 'var(--color-primary)' }}>
+      <p className="text-2xl font-bold mt-1 text-center" style={{ color: 'var(--color-primary)' }}>
         Coins {coins}
       </p>
 
