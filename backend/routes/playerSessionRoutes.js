@@ -6,6 +6,7 @@ import {
   buyItem,
   earnMoney,
   loseLife,
+  resetToStart,
   finishPlayer
 } from '../controllers/playerSessionController.js';
 
@@ -17,6 +18,7 @@ router.patch('/:id/checkpoint', updateCheckpoint);
 router.patch('/:id/buy', buyItem);
 router.patch('/:id/earn-money', earnMoney);
 router.patch('/:id/lose-life', loseLife);
+router.patch('/:id/reset-to-start', resetToStart);
 router.patch('/:id/finish', finishPlayer);
 
 export default router;

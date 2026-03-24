@@ -33,9 +33,12 @@ export function applyLosePurchase(result, setLoseState) {
   });
 }
 
-export function handleCheckpointLoseExit(loseState, navigate) {
+export function handleCheckpointLoseExit(loseState, navigate, playerSessionId) {
   if (loseState.needsLifePurchase) {
     resetProgressToCheckpointOne();
+    if (playerSessionId) {
+      playerAPI.resetToStart(playerSessionId).catch(() => {});
+    }
   } else {
     clearUnusedExtraLife();
   }
@@ -43,9 +46,12 @@ export function handleCheckpointLoseExit(loseState, navigate) {
   navigate('/game');
 }
 
-export function handleCheckpointLosePrimaryAction(loseState, navigate, onReplay) {
+export function handleCheckpointLosePrimaryAction(loseState, navigate, onReplay, playerSessionId) {
   if (loseState.needsLifePurchase) {
     resetProgressToCheckpointOne();
+    if (playerSessionId) {
+      playerAPI.resetToStart(playerSessionId).catch(() => {});
+    }
     navigate('/game');
     return;
   }

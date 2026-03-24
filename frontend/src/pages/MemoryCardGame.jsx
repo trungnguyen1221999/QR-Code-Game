@@ -133,10 +133,12 @@ export default function MemoryCardGame() {
 
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
+  const playerSessionId = playerSession?._id || playerSession?.id;
+
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
   const handleLosePrimaryAction = () =>
-    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry);
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry, playerSessionId);
 
   const registerLifeLoss = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
@@ -163,7 +165,7 @@ export default function MemoryCardGame() {
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
-      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate, playerSessionId);
       return;
     }
     navigate('/game');
@@ -287,7 +289,7 @@ export default function MemoryCardGame() {
               All cards are matched. You earned {earnedCoins} coins from the time left.
             </p>
           </div>
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleBackToGame} disabled={busy}>
             Continue
           </Button>
@@ -309,6 +311,7 @@ export default function MemoryCardGame() {
           </div>
           <CheckpointShopPanel
             isOpen={showLose}
+            checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
                 ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'

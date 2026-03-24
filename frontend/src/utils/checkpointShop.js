@@ -5,7 +5,7 @@ export const SHOP_ITEMS = [
     img: '/shop/x2time.png',
     label: 'Time Boost',
     desc: 'Extend the next game time limit by 10 seconds',
-    price: 10,
+    basePrice: 200,
   },
   {
     id: 'life',
@@ -13,13 +13,17 @@ export const SHOP_ITEMS = [
     img: null,
     label: 'Extra Life',
     desc: 'Add one more life to your player',
-    price: 10,
+    basePrice: 200,
   },
 ];
 
+export function getItemPrice(item, checkpoint = 1) {
+  return item.basePrice * checkpoint;
+}
+
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 const PLAYER_POWERUPS_KEY = 'playerGamePowerups';
-export const DEFAULT_PROGRESS = { completed: 0, current: 1, life: 3, coins: 0 };
+export const DEFAULT_PROGRESS = { completed: 0, current: 0, life: 3, coins: 0 };
 const DEFAULT_POWERUPS = { timeBoost: 0, extraLife: 0 };
 
 function readJson(key, fallback) {
@@ -64,15 +68,9 @@ export function applyLossToStoredProgress() {
 }
 
 export function resetProgressToCheckpointOne() {
-  const progress = getPlayerProgress();
-  const reset = {
-    ...progress,
-    completed: 0,
-    current: 1,
-    life: DEFAULT_PROGRESS.life,
-  };
-
+  const reset = { ...DEFAULT_PROGRESS };
   setPlayerProgress(reset);
+  setStoredPowerups(DEFAULT_POWERUPS);
   return reset;
 }
 
@@ -99,20 +97,21 @@ export function clearUnusedExtraLife() {
   return getPlayerProgress();
 }
 
-export function buyCheckpointItem(itemId) {
+export function buyCheckpointItem(itemId, checkpoint = 1) {
   const item = SHOP_ITEMS.find((entry) => entry.id === itemId);
   if (!item) {
     return { ok: false, message: 'Item not found' };
   }
 
+  const price = getItemPrice(item, checkpoint);
   const progress = getPlayerProgress();
   const powerups = getStoredPowerups();
 
-  if ((progress.coins ?? 0) < item.price) {
+  if ((progress.coins ?? 0) < price) {
     return { ok: false, message: 'Not enough coins' };
   }
 
-  const updatedProgress = { ...progress, coins: progress.coins - item.price };
+  const updatedProgress = { ...progress, coins: progress.coins - price };
 
   if (itemId === 'life') {
     updatedProgress.life = (updatedProgress.life ?? DEFAULT_PROGRESS.life) + 1;

@@ -190,10 +190,12 @@ export default function CombinedWordQuizGame() {
 
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
+  const playerSessionId = playerSession?.id;
+
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
   const handleLosePrimaryAction = () =>
-    handleCheckpointLosePrimaryAction(loseState, navigate, resetGame);
+    handleCheckpointLosePrimaryAction(loseState, navigate, resetGame, playerSessionId);
 
   const registerLifeLoss = async () => {
     const playerSessionId = playerSession?.id;
@@ -219,7 +221,7 @@ export default function CombinedWordQuizGame() {
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
-      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate, playerSessionId);
       return;
     }
     navigate('/game');
@@ -389,7 +391,7 @@ export default function CombinedWordQuizGame() {
               {COPY.winText(earnedCoins)}
             </p>
           </div>
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             {COPY.continue}
           </Button>
@@ -411,6 +413,7 @@ export default function CombinedWordQuizGame() {
           </div>
           <CheckpointShopPanel
             isOpen={showLose}
+            checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
                 ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'

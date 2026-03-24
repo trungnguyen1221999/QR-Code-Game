@@ -281,7 +281,7 @@ export default function PuzzlePlacementGame() {
     const summary = await registerLifeLoss();
 
     if (summary.needsLifePurchase) {
-      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate, playerSessionId);
       return;
     }
 
@@ -293,10 +293,12 @@ export default function PuzzlePlacementGame() {
 
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-  const handleLosePrimaryAction = () =>
-    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry);
+  const playerSessionId = playerSession?._id || playerSession?.id;
 
-  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry, playerSessionId);
+
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
@@ -509,7 +511,7 @@ export default function PuzzlePlacementGame() {
             </p>
           </div>
 
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
 
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
@@ -560,6 +562,7 @@ export default function PuzzlePlacementGame() {
 
           <CheckpointShopPanel
             isOpen={showLose}
+            checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
                 ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'

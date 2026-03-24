@@ -255,18 +255,20 @@ export default function TowerBuilderGame() {
     void initializeGame(false);
   }, [canvasDomId, canvasSize.height, canvasSize.width]);
 
-  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
+  const playerSessionId = playerSession?._id || playerSession?.id;
+
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
   const handleLosePrimaryAction = () =>
     handleCheckpointLosePrimaryAction(loseState, navigate, () => {
       void initializeGame(true, true);
-    });
+    }, playerSessionId);
 
   const handleBackExit = () => {
     setBusy(true);
     const summary = registerLifeLoss();
     if (summary.needsLifePurchase) {
-      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate, playerSessionId);
       return;
     }
     navigate('/game');
@@ -383,7 +385,7 @@ export default function TowerBuilderGame() {
               You cleared the tower game!
             </p>
           </div>
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
@@ -405,6 +407,7 @@ export default function TowerBuilderGame() {
           </div>
           <CheckpointShopPanel
             isOpen={showLose}
+            checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
                 ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'

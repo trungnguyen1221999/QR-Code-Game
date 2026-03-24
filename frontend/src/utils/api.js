@@ -39,6 +39,7 @@ export const playerAPI = {
   buy:        (id, body)  => api.patch(`/player-sessions/${id}/buy`, body),
   earnMoney:  (id, body)  => api.patch(`/player-sessions/${id}/earn-money`, body),
   loseLife:   (id)        => api.patch(`/player-sessions/${id}/lose-life`),
+  resetToStart: (id)      => api.patch(`/player-sessions/${id}/reset-to-start`),
   finish:     (id, body)  => api.patch(`/player-sessions/${id}/finish`, body),
 };
 

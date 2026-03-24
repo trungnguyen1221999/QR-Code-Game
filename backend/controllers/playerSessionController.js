@@ -158,6 +158,25 @@ export const loseLife = async (req, res) => {
   }
 };
 
+// PATCH /api/player-sessions/:id/reset-to-start - player loses all lives, reset to checkpoint 0
+export const resetToStart = async (req, res) => {
+  try {
+    const ps = await PlayerSession.findById(req.params.id);
+
+    if (!ps) return res.status(404).json({ message: 'Player session not found' });
+
+    ps.currentCheckpointIndex = 0;
+    ps.lives = 3;
+    ps.money = 0;
+    ps.status = 'active';
+    await ps.save();
+
+    res.json(ps);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // PATCH /api/player-sessions/:id/finish - player finishes the final game (win or game-over)
 export const finishPlayer = async (req, res) => {
   try {

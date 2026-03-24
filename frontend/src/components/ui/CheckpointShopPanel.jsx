@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   addCoinsToProgress,
   buyCheckpointItem,
+  getItemPrice,
   getPlayerProgress,
   SHOP_ITEMS,
 } from '../../utils/checkpointShop';
@@ -14,6 +15,7 @@ export default function CheckpointShopPanel({
   isOpen = false,
   warningMessage = '',
   onPurchase,
+  checkpoint = 1,
 }) {
   const [coins, setCoins] = useState(() => {
     const baseCoins = getPlayerProgress().coins ?? 0;
@@ -48,7 +50,7 @@ export default function CheckpointShopPanel({
   const handleBuy = (itemId) => {
     if (purchasedItems[itemId]) return;
 
-    const result = buyCheckpointItem(itemId);
+    const result = buyCheckpointItem(itemId, checkpoint);
     if (!result.ok) {
       setMessage(result.message);
       return;
@@ -96,11 +98,11 @@ export default function CheckpointShopPanel({
             <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
               <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{item.desc}</p>
-              <p className="text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>Coins {item.price}</p>
+              <p className="text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>Coins {getItemPrice(item, checkpoint)}</p>
             </div>
             <button
               onClick={() => handleBuy(item.id)}
-              disabled={coins < item.price || !!purchasedItems[item.id]}
+              disabled={coins < getItemPrice(item, checkpoint) || !!purchasedItems[item.id]}
               className="rounded-xl px-4 py-2 text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
               style={{
                 backgroundColor: purchasedItems[item.id] ? '#9CA3AF' : 'var(--color-primary)',

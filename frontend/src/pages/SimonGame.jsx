@@ -266,7 +266,7 @@ export default function SimonGame() {
     const summary = await registerLifeLoss();
 
     if (summary.needsLifePurchase) {
-      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate, playerSessionId);
       return;
     }
 
@@ -278,10 +278,12 @@ export default function SimonGame() {
 
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-  const handleLosePrimaryAction = () =>
-    handleCheckpointLosePrimaryAction(loseState, navigate, handleReset);
+  const playerSessionId = playerSession?._id || playerSession?.id;
 
-  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleReset, playerSessionId);
+
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
   const handleWrongInput = async () => {
     setStatus('Wrong pattern!');
@@ -588,6 +590,7 @@ export default function SimonGame() {
           </p>
           <CheckpointShopPanel
             isOpen={showLose}
+            checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
                 ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
