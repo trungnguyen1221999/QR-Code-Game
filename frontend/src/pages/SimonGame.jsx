@@ -20,7 +20,7 @@ import {
   INITIAL_LOSE_STATE,
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 const SIMON_TIME_LIMIT = 120;
 const COINS_PER_SECOND = 2;
@@ -337,33 +337,6 @@ export default function SimonGame() {
       await playSequence(nextSequence);
     }
   };
-
-  const handleBackToGame = async () => {
-    const playerSessionId = playerSession?._id || playerSession?.id;
-    const resultId = `simon-win-${Date.now()}`;
-
-    setBusy(true);
-
-    try {
-      if (playerSessionId) {
-        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
-      }
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      clearUnusedExtraLife();
-      navigate('/game', {
-        state: {
-          justCompleted: true,
-          completedCheckpoint: checkpoint,
-          nextCheckpoint: checkpoint + 1,
-          rewardCoins: 0,
-          resultId,
-        },
-      });
-    }
-  };
-
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
     const resultId = `quiz-win-${Date.now()}`;
