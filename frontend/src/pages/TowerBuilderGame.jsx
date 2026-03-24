@@ -8,6 +8,7 @@ import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI } from '../utils/api';
 import {
+  applyLossToStoredProgress,
   clearUnusedExtraLife,
   getPlayerProgress,
   getInitialGameTime,
@@ -18,7 +19,6 @@ import {
   handleCheckpointLoseExit,
   handleCheckpointLosePrimaryAction,
   INITIAL_LOSE_STATE,
-  registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
@@ -84,6 +84,7 @@ export default function TowerBuilderGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
 
   const [canvasSize, setCanvasSize] = useState(() => getCanvasSize());
+  const [canvasVersion, setCanvasVersion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'tower-builder', location.key));
   const [floors, setFloors] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -96,6 +97,19 @@ export default function TowerBuilderGame() {
   const endedRef = useRef(false);
   const pausedByOverlayRef = useRef(false);
   const initializingRef = useRef(false);
+  const resetTimeOnNextInitRef = useRef(false);
+  const activeGameInstanceRef = useRef(0);
+  const busyRef = useRef(false);
+  const showLoseRef = useRef(false);
+  const canvasDomId = `${CANVAS_ID}-${canvasVersion}`;
+
+  useEffect(() => {
+    busyRef.current = busy;
+  }, [busy]);
+
+  useEffect(() => {
+    showLoseRef.current = showLose;
+  }, [showLose]);
 
   useEffect(() => {
     const handleResize = () => setCanvasSize(getCanvasSize());
@@ -130,8 +144,8 @@ export default function TowerBuilderGame() {
     };
   }, []);
 
-  const stopGame = () => {
-    const game = towerGameRef.current;
+  const stopGame = (gameOverride = null) => {
+    const game = gameOverride ?? towerGameRef.current;
     if (!game) return;
 
     game.setVariable?.('GAME_START_NOW', false);
@@ -144,32 +158,43 @@ export default function TowerBuilderGame() {
     game.pauseBgm?.();
   };
 
-  const registerLifeLoss = async () => {
+  const registerLifeLoss = () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    try {
-      return await registerCheckpointLifeLoss(playerSessionId);
-    } catch (error) {
-      toast.error(error.message);
-      return INITIAL_LOSE_STATE;
+    const summary = applyLossToStoredProgress();
+    if (playerSessionId) {
+      playerAPI.loseLife(playerSessionId).catch((error) => {
+        toast.error(error.message);
+      });
     }
+    return summary;
   };
 
-  const handleLoss = async () => {
-    if (busy || showLose) return;
+  const handleLoss = (instanceId = activeGameInstanceRef.current) => {
+    if (instanceId !== activeGameInstanceRef.current) return;
+    if (busyRef.current || showLoseRef.current) return;
     endedRef.current = true;
     stopGame();
-    setBusy(true);
-    const summary = await registerLifeLoss();
+    const summary = registerLifeLoss();
     setLoseState(summary);
-    setBusy(false);
     setShowLose(true);
   };
 
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-  const initializeGame = async (resetTime = false) => {
+  const initializeGame = async (resetTime = false, remountCanvas = false) => {
+    if (remountCanvas) {
+      stopGame();
+      towerGameRef.current = null;
+      activeGameInstanceRef.current += 1;
+      resetTimeOnNextInitRef.current = resetTime;
+      setCanvasVersion((v) => v + 1);
+      return;
+    }
+
     if (initializingRef.current) return;
     initializingRef.current = true;
+    const shouldResetTime = resetTime || resetTimeOnNextInitRef.current;
+    resetTimeOnNextInitRef.current = false;
     endedRef.current = false;
     setShowWin(false);
     setShowLose(false);
@@ -177,7 +202,7 @@ export default function TowerBuilderGame() {
     setLoseState(INITIAL_LOSE_STATE);
     setFloors(0);
     setBusy(false);
-    if (resetTime) {
+    if (shouldResetTime) {
       setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
     }
 
@@ -188,22 +213,26 @@ export default function TowerBuilderGame() {
         towerGameRef.current.pauseBgm();
       }
 
+      const instanceId = activeGameInstanceRef.current;
+
       const game = window.TowerGame({
         width: canvasSize.width,
         height: canvasSize.height,
-        canvasId: CANVAS_ID,
+        canvasId: canvasDomId,
         soundOn: false,
         setGameSuccess: (successCount) => {
+          if (instanceId !== activeGameInstanceRef.current) return;
           setFloors(successCount);
           if (successCount >= TARGET_FLOORS && !endedRef.current) {
             endedRef.current = true;
-            stopGame();
+            stopGame(game);
             setShowWin(true);
           }
         },
         setGameFailed: (failedCount) => {
+          if (instanceId !== activeGameInstanceRef.current) return;
           if (failedCount >= 3 && !endedRef.current) {
-            void handleLoss();
+            handleLoss(instanceId);
           }
         },
       });
@@ -224,18 +253,18 @@ export default function TowerBuilderGame() {
 
   useEffect(() => {
     void initializeGame(false);
-  }, [canvasSize.height, canvasSize.width]);
+  }, [canvasDomId, canvasSize.height, canvasSize.width]);
 
   const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
 
   const handleLosePrimaryAction = () =>
     handleCheckpointLosePrimaryAction(loseState, navigate, () => {
-      void initializeGame(true);
+      void initializeGame(true, true);
     });
 
-  const handleBackExit = async () => {
+  const handleBackExit = () => {
     setBusy(true);
-    const summary = await registerLifeLoss();
+    const summary = registerLifeLoss();
     if (summary.needsLifePurchase) {
       handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
       return;
@@ -311,7 +340,8 @@ export default function TowerBuilderGame() {
           className="rounded-3xl  flex flex-col items-center"
         >
           <canvas
-            id={CANVAS_ID}
+            key={canvasDomId}
+            id={canvasDomId}
             className="rounded-2xl"
             style={{
               width: canvasSize.width,
