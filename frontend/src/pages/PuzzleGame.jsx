@@ -8,13 +8,18 @@ import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI } from '../utils/api';
 import {
-  applyLossToStoredProgress,
   clearUnusedExtraLife,
   getInitialGameTime,
   getReplayGameTime,
   getPlayerProgress,
-  resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import {
+  applyLosePurchase,
+  handleCheckpointLoseExit,
+  handleCheckpointLosePrimaryAction,
+  INITIAL_LOSE_STATE,
+  registerCheckpointLifeLoss,
+} from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
 const GRID_SIZE = 3;
@@ -98,7 +103,7 @@ export default function PuzzlePlacementGame() {
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
-  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
+  const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
 
   const earnedCoins = Math.max(0, timeLeft * COINS_PER_SECOND);
 
@@ -246,23 +251,18 @@ export default function PuzzlePlacementGame() {
     setShowWin(false);
     setShowLose(false);
     setShowBackConfirm(false);
-    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    setLoseState(INITIAL_LOSE_STATE);
     lossHandledRef.current = false;
   };
 
   const registerLifeLoss = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    const summary = applyLossToStoredProgress();
-
     try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
+      return await registerCheckpointLifeLoss(playerSessionId);
     } catch (error) {
       toast.error(error.message);
+      return INITIAL_LOSE_STATE;
     }
-
-    return summary;
   };
 
   const handleLoss = async () => {
@@ -281,7 +281,8 @@ export default function PuzzlePlacementGame() {
     const summary = await registerLifeLoss();
 
     if (summary.needsLifePurchase) {
-      resetProgressToCheckpointOne();
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      return;
     }
 
     navigate('/game');
@@ -290,34 +291,12 @@ export default function PuzzlePlacementGame() {
   const currentLives = getPlayerProgress().life ?? 0;
   const backWillResetToStart = currentLives <= 1;
 
-  const handleLoseShopPurchase = (result) => {
-    if (result.item?.id !== 'life') return;
+  const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-    setLoseState({
-      remainingLives: result.progress?.life ?? 1,
-      needsLifePurchase: false,
-    });
-  };
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry);
 
-  const handleLosePrimaryAction = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-      navigate('/game');
-      return;
-    }
-
-    handleRetry();
-  };
-
-  const handleLoseExit = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-    } else {
-      clearUnusedExtraLife();
-    }
-
-    navigate('/game');
-  };
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;

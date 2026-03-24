@@ -9,13 +9,18 @@ import Input from '../components/ui/Input';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI } from '../utils/api';
 import {
-  applyLossToStoredProgress,
   clearUnusedExtraLife,
   getPlayerProgress,
   getInitialGameTime,
   getReplayGameTime,
-  resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import {
+  applyLosePurchase,
+  handleCheckpointLoseExit,
+  handleCheckpointLosePrimaryAction,
+  INITIAL_LOSE_STATE,
+  registerCheckpointLifeLoss,
+} from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
 const QUIZ_TIME_LIMIT = 300;
@@ -122,7 +127,7 @@ export default function CombinedWordQuizGame() {
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
-  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
+  const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   const currentQuestion = questions[currentIndex];
@@ -180,51 +185,25 @@ export default function CombinedWordQuizGame() {
     setShowWin(false);
     setShowLose(false);
     setShowBackConfirm(false);
-    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    setLoseState(INITIAL_LOSE_STATE);
   };
 
-  const handleLoseShopPurchase = (result) => {
-    if (result.item?.id !== 'life') return;
+  const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-    setLoseState({
-      remainingLives: result.progress?.life ?? 1,
-      needsLifePurchase: false,
-    });
-  };
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
 
-  const handleLoseExit = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-    } else {
-      clearUnusedExtraLife();
-    }
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, resetGame);
 
-    navigate('/game');
-  };
-
-  const handleLosePrimaryAction = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-      navigate('/game');
-      return;
-    }
-
-    resetGame();
-  };
-
-    const registerLifeLoss = async () => {
-    const playerSessionId =  playerSession?.id; 
-    const summary = applyLossToStoredProgress();
+  const registerLifeLoss = async () => {
+    const playerSessionId = playerSession?.id;
 
     try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
+      return await registerCheckpointLifeLoss(playerSessionId);
     } catch (error) {
       toast.error(error.message);
+      return INITIAL_LOSE_STATE;
     }
-
-    return summary;
   };
 
   const handleLoss = async () => {
@@ -240,7 +219,8 @@ export default function CombinedWordQuizGame() {
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
-      resetProgressToCheckpointOne();
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      return;
     }
     navigate('/game');
   };

@@ -8,13 +8,18 @@ import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI } from '../utils/api';
 import {
-  applyLossToStoredProgress,
   clearUnusedExtraLife,
   getInitialGameTime,
   getReplayGameTime,
   getPlayerProgress,
-  resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import {
+  applyLosePurchase,
+  handleCheckpointLoseExit,
+  handleCheckpointLosePrimaryAction,
+  INITIAL_LOSE_STATE,
+  registerCheckpointLifeLoss,
+} from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
 const SIMON_TIME_LIMIT = 300;
@@ -59,7 +64,7 @@ export default function SimonGame() {
   const [showWin, setShowWin] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
+  const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
 
   const audioContextRef = useRef(null);
   const mountedRef = useRef(true);
@@ -210,7 +215,7 @@ export default function SimonGame() {
     setBackEnabled(true);
     setShowLose(false);
     setShowWin(false);
-    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    setLoseState(INITIAL_LOSE_STATE);
     lossHandledRef.current = false;
     setFlashWrong(false);
     setStatus('Watch the pattern carefully...');
@@ -230,23 +235,18 @@ export default function SimonGame() {
     setStatus('Press Start to begin.');
     setShowLose(false);
     setShowWin(false);
-    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    setLoseState(INITIAL_LOSE_STATE);
     lossHandledRef.current = false;
   };
 
   const registerLifeLoss = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    const summary = applyLossToStoredProgress();
-
     try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
+      return await registerCheckpointLifeLoss(playerSessionId);
     } catch (error) {
       toast.error(error.message);
+      return INITIAL_LOSE_STATE;
     }
-
-    return summary;
   };
 
   const handleLoss = async () => {
@@ -266,7 +266,8 @@ export default function SimonGame() {
     const summary = await registerLifeLoss();
 
     if (summary.needsLifePurchase) {
-      resetProgressToCheckpointOne();
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      return;
     }
 
     navigate('/game');
@@ -275,34 +276,12 @@ export default function SimonGame() {
   const currentLives = getPlayerProgress().life ?? 0;
   const backWillResetToStart = currentLives <= 1;
 
-  const handleLoseShopPurchase = (result) => {
-    if (result.item?.id !== 'life') return;
+  const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
-    setLoseState({
-      remainingLives: result.progress?.life ?? 1,
-      needsLifePurchase: false,
-    });
-  };
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleReset);
 
-  const handleLosePrimaryAction = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-      navigate('/game');
-      return;
-    }
-
-    handleReset();
-  };
-
-  const handleLoseExit = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-    } else {
-      clearUnusedExtraLife();
-    }
-
-    navigate('/game');
-  };
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
 
   const handleWrongInput = async () => {
     setStatus('Wrong pattern!');

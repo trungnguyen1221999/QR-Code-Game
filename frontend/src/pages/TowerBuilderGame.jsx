@@ -8,13 +8,18 @@ import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import { playerAPI } from '../utils/api';
 import {
-  applyLossToStoredProgress,
   clearUnusedExtraLife,
   getPlayerProgress,
   getInitialGameTime,
   getReplayGameTime,
-  resetProgressToCheckpointOne,
 } from '../utils/checkpointShop';
+import {
+  applyLosePurchase,
+  handleCheckpointLoseExit,
+  handleCheckpointLosePrimaryAction,
+  INITIAL_LOSE_STATE,
+  registerCheckpointLifeLoss,
+} from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
 const GAME_TIME_LIMIT = 180;
@@ -85,7 +90,7 @@ export default function TowerBuilderGame() {
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
-  const [loseState, setLoseState] = useState({ remainingLives: null, needsLifePurchase: false });
+  const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const earnedCoins = Math.max(0, timeLeft * 2);
   const towerGameRef = useRef(null);
   const endedRef = useRef(false);
@@ -141,17 +146,12 @@ export default function TowerBuilderGame() {
 
   const registerLifeLoss = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
-    const summary = applyLossToStoredProgress();
-
     try {
-      if (playerSessionId) {
-        await playerAPI.loseLife(playerSessionId);
-      }
+      return await registerCheckpointLifeLoss(playerSessionId);
     } catch (error) {
       toast.error(error.message);
+      return INITIAL_LOSE_STATE;
     }
-
-    return summary;
   };
 
   const handleLoss = async () => {
@@ -165,14 +165,7 @@ export default function TowerBuilderGame() {
     setShowLose(true);
   };
 
-  const handleLoseShopPurchase = (result) => {
-    if (result.item?.id !== 'life') return;
-
-    setLoseState({
-      remainingLives: result.progress?.life ?? 1,
-      needsLifePurchase: false,
-    });
-  };
+  const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
   const initializeGame = async (resetTime = false) => {
     if (initializingRef.current) return;
@@ -181,7 +174,7 @@ export default function TowerBuilderGame() {
     setShowWin(false);
     setShowLose(false);
     setShowBackConfirm(false);
-    setLoseState({ remainingLives: null, needsLifePurchase: false });
+    setLoseState(INITIAL_LOSE_STATE);
     setFloors(0);
     setBusy(false);
     if (resetTime) {
@@ -233,31 +226,19 @@ export default function TowerBuilderGame() {
     void initializeGame(false);
   }, [canvasSize.height, canvasSize.width]);
 
-  const handleLoseExit = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-    } else {
-      clearUnusedExtraLife();
-    }
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate);
 
-    navigate('/game');
-  };
-
-  const handleLosePrimaryAction = () => {
-    if (loseState.needsLifePurchase) {
-      resetProgressToCheckpointOne();
-      navigate('/game');
-      return;
-    }
-
-    void initializeGame(true);
-  };
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, () => {
+      void initializeGame(true);
+    });
 
   const handleBackExit = async () => {
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
-      resetProgressToCheckpointOne();
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate);
+      return;
     }
     navigate('/game');
   };
@@ -347,7 +328,7 @@ export default function TowerBuilderGame() {
             How to win
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Tap the game area to release the hanging block. Build {TARGET_FLOORS} successful floors to clear checkpoint 4.
+            Tap the game area to release the hanging block. Build {TARGET_FLOORS} successful floors to clear checkpoint 1.
           </p>
         </Card>
 
