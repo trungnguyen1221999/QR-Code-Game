@@ -73,7 +73,7 @@ export default function IntroVideoModal({ open, onSkip }) {
       setLeaving(null);
       setFading(false);
       setTextVisible(true);
-    }, 400);
+    }, 1000);
   };
 
   const handleNext = () => {
@@ -101,7 +101,7 @@ export default function IntroVideoModal({ open, onSkip }) {
               position: 'absolute', top: 0, left: 0,
               width: '100%', height: '100%', objectFit: 'cover',
               opacity: fading ? 0 : 1,
-              transition: 'opacity 0.4s ease',
+              transition: 'opacity 1s ease',
               zIndex: 1,
             }}
           />
@@ -113,7 +113,7 @@ export default function IntroVideoModal({ open, onSkip }) {
           alt={scene.title}
           style={{
             width: '100%', height: 'auto', display: 'block',
-            animation: 'imgFadeIn 0.4s ease forwards',
+            animation: 'imgFadeIn 1s ease forwards',
           }}
         />
         <style>{`@keyframes imgFadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
@@ -174,7 +174,7 @@ export default function IntroVideoModal({ open, onSkip }) {
           flexDirection: 'column',
           gap: 12,
           opacity: textVisible ? 1 : 0,
-          transition: 'opacity 0.4s ease',
+          transition: 'opacity 1s ease',
         }}
       >
         <p
@@ -191,7 +191,7 @@ export default function IntroVideoModal({ open, onSkip }) {
           display: 'flex', gap: 10, marginTop: 4,
           opacity: displayed === scene.text ? 1 : 0,
           transform: displayed === scene.text ? 'translateY(0)' : 'translateY(8px)',
-          transition: 'opacity 0.4s ease, transform 0.4s ease',
+          transition: 'opacity 1s ease, transform 1s ease',
           pointerEvents: displayed === scene.text ? 'auto' : 'none',
         }}>
           {current > 0 && (
