@@ -81,14 +81,14 @@ Capybara Quest is a location-based multiplayer game designed for physical events
 
 ## Mini-Games
 
-| Checkpoint | Game | Description | Win Condition | Time Limit |
-|---|---|---|---|---|
-| 1 | **Tower Builder** | Stack platforms to build a tower without falling | Build 12 floors | 180s |
-| 2 | **Whack-A-Mole** | Hit animals (cat, bird, frog, rabbit) as they pop up from 9 holes | Get 10 hits | 120s |
-| 3 | **Word Quiz** | Match pictures to Finnish compound words | 2+ correct out of 10 | 300s |
-| 4 | **Memory Cards** | Flip and match 6 pairs of emoji cards | Match all pairs | 120s |
-| 5 | **Puzzle** | Drag and drop pieces to complete a 3×3 jigsaw | Solve the puzzle | 100s |
-| 6 | **Simon Says** | Repeat a growing color sequence | Complete 5 rounds | 120s |
+| Checkpoint | Game | Description |
+|---|---|---|
+| 1 | **Tower Builder** | Stack platforms to build a tower without falling |
+| 2 | **Whack-A-Mole** | Hit animals (cat, bird, frog, rabbit) as they pop up from 9 holes |
+| 3 | **Word Quiz** | Match pictures to Finnish compound words |
+| 4 | **Memory Cards** | Flip and match pairs of emoji cards |
+| 5 | **Puzzle** | Drag and drop pieces to complete a jigsaw |
+| 6 | **Simon Says** | Repeat a growing color sequence |
 
 ---
 
