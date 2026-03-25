@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit:*)",
+      "Bash(grep -r \"localhost:5000\\\\|api.*url\\\\|baseURL\\\\|BASE_URL\" /c/Users/trung.nguyen/Documents/GitHub/QR-Code-Game/frontend/src/ --include=*.js --include=*.jsx -l)",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

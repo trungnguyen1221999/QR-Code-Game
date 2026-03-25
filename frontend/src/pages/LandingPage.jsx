@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import { sessionAPI, userAPI } from '../utils/api';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 
 const PODIUM = {
@@ -94,7 +94,7 @@ export default function LandingPage({ onLogout }) {
       {/* Mascot + Title */}
       <div className="flex flex-col items-center gap-2 pt-2 pb-6">
         <img src="/capy.gif" alt="Capybara mascot" style={{ height: '100px', objectFit: 'contain' }} />
-        <h1 className="text-4xl font-bold" style={{ color: 'var(--color-primary)' }}>Capy Quest</h1>
+        <h1 className="text-4xl font-bold" style={{ color: 'var(--color-primary)' }}>Capybara Quest</h1>
         <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>Find QR codes. Play games. Win!</p>
       </div>
 

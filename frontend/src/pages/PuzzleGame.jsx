@@ -21,7 +21,7 @@ import {
   INITIAL_LOSE_STATE,
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;

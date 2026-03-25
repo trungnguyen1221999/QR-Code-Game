@@ -7,7 +7,7 @@ import {
   SHOP_ITEMS,
 } from '../../utils/checkpointShop';
 import Button from './Button';
-import Card from './card';
+import Card from './Card';
 
 export default function CheckpointShopPanel({
   earnedCoins = 0,
