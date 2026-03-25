@@ -7,18 +7,28 @@ export default function BackgroundMusic() {
 
   // Start audio on first user interaction with the page
   useEffect(() => {
+    if (started) return;
     const startAudio = () => {
-      if (!started && audioRef.current) {
-        audioRef.current.volume = 0.3;
-        audioRef.current.play().catch(() => {});
-        setStarted(true);
+      if (!audioRef.current) return;
+      // Unlock AudioContext on mobile (required for Android/iOS)
+      const AudioCtx = window.AudioContext || window['webkitAudioContext'];
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        ctx.resume().then(() => ctx.close());
       }
+      audioRef.current.volume = 0.3;
+      audioRef.current.play().catch(() => {});
+      setStarted(true);
     };
     document.addEventListener('click', startAudio, { once: true });
     document.addEventListener('touchstart', startAudio, { once: true });
+    document.addEventListener('touchend', startAudio, { once: true });
+    document.addEventListener('pointerdown', startAudio, { once: true });
     return () => {
       document.removeEventListener('click', startAudio);
       document.removeEventListener('touchstart', startAudio);
+      document.removeEventListener('touchend', startAudio);
+      document.removeEventListener('pointerdown', startAudio);
     };
   }, [started]);
 
