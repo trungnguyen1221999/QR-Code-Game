@@ -127,7 +127,8 @@ export default function PlayerGame() {
 const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [hostEndedCountdown, setHostEndedCountdown] = useState(5);
   const [scanning, setScanning] = useState(false);
-  const [showIntro, setShowIntro] = useState(() => !localStorage.getItem('introPlayed'));
+  const introKey = `introPlayed_${session?.id || session?._id}`;
+  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem(introKey));
 
   // Track completed checkpoints; accept update from challenge page
   const [completed, setCompleted] = useState(initialProgress.completed);
@@ -265,7 +266,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   // Nếu đang show intro video thì chỉ show modal, không show game
   if (showIntro) {
     const handleDone = () => {
-      localStorage.setItem('introPlayed', '1');
+      sessionStorage.setItem(introKey, '1');
       setShowIntro(false);
     };
     return <IntroVideoModal open={true} onSkip={handleDone} />;
