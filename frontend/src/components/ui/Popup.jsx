@@ -20,6 +20,7 @@ export default function Popup({ open, onClose, title, children, showClose = true
     >
       <div
         className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative"
+        style={{ maxHeight: '90vh', overflowY: 'auto' }}
         onClick={e => e.stopPropagation()}
       >
         {showClose && (

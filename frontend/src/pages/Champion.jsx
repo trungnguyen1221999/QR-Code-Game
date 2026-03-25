@@ -1,16 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const MOCK_RANK = 1;
-const MOCK_TOTAL = 12;
-const GAME_DURATION = '30 min';
-
-const MOCK_PLAYERS = [
-  { rank: 1, name: 'Shun',  avatar: '/avatar/avatar1.png', score: 2000 },
-  { rank: 2, name: 'Trung', avatar: '/avatar/avatar2.png', score: 1800 },
-  { rank: 3, name: 'Yan',   avatar: '/avatar/avatar3.png', score: 1750 },
-  { rank: 4, name: 'Helen', avatar: '/avatar/avatar4.png', score: 1510 },
-  { rank: 5, name: 'Helen', avatar: '/avatar/avatar1.png', score: 1510 },
-];
+import { rankPlayers } from '../components/LeaderboardList';
+import { sessionAPI } from '../utils/api';
 
 const STAR_COLORS = { 1: '#FBBF24', 2: '#6366F1', 3: '#EF4444' };
 
@@ -20,7 +11,24 @@ function RankBadge({ rank }) {
 }
 
 export default function Champion() {
-  const navigate = useNavigate();
+  const navigate  = useNavigate();
+  const session   = JSON.parse(localStorage.getItem('session') || 'null');
+  const player    = JSON.parse(localStorage.getItem('player')  || 'null');
+  const sessionId = session?.id || session?._id;
+
+  const [players, setPlayers] = useState([]);
+
+  useEffect(() => {
+    if (!sessionId) return;
+    sessionAPI.getPlayers(sessionId)
+      .then(data => setPlayers(data))
+      .catch(() => {});
+  }, [sessionId]);
+
+  const ranked     = rankPlayers(players);
+  const me         = ranked.find(p => (p.username || p.name) === player?.username);
+  const myRank     = me?.rank ?? '—';
+  const totalCount = ranked.length;
 
   return (
     <div className="min-h-screen flex justify-center relative" style={{
@@ -34,9 +42,9 @@ export default function Champion() {
 
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 pt-8 pb-5 px-5">
-          <span className="text-6xl">🥇</span>
+          <span className="text-6xl">{myRank === 1 ? '🥇' : myRank === 2 ? '🥈' : myRank === 3 ? '🥉' : '🎉'}</span>
           <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>Game completed</h2>
-          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You finished in #{MOCK_RANK} place</p>
+          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You finished in #{myRank} place</p>
           <p className="text-2xl font-bold text-center mt-1" style={{ color: 'var(--color-primary)' }}>
             🎉 Congratulations
           </p>
@@ -52,17 +60,17 @@ export default function Champion() {
         <div className="mx-5 rounded-2xl p-5 mb-5" style={{ backgroundColor: '#FEF3E2' }}>
           <p className="text-xs text-center mb-1" style={{ color: 'var(--color-subtext)' }}>Your rank</p>
           <p className="text-4xl font-bold text-center mb-4" style={{ color: 'var(--color-primary)' }}>
-            #{MOCK_RANK}
+            #{myRank}
           </p>
           <div className="flex justify-around">
             <div className="text-center">
               <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Total players</p>
-              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{MOCK_TOTAL}</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{totalCount || '—'}</p>
             </div>
             <div className="w-px" style={{ backgroundColor: '#E8C99A' }} />
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Game durations</p>
-              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{GAME_DURATION}</p>
+              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Your score</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{me?.score ?? '—'}</p>
             </div>
           </div>
         </div>
@@ -70,27 +78,36 @@ export default function Champion() {
         {/* Final leaderboard */}
         <div className="px-5">
           <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>Final leaderboard</p>
-          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#4AADE8' }}>
-            <div className="flex items-center px-4 py-2.5 gap-2">
-              <span className="w-10 text-xs font-bold text-white">Rank</span>
-              <span className="flex-1 text-xs font-bold text-white">Name</span>
-              <span className="text-xs font-bold text-white">Score</span>
+          {ranked.length === 0 ? (
+            <p className="text-center text-sm py-6" style={{ color: 'var(--color-subtext)' }}>Loading...</p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#4AADE8' }}>
+              <div className="flex items-center px-4 py-2.5 gap-2">
+                <span className="w-10 text-xs font-bold text-white">Rank</span>
+                <span className="flex-1 text-xs font-bold text-white">Name</span>
+                <span className="text-xs font-bold text-white">Score</span>
+              </div>
+              <div className="flex flex-col gap-1 px-2 pb-3">
+                {ranked.map((p) => {
+                  const isMe = (p.username || p.name) === player?.username;
+                  return (
+                    <div key={p._id || p.id || p.name}
+                      className="flex items-center px-3 py-2 rounded-xl gap-2"
+                      style={{ backgroundColor: isMe ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.18)',
+                               border: isMe ? '1.5px solid #86EFAC' : '1.5px solid transparent' }}>
+                      <div className="w-10 flex items-center justify-center">
+                        <RankBadge rank={p.rank} />
+                      </div>
+                      <img src={p.avatar || '/avatar/avatar1.png'} alt={p.username || p.name}
+                        className="w-8 h-8 rounded-full object-cover" />
+                      <span className="flex-1 text-sm font-semibold text-white">{p.username || p.name}</span>
+                      <span className="text-sm font-bold text-white">{p.score ?? 0}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex flex-col gap-1 px-2 pb-3">
-              {MOCK_PLAYERS.map((p, i) => (
-                <div key={i}
-                  className="flex items-center px-3 py-2 rounded-xl gap-2"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.18)' }}>
-                  <div className="w-10 flex items-center justify-center">
-                    <RankBadge rank={p.rank} />
-                  </div>
-                  <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
-                  <span className="flex-1 text-sm font-semibold text-white">{p.name}</span>
-                  <span className="text-sm font-bold text-white">{p.score}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
 
       </div>

@@ -41,7 +41,13 @@
 
 /* ─── Base overrides ─────────────────────────────────────────── */
 @layer base {
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    font-size: 17px;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
 
   * {
     font-family: 'Nunito', sans-serif;
@@ -54,6 +60,11 @@
     font-weight: 700;
     letter-spacing: -0.01em;
   }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.6rem; }
+  h3 { font-size: 1.35rem; }
+  h4 { font-size: 1.15rem; }
 
   button, [role="button"] {
     cursor: pointer;

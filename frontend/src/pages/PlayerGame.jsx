@@ -374,11 +374,11 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
             { label: 'Life',      value: `❤️ ${life}`,         color: '#DC2626', icon: null },
             { label: 'Coins',     value: `🪙 ${coins}`,        color: '#CA8A04', icon: null },
           ].map(({ label, value, color, icon }) => (
-            <Card key={label} className="rounded-xl p-3 flex flex-col items-center gap-1">
-              <span className="text-xs font-medium" style={{ color }}>{label}</span>
+            <Card key={label} className="rounded-xl py-4 px-2 flex flex-col items-center gap-1.5">
+              <span className="text-sm font-semibold" style={{ color }}>{label}</span>
               <div className="flex items-center gap-1">
                 {icon && <span style={{ color }}>{icon}</span>}
-                <span className="text-sm font-bold" style={{ color }}>{value}</span>
+                <span className="text-base font-bold" style={{ color }}>{value}</span>
               </div>
             </Card>
           ))}

@@ -142,7 +142,7 @@ export default function IntroVideoModal({ open, onSkip }) {
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          overflow: 'hidden',
+          overflowY: 'auto',
         }}
       >
         <p
