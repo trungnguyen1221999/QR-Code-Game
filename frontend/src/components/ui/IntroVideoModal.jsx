@@ -3,32 +3,32 @@ import Button from './Button';
 
 const SCENES = [
   {
-    img: '/Scene1.png',
+    img: '/scene1.png',
     title: 'Scene 1',
     text: 'In a vast and peaceful land of forests, rivers, and wildlife, all animals once lived in perfect balance. At the heart of this world stood a great natural kingdom, where harmony was maintained through unity and trust.',
   },
   {
-    img: '/Scene2.png',
+    img: '/scene2.png',
     title: 'Scene 2',
     text: 'But everything changed when a mysterious force known only as "X" took control of the land. The rivers began to dry... The forests grew silent... And the animals turned against each other.',
   },
   {
-    img: '/Scene3.png',
+    img: '/scene3.png',
     title: 'Scene 3',
     text: 'The ancestors of the forest knew that these days would come. They passed down the prophecy from generation to generation about a young capybara gifted by the Finnish forest god Tapio who will save this forest from that tragedy.',
   },
   {
-    img: '/Scene4.png',
+    img: '/scene4.png',
     title: 'Scene 4',
     text: 'The rightful guardian of balance — a young capybara — was born and forced into hiding after the fall of the kingdom.',
   },
   {
-    img: '/Scene5.png',
+    img: '/scene5.png',
     title: 'Scene 5',
     text: 'When the capybara grew up, the guardian animals around him passed down a time-travel magical wand which can open a time portal gifted by the Tapio god to the ancestors — in order to go back to the past and collect powerful items in the forest. Only the worthy heir can awaken the power trapped inside the wand.',
   },
   {
-    img: '/Scene6.png',
+    img: '/scene6.png',
     title: 'Scene 6',
     text: 'The capybara opens the time travel portal with the wand, seeing the past peaceful and beautiful forest. With a backpack on his back, he is ready for the adventure to find the items from the past.',
   },
