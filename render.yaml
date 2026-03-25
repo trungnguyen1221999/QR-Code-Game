@@ -20,3 +20,13 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
+
+  - type: web
+    name: qr-code-game-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://qr-code-game-backend.onrender.com/api
