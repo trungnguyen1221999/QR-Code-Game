@@ -10,9 +10,9 @@ A real-time multiplayer QR code scavenger hunt game where players race through p
 
 | Member | Role |
 |---|---|
-| **Kai** | Backend development, Database design, System architecture, UI, Final challenge game, Deployment |
+| **Kai** | Backend development, Database design, System architecture, UI, Final game, Deployment |
 | **Shun** | Mini-game development, UX flow, UI, Design, Shop system, Ideation, Figma design |
-| **Yan** | Game story & concept, UI, Mini-game development, Design, Presentation slides, Ideation |
+| **Yan** | Game story, UI, Mini-game development, Design, Presentation slides, Ideation |
 
 ---
 
