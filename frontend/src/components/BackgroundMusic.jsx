@@ -1,16 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const DURING_GAME_ROUTES = [
-  '/game', '/waiting-room', '/challenge', '/shop', '/game-over', '/final-shop',
-  '/memory-game', '/whack-a-mole', '/combined-word-quiz',
-  '/puzzle-game', '/simon-game', '/tower-builder', '/leaderboard', '/live-leaderboard', '/champion'
-];
 
 function getRouteTrack(pathname) {
   if (pathname === '/intro') return '/Songs/Opening song 2.mp3';
-  if (DURING_GAME_ROUTES.includes(pathname)) return '/Songs/during game play song 1.mp3';
-  return '/backgroundmusic.mp3';
+   return '/Songs/during game play song 1.mp3';
 }
 
 function getRouteVolume() {
