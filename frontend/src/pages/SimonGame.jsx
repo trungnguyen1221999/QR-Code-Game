@@ -28,10 +28,42 @@ const SIMON_TIME_LIMIT = 120;
 const COINS_PER_SECOND = 2;
 
 const COLORS = [
-  { id: 'green', label: 'Green', base: '#22C55E', glow: '#86EFAC', freq: 329.63 },
-  { id: 'red', label: 'Red', base: '#EF4444', glow: '#FCA5A5', freq: 261.63 },
-  { id: 'yellow', label: 'Yellow', base: '#EAB308', glow: '#FDE047', freq: 392.0 },
-  { id: 'blue', label: 'Blue', base: '#3B82F6', glow: '#93C5FD', freq: 493.88 },
+  {
+    id: 'green',
+    label: 'Owl',
+    animal: 'owl',
+    image: '/images/animals/owl.png',
+    base: '#22C55E',
+    glow: '#86EFAC',
+    freq: 329.63,
+  },
+  {
+    id: 'red',
+    label: 'Fox',
+    animal: 'fox',
+    image: '/images/animals/fox.png',
+    base: '#EF4444',
+    glow: '#FCA5A5',
+    freq: 261.63,
+  },
+  {
+    id: 'yellow',
+    label: 'Bird',
+    animal: 'bird',
+    image: '/images/animals/bird.png',
+    base: '#EAB308',
+    glow: '#FDE047',
+    freq: 392.0,
+  },
+  {
+    id: 'blue',
+    label: 'Deer',
+    animal: 'deer',
+    image: '/images/animals/deer.png',
+    base: '#3B82F6',
+    glow: '#93C5FD',
+    freq: 493.88,
+  },
 ];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -73,10 +105,10 @@ export default function SimonGame() {
   const mountedRef = useRef(true);
   const lossHandledRef = useRef(false);
   const soundsRef = useRef({
-    green: typeof Audio !== 'undefined' ? new Audio('/sounds/green.mp3') : null,
-    red: typeof Audio !== 'undefined' ? new Audio('/sounds/red.mp3') : null,
-    yellow: typeof Audio !== 'undefined' ? new Audio('/sounds/yellow.mp3') : null,
-    blue: typeof Audio !== 'undefined' ? new Audio('/sounds/blue.mp3') : null,
+    green: typeof Audio !== 'undefined' ? new Audio('/sounds/owl.mp3') : null,
+    red: typeof Audio !== 'undefined' ? new Audio('/sounds/fox.mp3') : null,
+    yellow: typeof Audio !== 'undefined' ? new Audio('/sounds/bird.mp3') : null,
+    blue: typeof Audio !== 'undefined' ? new Audio('/sounds/deer.mp3') : null,
     wrong: typeof Audio !== 'undefined' ? new Audio('/sounds/wrong.mp3') : null,
   });
 
@@ -423,28 +455,56 @@ export default function SimonGame() {
           }}
         >
           <div className="grid grid-cols-2 gap-3">
-            {COLORS.map((color) => {
-              const isActive = activeButton === color.id;
+           {COLORS.map((color) => {
+  const isActive = activeButton === color.id;
 
-              return (
-                <button
-                  key={color.id}
-                  type="button"
-                  onClick={() => handleButtonClick(color.id)}
-                  disabled={!canPlayerInput}
-                  className="aspect-square rounded-[28px] border-4 transition-all disabled:cursor-not-allowed"
-                  style={{
-                    borderColor: 'rgba(255,255,255,0.25)',
-                    backgroundColor: isActive ? color.glow : color.base,
-                    transform: isActive ? 'scale(0.96)' : 'scale(1)',
-                    boxShadow: isActive
-                      ? `0 0 0 4px rgba(255,255,255,0.18), 0 0 30px 8px ${color.glow}`
-                      : 'inset 0 -10px 18px rgba(0,0,0,0.22)',
-                  }}
-                  aria-label={color.label}
-                />
-              );
-            })}
+  return (
+    <button
+      key={color.id}
+      type="button"
+      onClick={() => handleButtonClick(color.id)}
+      disabled={!canPlayerInput}
+      className="relative aspect-square overflow-hidden rounded-[28px] border-4 transition-all disabled:cursor-not-allowed"
+      style={{
+        borderColor: 'rgba(255,255,255,0.25)',
+        background: isActive
+          ? `radial-gradient(circle at center, ${color.glow} 0%, ${color.base} 80%)`
+          : color.base,
+        transform: isActive ? 'scale(0.96)' : 'scale(1)',
+        boxShadow: isActive
+          ? `0 0 0 4px rgba(255,255,255,0.18), 0 0 30px 8px ${color.glow}`
+          : 'inset 0 -10px 18px rgba(0,0,0,0.22)',
+      }}
+      aria-label={color.label}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(to bottom right, rgba(255,255,255,0.10), rgba(0,0,0,0.12))`,
+        }}
+      />
+
+      <div className="relative z-10 flex h-full w-full items-center justify-center p-4">
+        <img
+          src={color.image}
+          alt={color.label}
+          className="max-h-[68%] max-w-[68%] object-contain select-none pointer-events-none drop-shadow-[0_6px_10px_rgba(0,0,0,0.35)]"
+          draggable={false}
+        />
+      </div>
+
+      <div
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[11px] font-bold text-white shadow"
+        style={{
+          backgroundColor: 'rgba(0,0,0,0.28)',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        {color.label}
+      </div>
+    </button>
+  );
+})}
           </div>
         </div>
 
