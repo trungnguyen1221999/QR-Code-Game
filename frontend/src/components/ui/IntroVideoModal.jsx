@@ -70,19 +70,19 @@ export default function IntroVideoModal({ open, onSkip }) {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ backgroundColor: '#000', width: '100vw', height: '100vh' }}
+      style={{ backgroundColor: '#000', width: '100vw', height: '100vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
     >
       {/* Image */}
-      <div className="relative overflow-hidden" style={{ height: '50vh', flexShrink: 0 }}>
+      <div className="relative" style={{ flexShrink: 0 }}>
         <img
           key={scene.img}
           src={scene.img}
           alt={scene.title}
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
+            width: '90%',
+            height: 'auto',
             display: 'block',
+            margin: '0 auto',
           }}
         />
 
@@ -137,12 +137,10 @@ export default function IntroVideoModal({ open, onSkip }) {
         style={{
           backgroundColor: 'var(--color-bg)',
           padding: '20px 24px 28px',
-          height: 220,
           flexShrink: 0,
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          overflowY: 'auto',
         }}
       >
         <p
@@ -151,7 +149,6 @@ export default function IntroVideoModal({ open, onSkip }) {
             lineHeight: 1.7,
             color: 'var(--color-text)',
             margin: 0,
-            flex: 1,
           }}
         >
           {displayed}

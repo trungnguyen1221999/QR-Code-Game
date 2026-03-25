@@ -206,7 +206,7 @@ const KEYFRAMES = `
 export default function PageLayout({ children, back, className = '' }) {
   return (
     <div
-      className="min-h-screen flex justify-center relative overflow-hidden"
+      className="min-h-screen flex justify-center relative overflow-x-hidden"
       style={{
         backgroundImage: 'url(/forest2.png)',
         backgroundSize: 'cover',
