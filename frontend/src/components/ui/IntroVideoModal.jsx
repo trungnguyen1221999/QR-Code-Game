@@ -36,8 +36,10 @@ const SCENES = [
 
 export default function IntroVideoModal({ open, onSkip }) {
   const [current, setCurrent] = useState(0);
+  const [leaving, setLeaving] = useState(null);
+  const [fading, setFading] = useState(false);
   const [displayed, setDisplayed] = useState('');
-  const [visible, setVisible] = useState(true);
+  const [textVisible, setTextVisible] = useState(true);
 
   const scene = SCENES[current];
   const isLast = current === SCENES.length - 1;
@@ -63,10 +65,14 @@ export default function IntroVideoModal({ open, onSkip }) {
   if (!open) return null;
 
   const goTo = (next) => {
-    setVisible(false);
+    setLeaving(current);
+    setFading(true);
+    setTextVisible(false);
     setTimeout(() => {
       setCurrent(next);
-      setVisible(true);
+      setLeaving(null);
+      setFading(false);
+      setTextVisible(true);
     }, 400);
   };
 
@@ -85,18 +91,32 @@ export default function IntroVideoModal({ open, onSkip }) {
       style={{ width: '100vw', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
     >
       {/* Image */}
-      <div className="relative" style={{ flexShrink: 0, opacity: visible ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+      <div className="relative" style={{ flexShrink: 0 }}>
+        {/* Leaving image fades out */}
+        {leaving !== null && (
+          <img
+            src={SCENES[leaving].img}
+            alt=""
+            style={{
+              position: 'absolute', top: 0, left: 0,
+              width: '100%', height: '100%', objectFit: 'cover',
+              opacity: fading ? 0 : 1,
+              transition: 'opacity 0.4s ease',
+              zIndex: 1,
+            }}
+          />
+        )}
+        {/* Current image fades in */}
         <img
-          key={scene.img}
+          key={current}
           src={scene.img}
           alt={scene.title}
           style={{
-            width: '100%',
-            height: 'auto',
-            display: 'block',
-            margin: '0 auto',
+            width: '100%', height: 'auto', display: 'block',
+            animation: 'imgFadeIn 0.4s ease forwards',
           }}
         />
+        <style>{`@keyframes imgFadeIn { from { opacity: 0; } to { opacity: 1; } }`}</style>
 
         {/* Skip button */}
         <button
@@ -153,7 +173,7 @@ export default function IntroVideoModal({ open, onSkip }) {
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          opacity: visible ? 1 : 0,
+          opacity: textVisible ? 1 : 0,
           transition: 'opacity 0.4s ease',
         }}
       >
