@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 
 function getRouteTrack(pathname) {
   if (pathname === '/intro') return '/Songs/Opening song 2.mp3';
+  if (pathname === '/final-intro') return '/Songs/middle scene.mp3';
   if (pathname === '/final-win') return '/Songs/CLosing song.mp3';
   return '/Songs/during game play song 1.mp3';
 }
