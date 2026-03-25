@@ -37,6 +37,7 @@ const SCENES = [
 export default function IntroVideoModal({ open, onSkip }) {
   const [current, setCurrent] = useState(0);
   const [displayed, setDisplayed] = useState('');
+  const [visible, setVisible] = useState(true);
 
   const scene = SCENES[current];
   const isLast = current === SCENES.length - 1;
@@ -55,16 +56,21 @@ export default function IntroVideoModal({ open, onSkip }) {
 
   if (!open) return null;
 
+  const goTo = (next) => {
+    setVisible(false);
+    setTimeout(() => {
+      setCurrent(next);
+      setVisible(true);
+    }, 400);
+  };
+
   const handleNext = () => {
-    if (isLast) {
-      onSkip();
-    } else {
-      setCurrent((c) => c + 1);
-    }
+    if (isLast) onSkip();
+    else goTo(current + 1);
   };
 
   const handlePrev = () => {
-    setCurrent((c) => Math.max(0, c - 1));
+    if (current > 0) goTo(current - 1);
   };
 
   return (
@@ -73,7 +79,7 @@ export default function IntroVideoModal({ open, onSkip }) {
       style={{ width: '100vw', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
     >
       {/* Image */}
-      <div className="relative" style={{ flexShrink: 0 }}>
+      <div className="relative" style={{ flexShrink: 0, opacity: visible ? 1 : 0, transition: 'opacity 0.4s ease' }}>
         <img
           key={scene.img}
           src={scene.img}
@@ -141,6 +147,8 @@ export default function IntroVideoModal({ open, onSkip }) {
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.4s ease',
         }}
       >
         <p
