@@ -6,6 +6,16 @@ A real-time multiplayer QR code scavenger hunt game where players race through p
 
 ---
 
+## Team
+
+| Member | Role |
+|---|---|
+| **Kai** | Backend development, Database design, System architecture, UI, Final challenge game, Deployment |
+| **Shun** | Mini-game development, UX flow, UI, Design, Shop system |
+| **Yan** | Game story & concept, UI, Mini-game development, Design, Presentation slides, Ideation |
+
+---
+
 ## Overview
 
 Capybara Quest is a location-based multiplayer game designed for physical events. A host creates a game session and places QR codes at 6 checkpoints around a venue. Players scan each QR code on their phone, complete a mini-game to pass the checkpoint, earn coins to spend at in-game shops, and race to finish all 6 checkpoints before time runs out.
