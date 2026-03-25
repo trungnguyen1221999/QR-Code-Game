@@ -32,6 +32,84 @@ const CROC_CONFIG = [
 ];
 
 
+// ── Story scenes ───────────────────────────────────────────────
+const BEFORE_GAME_TEXT = 'The capybara has collected all the magical items from the past. Now the final trial awaits — cross the ancient bridge over the crocodile-filled waters and claim your destiny!';
+
+const WIN_SCENES = [
+  { img: '/FS1.png', text: 'The capybara steps through the final portal, the magical wand glowing in hand...' },
+  { img: '/FS2.png', text: 'The ancient forest erupts in brilliant light. The air shimmers with long-forgotten magic.' },
+  { img: '/FS3.png', text: 'One by one, the collected items from the past begin to float and radiate power.' },
+  { img: '/FS4.png', text: 'The mysterious force known as "X" shudders. Its dark grip over the land begins to loosen.' },
+  { img: '/FS5.png', text: 'The rivers flow once more — clear, pure, and singing over stones that had been dry for generations.' },
+  { img: '/FS6.png', text: 'Life rushes back into the forest. Trees burst into bloom, birdsong fills every shadow.' },
+  { img: '/FS7.png', text: 'Animals that had turned against one another slowly approach, eyes wide, and bow their heads in peace.' },
+  { img: '/FS8.png', text: 'The great natural kingdom is restored. Its towers glow golden in the light of a new dawn.' },
+  { img: '/FS9.png', text: 'The capybara smiles, sets the wand gently in the earth, and watches the forest breathe again. The prophecy is fulfilled.' },
+];
+
+// ── Shared story viewer (before-game + win scenes) ─────────────
+function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue →' }) {
+  const [current, setCurrent]     = useState(0);
+  const [leaving, setLeaving]     = useState(null);
+  const [fading, setFading]       = useState(false);
+  const [displayed, setDisplayed] = useState('');
+  const [textVisible, setTextVisible] = useState(true);
+  const scene  = scenes[current];
+  const isLast = current === scenes.length - 1;
+
+  useEffect(() => {
+    scenes.forEach(s => { new Image().src = s.img; });
+  }, []);
+
+  useEffect(() => {
+    setDisplayed('');
+    let i = 0;
+    const iv = setInterval(() => {
+      i++; setDisplayed(scene.text.slice(0, i));
+      if (i >= scene.text.length) clearInterval(iv);
+    }, 10);
+    return () => clearInterval(iv);
+  }, [current]);
+
+  const goTo = (next) => {
+    setLeaving(current); setFading(true); setTextVisible(false);
+    setTimeout(() => { setCurrent(next); setLeaving(null); setFading(false); setTextVisible(true); }, 700);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div className="relative" style={{ flexShrink: 0 }}>
+        {leaving !== null && (
+          <img src={scenes[leaving].img} alt="" style={{
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover',
+            opacity: fading ? 0 : 1, transition: 'opacity 1s ease', zIndex: 1,
+          }} />
+        )}
+        <img key={current} src={scene.img} alt="" style={{ width: '100%', height: 'auto', display: 'block', animation: 'imgFadeIn 1s ease forwards' }} />
+        <style>{`@keyframes imgFadeIn { from { opacity:0 } to { opacity:1 } }`}</style>
+        <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
+          {scenes.map((_, i) => (
+            <div key={i} style={{ width: i === current ? 20 : 8, height: 8, borderRadius: 4, backgroundColor: i === current ? 'white' : 'rgba(255,255,255,0.4)', transition: 'width 0.2s' }} />
+          ))}
+        </div>
+      </div>
+      <div style={{ backgroundColor: 'var(--color-bg)', padding: '20px 24px 28px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, opacity: textVisible ? 1 : 0, transition: 'opacity 1s ease' }}>
+        <p style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--color-text)', margin: 0 }}>{displayed}</p>
+        <div style={{ display: 'flex', gap: 10, marginTop: 4, opacity: displayed === scene.text ? 1 : 0, transform: displayed === scene.text ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 1s ease, transform 1s ease', pointerEvents: displayed === scene.text ? 'auto' : 'none' }}>
+          {current > 0 && (
+            <button onClick={() => goTo(current - 1)} style={{ padding: '10px 20px', borderRadius: 12, border: '2px solid #E5E7EB', backgroundColor: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
+              ← Back
+            </button>
+          )}
+          <button onClick={() => isLast ? onDone() : goTo(current + 1)} style={{ flex: 1, padding: '12px 20px', borderRadius: 12, border: 'none', backgroundColor: isLast ? '#22C55E' : 'var(--color-primary)', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 15 }}>
+            {isLast ? lastBtnLabel : 'Next →'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Pure helpers ───────────────────────────────────────────────
 const last = (a) => a[a.length - 1];
 
@@ -284,6 +362,7 @@ export default function FinalChallenge() {
   const [score, setScore]               = useState(0);
   const [scorePopup, setScorePopup]     = useState(null);
   const [scoreVisible, setScoreVisible] = useState(false);
+  const [showBeforeGame, setShowBeforeGame] = useState(true);
   const [showIntro, setShowIntro]       = useState(true);
   const [perfectMsg, setPerfectMsg]     = useState(false);
   const [rewardMsg, setRewardMsg]       = useState(null);
@@ -291,7 +370,7 @@ export default function FinalChallenge() {
   const [showBuddy, setShowBuddy]       = useState(false);
   const [gameOver, setGameOver]         = useState(false);
   const [win, setWin]                   = useState(false);
-  const [showWinVideo, setShowWinVideo] = useState(false);
+  const [winSceneIdx, setWinSceneIdx]   = useState(0);
 
   const redraw = useCallback(() => {
     const c = canvasRef.current;
@@ -447,7 +526,7 @@ export default function FinalChallenge() {
     scoreRef.current = 0;
     setLives(initLives); setBuddyCount(initBuddy); setCurrentIdx(0); setScore(0); setScorePopup(null); setScoreVisible(false);
     setShowIntro(true); setPerfectMsg(false); setLostLife(false);
-    setShowBuddy(false); setGameOver(false); setWin(false); setShowWinVideo(false);
+    setShowBuddy(false); setGameOver(false); setWin(false); setWinSceneIdx(0); setShowBeforeGame(true);
     redraw();
   }, [redraw, initLives, initBuddy]);
 
@@ -596,37 +675,22 @@ export default function FinalChallenge() {
         </div>
       )}
 
-      {/* Win popup */}
-      {win && !showWinVideo && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-8"
-          style={{ backgroundColor: 'rgba(0,0,0,0.75)' }}>
-          <p className="text-5xl">🎉</p>
-          <p className="text-2xl font-black text-white text-center">Congratulations!</p>
-          <p className="text-sm text-white text-center opacity-90 leading-relaxed">
-            You found the way out of the forest!
-          </p>
-          <button
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => { e.stopPropagation(); setShowWinVideo(true); }}
-            className="w-48 py-3 rounded-2xl font-bold text-white text-base"
-            style={{ backgroundColor: '#22C55E' }}>
-            ▶ Go
-          </button>
-        </div>
+      {/* Before-game story scene */}
+      {showBeforeGame && (
+        <StoryModal
+          scenes={[{ img: '/beforeFinalGame.png', text: BEFORE_GAME_TEXT }]}
+          onDone={() => setShowBeforeGame(false)}
+          lastBtnLabel="Start Adventure →"
+        />
       )}
 
-      {/* Win video */}
-      {showWinVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-          <video src="/intro.mp4" autoPlay controls={false}
-            style={{ width: '100vw', height: '100vh', objectFit: 'cover', maxWidth: '100vw', maxHeight: '100vh', aspectRatio: '9/16' }}
-            onEnded={goToLeaderboard} className="win-video-responsive" />
-          <button onClick={goToLeaderboard}
-            style={{ position: 'fixed', top: 24, right: 24, zIndex: 100, background: 'rgba(0,0,0,0.5)', color: 'white', border: 'none', borderRadius: 8, padding: '10px 22px', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
-            Skip
-          </button>
-          <style>{`@media (min-width: 600px) { .win-video-responsive { width: auto !important; height: 100vh !important; } }`}</style>
-        </div>
+      {/* Win scenes FS1–FS9 */}
+      {win && (
+        <StoryModal
+          scenes={WIN_SCENES}
+          onDone={goToLeaderboard}
+          lastBtnLabel="See Leaderboard →"
+        />
       )}
 
       {/* Game Over */}
