@@ -257,6 +257,7 @@ function initState(lives = 1, buddyCount = 0) {
     trees, lives, buddyCount,
     currentPlatformIdx: 0,
     buddyBridge: null,
+    buddyUsed: false,
   };
 }
 
@@ -379,7 +380,8 @@ export default function FinalChallenge() {
               if (reward) { setRewardMsg(reward); setTimeout(() => setRewardMsg(null), 2000); }
             }
             if (buddyHelped) {
-              g.buddyCount -= 1; setBuddyCount(g.buddyCount);
+              // Defer decrement to transitioning — decrementing here breaks platformHit tol during walking
+              g.buddyUsed = true;
               const farX = last(g.sticks).x + last(g.sticks).length;
               g.buddyBridge = { from: farX, to: hit.x };
               setShowBuddy(true); setTimeout(() => setShowBuddy(false), 1500); playBuddySound();
@@ -410,6 +412,7 @@ export default function FinalChallenge() {
           setCurrentIdx(g.currentPlatformIdx);
           g.sticks.push({ x: hit.x + hit.w, length: 0, rotation: 0 });
           g.buddyBridge = null;
+          if (g.buddyUsed) { g.buddyUsed = false; g.buddyCount -= 1; setBuddyCount(g.buddyCount); }
           if (g.currentPlatformIdx >= WIN_CHECKPOINTS) {
             cancelAnimationFrame(rafRef.current); redraw(); setWin(true);
             // Submit score + finishedAt to backend
