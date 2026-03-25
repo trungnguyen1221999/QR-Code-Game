@@ -62,6 +62,13 @@ export default function IntroVideoModal({ open, onSkip }) {
     SCENES.forEach(s => { new Image().src = s.img; });
   }, [open]);
 
+  // Override background music while intro is open
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('music-override', {
+      detail: { track: open ? '/Songs/Opening song 2.mp3' : null },
+    }));
+  }, [open]);
+
   if (!open) return null;
 
   const goTo = (next) => {
