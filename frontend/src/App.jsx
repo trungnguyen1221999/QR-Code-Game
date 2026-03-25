@@ -27,6 +27,7 @@ import Champion from './pages/Champion';
 import AvatarSelect from './pages/AvatarSelect';
 import NotFound from './pages/NotFound';
 import IntroPage from './pages/IntroPage';
+import FinalWinPage from './pages/FinalWinPage';
 import BackgroundMusic from './components/BackgroundMusic';
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
         <Route path="/game-over" element={<GameOver />} />
         <Route path="/final-shop" element={<FinalShop />} />
         <Route path="/final-challenge" element={<FinalChallenge />} />
+        <Route path="/final-win" element={<FinalWinPage />} />
         <Route path="/live-leaderboard" element={<LiveLeaderboard />} />
         <Route path="/champion" element={<Champion />} />
         <Route path="*" element={<NotFound />} />
