@@ -4,7 +4,6 @@ import { QrCode, Camera, Trophy, LogOut, ScanLine, Clock } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
-import IntroVideoModal from '../components/ui/IntroVideoModal';
 import { playerAPI, sessionAPI } from '../utils/api';
 import Card from '../components/ui/Card';
 
@@ -128,7 +127,13 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [hostEndedCountdown, setHostEndedCountdown] = useState(5);
   const [scanning, setScanning] = useState(false);
   const introKey = `introPlayed_${session?.id || session?._id}`;
-  const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem(introKey));
+
+  // Redirect to intro page if not yet played
+  useEffect(() => {
+    if (!sessionStorage.getItem(introKey)) {
+      navigate('/intro', { replace: true });
+    }
+  }, []);
 
   // Track completed checkpoints; accept update from challenge page
   const [completed, setCompleted] = useState(initialProgress.completed);
@@ -262,15 +267,6 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
       navigate(getCheckpointRoute(current), { state: { checkpoint: current } });
     }, 3000);
   };
-
-  // Nếu đang show intro video thì chỉ show modal, không show game
-  if (showIntro) {
-    const handleDone = () => {
-      sessionStorage.setItem(introKey, '1');
-      setShowIntro(false);
-    };
-    return <IntroVideoModal open={true} onSkip={handleDone} />;
-  }
 
   return (
     <PageLayout>

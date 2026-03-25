@@ -4,10 +4,11 @@ import { useLocation } from 'react-router-dom';
 const DURING_GAME_ROUTES = [
   '/game', '/waiting-room', '/challenge', '/shop', '/game-over', '/final-shop',
   '/memory-game', '/whack-a-mole', '/combined-word-quiz',
-  '/puzzle-game', '/simon-game', '/tower-builder','/leaderboard', '/live-leaderboard', '/champion'
+  '/puzzle-game', '/simon-game', '/tower-builder', '/leaderboard', '/live-leaderboard', '/champion'
 ];
 
 function getRouteTrack(pathname) {
+  if (pathname === '/intro') return '/Songs/Opening song 2.mp3';
   if (DURING_GAME_ROUTES.includes(pathname)) return '/Songs/during game play song 1.mp3';
   return '/backgroundmusic.mp3';
 }
@@ -21,19 +22,10 @@ export default function BackgroundMusic() {
   const fadeTimerRef   = useRef(null);
   const [muted,   setMuted]   = useState(false);
   const [started, setStarted] = useState(false);
-  const [override, setOverride] = useState(null); // set by music-override event
-
-  const targetTrack = override ?? getRouteTrack(location.pathname);
-  const targetTrackRef = useRef(null);
+  const targetTrack = getRouteTrack(location.pathname);
+  const targetTrackRef = useRef(null);       // last track actually playing
   const mutedRef = useRef(muted);
   mutedRef.current = muted;
-
-  // Listen for music-override events (e.g. IntroVideoModal)
-  useEffect(() => {
-    const handler = (e) => setOverride(e.detail?.track ?? null);
-    window.addEventListener('music-override', handler);
-    return () => window.removeEventListener('music-override', handler);
-  }, []);
 
   // Unlock + start audio on first user interaction
   useEffect(() => {

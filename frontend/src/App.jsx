@@ -26,6 +26,7 @@ import LiveLeaderboard from './pages/LiveLeaderboard';
 import Champion from './pages/Champion';
 import AvatarSelect from './pages/AvatarSelect';
 import NotFound from './pages/NotFound';
+import IntroPage from './pages/IntroPage';
 import BackgroundMusic from './components/BackgroundMusic';
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
         <Route path="/join" element={<JoinGame onJoin={setPlayer} />} />
         <Route path="/select-avatar" element={<AvatarSelect />} />
         <Route path="/waiting-room" element={<WaitingRoom player={player} />} />
+        <Route path="/intro" element={<IntroPage />} />
         <Route path="/game" element={<PlayerGame />} />
         <Route path="/memory-game" element={<MemoryCardGame />} />
         <Route path="/whack-a-mole" element={<WhackAMoleGame />} />
