@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useState } from 'react';
 import LandingPage from './pages/LandingPage';
@@ -25,6 +25,7 @@ import FinalChallenge from './pages/FinalChallenge';
 import LiveLeaderboard from './pages/LiveLeaderboard';
 import Champion from './pages/Champion';
 import AvatarSelect from './pages/AvatarSelect';
+import NotFound from './pages/NotFound';
 import BackgroundMusic from './components/BackgroundMusic';
 
 function App() {
@@ -61,7 +62,7 @@ function App() {
         <Route path="/final-challenge" element={<FinalChallenge />} />
         <Route path="/live-leaderboard" element={<LiveLeaderboard />} />
         <Route path="/champion" element={<Champion />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <BackgroundMusic />
       <Toaster position="top-center" />
