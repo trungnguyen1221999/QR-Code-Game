@@ -13,6 +13,10 @@ function getRouteTrack(pathname) {
   return '/backgroundmusic.mp3';
 }
 
+function getRouteVolume() {
+  return 1.0;
+}
+
 const FADE_STEPS = 20;
 const FADE_MS    = 600;
 
@@ -23,6 +27,7 @@ export default function BackgroundMusic() {
   const [muted,   setMuted]   = useState(false);
   const [started, setStarted] = useState(false);
   const targetTrack = getRouteTrack(location.pathname);
+  const targetVolume = getRouteVolume();
   const targetTrackRef = useRef(null);       // last track actually playing
   const mutedRef = useRef(muted);
   mutedRef.current = muted;
@@ -35,7 +40,7 @@ export default function BackgroundMusic() {
       const AudioCtx = window.AudioContext || window['webkitAudioContext'];
       if (AudioCtx) { const ctx = new AudioCtx(); ctx.resume().then(() => ctx.close()); }
       audioRef.current.src = targetTrack;
-      audioRef.current.volume = 0.9;
+      audioRef.current.volume = targetVolume;
       audioRef.current.play().catch(() => {});
       targetTrackRef.current = targetTrack;
       setStarted(true);
@@ -79,7 +84,7 @@ export default function BackgroundMusic() {
           let inStep = 0;
           fadeTimerRef.current = setInterval(() => {
             inStep++;
-            audio.volume = Math.min(0.9, 0.9 * inStep / FADE_STEPS);
+            audio.volume = Math.min(targetVolume, targetVolume * inStep / FADE_STEPS);
             if (inStep >= FADE_STEPS) clearInterval(fadeTimerRef.current);
           }, stepTime);
         }
@@ -92,7 +97,7 @@ export default function BackgroundMusic() {
   const handleToggle = () => {
     if (!started && audioRef.current) {
       audioRef.current.src = targetTrack;
-      audioRef.current.volume = 0.9;
+      audioRef.current.volume = targetVolume;
       audioRef.current.play().catch(() => {});
       targetTrackRef.current = targetTrack;
       setStarted(true);
