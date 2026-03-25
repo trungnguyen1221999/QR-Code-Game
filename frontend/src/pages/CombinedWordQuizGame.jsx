@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, Target, Trophy } from 'lucide-react';
+import { Clock, Target } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import Input from '../components/ui/Input';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
+import CheckpointWinReward from '../components/ui/CheckpointWinReward';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -23,7 +24,7 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/card';
 
-const QUIZ_TIME_LIMIT = 300;
+const QUIZ_TIME_LIMIT = 50;
 const PASS_SCORE = 2;
 const TOTAL_QUESTIONS = 10;
 
@@ -374,20 +375,11 @@ export default function CombinedWordQuizGame() {
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
         <div className="flex flex-col items-center gap-4 text-center">
-          <div
-            className="h-16 w-16 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#DCFCE7' }}
-          >
-            <Trophy size={28} style={{ color: '#16A34A' }} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              {COPY.winTitle}
-            </h3>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {COPY.winText(earnedCoins)}
-            </p>
-          </div>
+          <CheckpointWinReward
+            checkpoint={checkpoint}
+            title={COPY.winTitle}
+            message={COPY.winText(earnedCoins)}
+          />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             {COPY.continue}

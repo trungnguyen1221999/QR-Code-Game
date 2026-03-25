@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Trophy } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
+import CheckpointWinReward from '../components/ui/CheckpointWinReward';
 import { playerAPI } from '../utils/api';
 import {
   applyLossToStoredProgress,
@@ -23,7 +23,7 @@ import {
 import Card from '../components/ui/card';
 
 const GAME_TIME_LIMIT = 180;
-const TARGET_FLOORS = 12;
+const TARGET_FLOORS = 2;
 const CANVAS_ID = 'tower-original-canvas';
 
 function formatTime(seconds) {
@@ -371,20 +371,11 @@ export default function TowerBuilderGame() {
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
         <div className="flex flex-col items-center gap-4 text-center">
-          <div
-            className="h-16 w-16 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#DCFCE7' }}
-          >
-            <Trophy size={28} style={{ color: '#16A34A' }} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Tower completed!
-            </h3>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You cleared the tower game!
-            </p>
-          </div>
+          <CheckpointWinReward
+            checkpoint={checkpoint}
+            title="Tower completed!"
+            message="You cleared the tower game!"
+          />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, Play, Trophy, Volume2 } from 'lucide-react';
+import { Clock, Play, Volume2 } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
+import CheckpointWinReward from '../components/ui/CheckpointWinReward';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -534,21 +535,18 @@ export default function SimonGame() {
         </div>
       </Popup>
       <Popup open={showWin} onClose={() => {}} showClose={false}>
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div
-                  className="h-16 w-16 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: '#DCFCE7' }}
-                >
-                  <Trophy size={28} style={{ color: '#16A34A' }} />
-                </div>
-                <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-                  You win
-                </h3>
-                <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-                  Continue
-                </Button>
-              </div>
-            </Popup>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <CheckpointWinReward
+            checkpoint={checkpoint}
+            title="You win"
+            message={`You completed the Simon game and earned ${earnedCoins} coins from the time left.`}
+          />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
+          <Button variant="green" onClick={handleWinContinue} disabled={busy}>
+            Continue
+          </Button>
+        </div>
+      </Popup>
 
       <Popup open={showLose} onClose={() => { }} showClose={false}>
         <div className="flex flex-col items-center gap-3 py-2">

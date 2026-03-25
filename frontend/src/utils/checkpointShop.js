@@ -23,7 +23,7 @@ export function getItemPrice(item, checkpoint = 1) {
 
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 const PLAYER_POWERUPS_KEY = 'playerGamePowerups';
-export const DEFAULT_PROGRESS = { completed: 0, current: 0, life: 3, coins: 0 };
+export const DEFAULT_PROGRESS = { completed: 0, current: 1, life: 3, coins: 0 };
 const DEFAULT_POWERUPS = { timeBoost: 0, extraLife: 0 };
 
 function readJson(key, fallback) {

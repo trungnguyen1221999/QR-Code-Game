@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Clock, Target, Trophy } from 'lucide-react';
+import { Clock, Target } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
+import CheckpointWinReward from '../components/ui/CheckpointWinReward';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -23,7 +24,7 @@ import {
 import Card from '../components/ui/card';
 
 const GAME_TIME_LIMIT = 120;
-const WINNING_SCORE = 10;
+const WINNING_SCORE = 1;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMAL_SPAWN_INTERVAL = 1300;
@@ -595,20 +596,11 @@ export default function WhackAMoleGame() {
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
         <div className="flex flex-col items-center gap-4 text-center">
-          <div
-            className="h-16 w-16 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#DCFCE7' }}
-          >
-            <Trophy size={28} style={{ color: '#16A34A' }} />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Nice job!
-            </h3>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              You reached the target score and earned {earnedCoins} coins.
-            </p>
-          </div>
+          <CheckpointWinReward
+            checkpoint={checkpoint}
+            title="Nice job!"
+            message={`You reached the target score and earned ${earnedCoins} coins.`}
+          />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
