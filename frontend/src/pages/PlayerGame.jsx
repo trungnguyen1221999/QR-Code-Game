@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import IntroVideoModal from '../components/ui/IntroVideoModal';
 import { playerAPI, sessionAPI } from '../utils/api';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;

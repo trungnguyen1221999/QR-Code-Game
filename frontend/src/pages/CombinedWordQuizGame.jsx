@@ -21,7 +21,7 @@ import {
   INITIAL_LOSE_STATE,
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 const QUIZ_TIME_LIMIT = 300;
 const PASS_SCORE = 2;

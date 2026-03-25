@@ -20,7 +20,7 @@ import {
   INITIAL_LOSE_STATE,
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 const GAME_TIME_LIMIT = 120;
 const WINNING_SCORE = 10;

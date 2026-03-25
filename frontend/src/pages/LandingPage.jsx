@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import { sessionAPI, userAPI } from '../utils/api';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 
 const PODIUM = {

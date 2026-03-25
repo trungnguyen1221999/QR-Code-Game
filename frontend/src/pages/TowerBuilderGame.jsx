@@ -20,7 +20,7 @@ import {
   handleCheckpointLosePrimaryAction,
   INITIAL_LOSE_STATE,
 } from '../utils/checkpointLoseFlow';
-import Card from '../components/ui/card';
+import Card from '../components/ui/Card';
 
 const GAME_TIME_LIMIT = 180;
 const TARGET_FLOORS = 12;
