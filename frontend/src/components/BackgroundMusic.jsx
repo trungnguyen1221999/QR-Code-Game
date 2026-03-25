@@ -1,19 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
-const MINI_GAME_ROUTES = [
+const DURING_GAME_ROUTES = [
+  '/game', '/waiting-room', '/challenge', '/shop', '/game-over', '/final-shop',
   '/memory-game', '/whack-a-mole', '/combined-word-quiz',
   '/puzzle-game', '/simon-game', '/tower-builder',
 ];
 const LEADERBOARD_ROUTES = ['/leaderboard', '/live-leaderboard', '/champion'];
-const MIDDLE_ROUTES = ['/game', '/waiting-room', '/challenge', '/shop', '/game-over', '/final-shop'];
-const FINAL_ROUTES = ['/final-challenge'];
 
 function getRouteTrack(pathname) {
-  if (MINI_GAME_ROUTES.includes(pathname))   return '/Songs/during game play song 1.mp3';
+  if (DURING_GAME_ROUTES.includes(pathname)) return '/Songs/during game play song 1.mp3';
   if (LEADERBOARD_ROUTES.includes(pathname)) return '/Songs/CLosing song.mp3';
-  if (MIDDLE_ROUTES.includes(pathname))      return '/Songs/middle scene.mp3';
-  if (FINAL_ROUTES.includes(pathname))       return '/backgroundmusic.mp3';
   return '/backgroundmusic.mp3';
 }
 

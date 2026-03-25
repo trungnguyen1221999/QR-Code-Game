@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import useBlockBack from '../hooks/useBlockBack';
 import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
@@ -78,6 +79,7 @@ function safelyTogglePause(game, shouldPause, pausedRef) {
 }
 
 export default function TowerBuilderGame() {
+  useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
   const checkpoint = location.state?.checkpoint ?? 4;

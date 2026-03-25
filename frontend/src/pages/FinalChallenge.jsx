@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import useBlockBack from '../hooks/useBlockBack';
 import { playerAPI } from '../utils/api';
 
 // ── Constants ──────────────────────────────────────────────────
@@ -261,6 +262,7 @@ function initState(lives = 1, buddyCount = 0) {
 
 // ── Component ──────────────────────────────────────────────────
 export default function FinalChallenge() {
+  useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
 

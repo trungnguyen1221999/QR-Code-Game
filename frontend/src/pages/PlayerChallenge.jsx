@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import useBlockBack from '../hooks/useBlockBack';
 import { CheckCircle, XCircle, Lightbulb } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
@@ -51,6 +52,7 @@ const QUESTIONS = [
 ];
 
 export default function PlayerChallenge() {
+  useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
   const checkpointIndex = location.state?.checkpoint ?? 3;

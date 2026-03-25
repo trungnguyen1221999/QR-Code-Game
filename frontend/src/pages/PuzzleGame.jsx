@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import useBlockBack from '../hooks/useBlockBack';
 import toast from 'react-hot-toast';
 import { Clock, Puzzle } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
@@ -81,6 +82,7 @@ function getDistance(a, b) {
 }
 
 export default function PuzzlePlacementGame() {
+  useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
 

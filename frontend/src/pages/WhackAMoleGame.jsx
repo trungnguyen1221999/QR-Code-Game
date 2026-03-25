@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import useBlockBack from '../hooks/useBlockBack';
 import toast from 'react-hot-toast';
 import { Clock, Target } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
@@ -87,6 +88,7 @@ function removeKey(source, keyToRemove) {
 }
 
 export default function WhackAMoleGame() {
+  useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
   const checkpoint = location.state?.checkpoint ?? 2;
