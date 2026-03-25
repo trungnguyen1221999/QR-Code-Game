@@ -212,20 +212,20 @@ npm run dev
 
 ### Environment Variables
 
-**Backend `.env`**
+**Backend `backend/.env`**
 ```
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=your_mongodb_connection_string
-CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_key
-CLOUDINARY_API_SECRET=your_cloudinary_secret
-FRONTEND_URL=http://localhost:5173
+PORT=
+NODE_ENV=
+MONGODB_URI=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+FRONTEND_URL=
 ```
 
-**Frontend `.env`**
+**Frontend `frontend/.env`**
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=
 ```
 
 ---
