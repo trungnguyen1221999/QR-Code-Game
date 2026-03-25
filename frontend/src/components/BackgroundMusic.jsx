@@ -48,7 +48,7 @@ export default function BackgroundMusic() {
       const AudioCtx = window.AudioContext || window['webkitAudioContext'];
       if (AudioCtx) { const ctx = new AudioCtx(); ctx.resume().then(() => ctx.close()); }
       audioRef.current.src = targetTrack;
-      audioRef.current.volume = 0.3;
+      audioRef.current.volume = 0.9;
       audioRef.current.play().catch(() => {});
       targetTrackRef.current = targetTrack;
       setStarted(true);
@@ -92,7 +92,7 @@ export default function BackgroundMusic() {
           let inStep = 0;
           fadeTimerRef.current = setInterval(() => {
             inStep++;
-            audio.volume = Math.min(0.3, 0.3 * inStep / FADE_STEPS);
+            audio.volume = Math.min(0.9, 0.9 * inStep / FADE_STEPS);
             if (inStep >= FADE_STEPS) clearInterval(fadeTimerRef.current);
           }, stepTime);
         }
@@ -105,7 +105,7 @@ export default function BackgroundMusic() {
   const handleToggle = () => {
     if (!started && audioRef.current) {
       audioRef.current.src = targetTrack;
-      audioRef.current.volume = 0.3;
+      audioRef.current.volume = 0.9;
       audioRef.current.play().catch(() => {});
       targetTrackRef.current = targetTrack;
       setStarted(true);
