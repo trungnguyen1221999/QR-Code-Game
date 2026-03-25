@@ -73,7 +73,7 @@ export default function IntroVideoModal({ open, onSkip }) {
       setLeaving(null);
       setFading(false);
       setTextVisible(true);
-    }, 1000);
+    }, 700)
   };
 
   const handleNext = () => {
