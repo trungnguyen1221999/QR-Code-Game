@@ -4,13 +4,11 @@ import { useLocation } from 'react-router-dom';
 const DURING_GAME_ROUTES = [
   '/game', '/waiting-room', '/challenge', '/shop', '/game-over', '/final-shop',
   '/memory-game', '/whack-a-mole', '/combined-word-quiz',
-  '/puzzle-game', '/simon-game', '/tower-builder',
+  '/puzzle-game', '/simon-game', '/tower-builder','/leaderboard', '/live-leaderboard', '/champion'
 ];
-const LEADERBOARD_ROUTES = ['/leaderboard', '/live-leaderboard', '/champion'];
 
 function getRouteTrack(pathname) {
   if (DURING_GAME_ROUTES.includes(pathname)) return '/Songs/during game play song 1.mp3';
-  if (LEADERBOARD_ROUTES.includes(pathname)) return '/Songs/CLosing song.mp3';
   return '/backgroundmusic.mp3';
 }
 
