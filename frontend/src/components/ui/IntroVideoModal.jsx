@@ -49,7 +49,7 @@ export default function IntroVideoModal({ open, onSkip }) {
       i++;
       setDisplayed(scene.text.slice(0, i));
       if (i >= scene.text.length) clearInterval(interval);
-    }, 18);
+    }, 10);
     return () => clearInterval(interval);
   }, [current, open]);
 
@@ -70,7 +70,7 @@ export default function IntroVideoModal({ open, onSkip }) {
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ width: '100vw', height: '100vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
+      style={{ width: '100vw', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
     >
       {/* Image */}
       <div className="relative" style={{ flexShrink: 0 }}>
@@ -153,7 +153,13 @@ export default function IntroVideoModal({ open, onSkip }) {
         >
           {displayed}
         </p>
-        <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+        <div style={{
+          display: 'flex', gap: 10, marginTop: 4,
+          opacity: displayed === scene.text ? 1 : 0,
+          transform: displayed === scene.text ? 'translateY(0)' : 'translateY(8px)',
+          transition: 'opacity 0.4s ease, transform 0.4s ease',
+          pointerEvents: displayed === scene.text ? 'auto' : 'none',
+        }}>
           {current > 0 && (
             <Button variant="ghost" onClick={handlePrev}>
               ← Back
