@@ -54,6 +54,12 @@ export default function IntroVideoModal({ open, onSkip }) {
     return () => clearInterval(interval);
   }, [current, open]);
 
+  // Preload all scene images
+  useEffect(() => {
+    if (!open) return;
+    SCENES.forEach(s => { new Image().src = s.img; });
+  }, [open]);
+
   if (!open) return null;
 
   const goTo = (next) => {
