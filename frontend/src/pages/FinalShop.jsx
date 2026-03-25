@@ -40,7 +40,7 @@ export default function FinalShop() {
   };
 
   const handlePlay = () => {
-    navigate('/final-challenge', {
+    navigate('/final-intro', {
       state: {
         lives:      totalLives,
         buddyCount: boughtBuddy,

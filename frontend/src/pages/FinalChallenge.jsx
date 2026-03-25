@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useBlockBack from '../hooks/useBlockBack';
 import { playerAPI } from '../utils/api';
-import StoryModal from '../components/ui/StoryModal';
+
 
 // ── Constants ──────────────────────────────────────────────────
 const CW = 375, CH = 375;
@@ -32,9 +32,6 @@ const CROC_CONFIG = [
   { base: 0.82, speed: 19, flip: true  },
 ];
 
-
-// ── Story scenes ───────────────────────────────────────────────
-const BEFORE_GAME_TEXT = 'The capybara has collected all the magical items from the past. Now the final trial awaits — cross the ancient bridge over the crocodile-filled waters and claim your destiny!';
 
 // ── Pure helpers ───────────────────────────────────────────────
 const last = (a) => a[a.length - 1];
@@ -288,7 +285,6 @@ export default function FinalChallenge() {
   const [score, setScore]               = useState(0);
   const [scorePopup, setScorePopup]     = useState(null);
   const [scoreVisible, setScoreVisible] = useState(false);
-  const [showBeforeGame, setShowBeforeGame] = useState(true);
   const [showIntro, setShowIntro]       = useState(true);
   const [perfectMsg, setPerfectMsg]     = useState(false);
   const [rewardMsg, setRewardMsg]       = useState(null);
@@ -451,7 +447,7 @@ export default function FinalChallenge() {
     scoreRef.current = 0;
     setLives(initLives); setBuddyCount(initBuddy); setCurrentIdx(0); setScore(0); setScorePopup(null); setScoreVisible(false);
     setShowIntro(true); setPerfectMsg(false); setLostLife(false);
-    setShowBuddy(false); setGameOver(false); setShowBeforeGame(true);
+    setShowBuddy(false); setGameOver(false);
     redraw();
   }, [redraw, initLives, initBuddy]);
 
@@ -598,15 +594,6 @@ export default function FinalChallenge() {
           style={{ backgroundColor: 'rgba(239,68,68,0.25)' }}>
           <p className="text-5xl">💔</p>
         </div>
-      )}
-
-      {/* Before-game story scene */}
-      {showBeforeGame && (
-        <StoryModal
-          scenes={[{ img: '/beforeFinalGame.png', text: BEFORE_GAME_TEXT }]}
-          onDone={() => setShowBeforeGame(false)}
-          lastBtnLabel="Start Adventure →"
-        />
       )}
 
       {/* Game Over */}

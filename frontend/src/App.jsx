@@ -28,6 +28,7 @@ import AvatarSelect from './pages/AvatarSelect';
 import NotFound from './pages/NotFound';
 import IntroPage from './pages/IntroPage';
 import FinalWinPage from './pages/FinalWinPage';
+import FinalIntroPage from './pages/FinalIntroPage';
 import BackgroundMusic from './components/BackgroundMusic';
 
 function App() {
@@ -62,6 +63,7 @@ function App() {
         <Route path="/shop" element={<PlayerShop />} />
         <Route path="/game-over" element={<GameOver />} />
         <Route path="/final-shop" element={<FinalShop />} />
+        <Route path="/final-intro" element={<FinalIntroPage />} />
         <Route path="/final-challenge" element={<FinalChallenge />} />
         <Route path="/final-win" element={<FinalWinPage />} />
         <Route path="/live-leaderboard" element={<LiveLeaderboard />} />
