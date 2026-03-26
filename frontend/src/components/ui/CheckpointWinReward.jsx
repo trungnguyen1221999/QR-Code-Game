@@ -29,7 +29,7 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
       `}</style>
 
       <div
-        className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-[30px]"
+        className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center overflow-hidden rounded-[24px] sm:rounded-[30px]"
         style={{
           background:
             'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.96) 0%, rgba(254,243,199,0.92) 45%, rgba(253,230,138,0.88) 100%)',
@@ -49,20 +49,20 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
         <img
           src={reward.image}
           alt={reward.name}
-          className="relative z-10 h-44 w-44 object-contain drop-shadow-[0_10px_20px_rgba(249,115,22,0.28)]"
+          className="relative z-10 h-32 w-32 sm:h-36 sm:w-36 object-contain drop-shadow-[0_10px_20px_rgba(249,115,22,0.28)]"
           style={{ animation: 'checkpoint-reward-float 2.4s ease-in-out infinite' }}
         />
       </div>
 
       <div>
-        <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+        <h3 className="text-base sm:text-lg font-bold" style={{ color: 'var(--color-text)' }}>
           {title}
         </h3>
-        <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+        <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
           {message}
         </p>
         <p
-          className="mt-3 text-base font-extrabold tracking-[0.01em]"
+          className="mt-2 sm:mt-3 text-sm sm:text-base font-extrabold tracking-[0.01em]"
           style={{
             color: '#B45309',
             animation: 'checkpoint-reward-text-glow 2.2s ease-in-out infinite',

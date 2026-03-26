@@ -66,44 +66,44 @@ export default function CheckpointShopPanel({
   };
 
   return (
-    <div className="w-full rounded-2xl p-4 mt-2" style={{ backgroundColor: '#FFF7ED' }}>
+    <div className="w-full rounded-2xl p-3 mt-2" style={{ backgroundColor: '#FFF7ED' }}>
       {warningMessage && (
-        <p className="text-xs font-bold text-center mb-3" style={{ color: 'var(--color-red)' }}>
+        <p className="text-[11px] font-bold text-center mb-2" style={{ color: 'var(--color-red)' }}>
           {warningMessage}
         </p>
       )}
-      <p className="text-sm font-bold text-center" style={{ color: 'var(--color-primary)' }}>
+      <p className="text-xs sm:text-sm font-bold text-center" style={{ color: 'var(--color-primary)' }}>
         Your coins
       </p>
-      <p className="text-2xl font-bold mt-1 text-center" style={{ color: 'var(--color-primary)' }}>
+      <p className="text-xl sm:text-2xl font-bold mt-1 text-center" style={{ color: 'var(--color-primary)' }}>
         Coins {coins}
       </p>
 
-      <p className="text-sm mt-3" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
+      <p className="text-xs sm:text-sm mt-2 sm:mt-3" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>
         Use your coins to buy power-ups for upcoming rounds
       </p>
 
-      <div className="flex flex-col gap-3 mt-4">
+      <div className="flex flex-col gap-2 mt-3">
         {SHOP_ITEMS.map((item) => (
           <Card
             key={item.id}
-            className="flex items-center gap-3 rounded-2xl px-4 py-3"
+            className="flex items-center gap-2 rounded-2xl px-3 py-2.5"
      
           >
-            <div className="shrink-0 flex items-center justify-center" style={{ width: 40, height: 40 }}>
+            <div className="shrink-0 flex items-center justify-center" style={{ width: 34, height: 34 }}>
               {item.img
-                ? <img src={item.img} className="w-10 h-10 object-contain" alt={item.label} />
-                : <span className="text-3xl">{item.emoji}</span>}
+                ? <img src={item.img} className="w-8 h-8 object-contain" alt={item.label} />
+                : <span className="text-2xl">{item.emoji}</span>}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
-              <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{item.desc}</p>
-              <p className="text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>Coins {getItemPrice(item, checkpoint)}</p>
+              <p className="text-xs sm:text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
+              <p className="text-[11px] sm:text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.35' }}>{item.desc}</p>
+              <p className="text-xs sm:text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>Coins {getItemPrice(item, checkpoint)}</p>
             </div>
             <button
               onClick={() => handleBuy(item.id)}
               disabled={coins < getItemPrice(item, checkpoint) || !!purchasedItems[item.id]}
-              className="rounded-xl px-4 py-2 text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              className="rounded-xl px-3 py-1.5 text-xs sm:text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
               style={{
                 backgroundColor: purchasedItems[item.id] ? '#9CA3AF' : 'var(--color-primary)',
                 color: 'white',
@@ -116,7 +116,7 @@ export default function CheckpointShopPanel({
       </div>
 
       {message && (
-        <p className="text-xs font-semibold mt-3 text-center" style={{ color: 'var(--color-primary)' }}>
+        <p className="text-[11px] sm:text-xs font-semibold mt-2 text-center" style={{ color: 'var(--color-primary)' }}>
           {message}
         </p>
       )}

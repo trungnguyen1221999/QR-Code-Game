@@ -13,7 +13,7 @@ const PERFECT  = 10;
 const HELPER_TOLERANCE = 18;
 const SPD_STRETCH = 4, SPD_TURN = 4, SPD_WALK = 4, SPD_TRANS = 2, SPD_FALL = 2;
 const HERO_W = 40;
-const WIN_CHECKPOINTS = 10;
+const WIN_CHECKPOINTS = 20;
 
 // ── Visual configs ─────────────────────────────────────────────
 const CLOUD_CONFIG = [

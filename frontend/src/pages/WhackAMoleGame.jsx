@@ -25,7 +25,7 @@ import {
 import Card from '../components/ui/Card';
 
 const GAME_TIME_LIMIT = 120;
-const WINNING_SCORE = 1;
+const WINNING_SCORE = 3;
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMAL_SPAWN_INTERVAL = 1300;
