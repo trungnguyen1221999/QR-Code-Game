@@ -356,6 +356,7 @@ export default function SimonGame() {
     if (nextPlayerSequence.length === sequence.length) {
       if (round >= targetRound) {
         setGameStarted(false);
+        addCoinsToProgress(Math.max(0, timeLeft * COINS_PER_SECOND));
         setShowWin(true);
         setStatus('Great job! You completed the Simon game.');
         return;
@@ -603,7 +604,6 @@ export default function SimonGame() {
             title="You win"
             message={`You completed the Simon game and earned ${earnedCoins} coins from the time left.`}
           />
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
