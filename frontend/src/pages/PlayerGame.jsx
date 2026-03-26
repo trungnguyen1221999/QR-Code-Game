@@ -333,17 +333,13 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
             <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
               You have completed {TOTAL_CHECKPOINTS} checkpoints. Ready to make the final challenge.
             </p>
-            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-end"
-              style={{ backgroundColor: '#1a1a2e', minHeight: 160 }}>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-6xl">🎮</span>
-              </div>
-              <button
+            <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-end h-100">
+              <img src="/games/finalGame/finalgamecapybara.png" alt="Final game" className="h-60 object-cover" />
+              <Button className='mt-10' style={{ backgroundColor: 'var(--color-green)' }}
                 onClick={() => navigate('/final-shop', { state: { coins } })}
-                className="relative z-10 w-full py-4 text-white font-bold text-base cursor-pointer"
-                style={{ backgroundColor: 'var(--color-primary)' }}>
+              >
                 ▶ Play final game
-              </button>
+              </Button>
             </div>
           </>
         ) : (
