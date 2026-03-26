@@ -80,7 +80,6 @@ const QUESTION_BANK = [
   { id: 'muistikirja', pictures: ['📝', '📚'], answer: 'muistikirja', hint: 'Kaytetaan muistiinpanoihin' },
   { id: 'pannukakku', pictures: ['🍳', '🍰'], answer: 'pannukakku', hint: 'Littea aamiaisherkku' },
   { id: 'koirankoppi', pictures: ['🐶', '🏠'], answer: 'koirankoppi', hint: 'Pieni koti lemmikille' },
-  { id: 'majakka', pictures: ['💡', '🏠'], answer: 'majakka', hint: 'Ohjaa laivoja rannikon lahella' },
   { id: 'postimies', pictures: ['✉️', '👨'], answer: 'postimies', hint: 'Tuo kirjeet kotiisi' },
   { id: 'teekannu', pictures: ['🫖', '🍲'], answer: 'teekannu', hint: 'Silla kaadetaan kuumaa teeta' },
   { id: 'korvakoru', pictures: ['👂', '💍'], answer: 'korvakoru', hint: 'Koru, jota pidetaan korvassa' },

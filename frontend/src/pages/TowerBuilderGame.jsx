@@ -24,7 +24,7 @@ import {
 import Card from '../components/ui/Card';
 
 const GAME_TIME_LIMIT = 180;
-const TARGET_FLOORS = 2;
+const TARGET_FLOORS = 5;
 const CANVAS_ID = 'tower-original-canvas';
 
 function formatTime(seconds) {
