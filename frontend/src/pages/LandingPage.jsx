@@ -161,7 +161,51 @@ export default function LandingPage({ onLogout }) {
           <Button onClick={() => navigate('/join')}>Join game</Button>
         </Card>
 
-        {/* All Time Ranking */}
+       
+
+        {/* How to play */}
+        <Card>
+          <button
+            onClick={() => setHowToOpen(v => !v)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <LayoutGrid size={22} style={{ color: 'var(--color-primary)' }} />
+              <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>How to play?</h2>
+            </div>
+            <ChevronDown size={18} style={{
+              color: 'var(--color-subtext)',
+              transform: howToOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+            }} />
+          </button>
+          <div style={{
+            maxHeight: howToOpen ? '400px' : '0px',
+            overflow: 'hidden',
+            opacity: howToOpen ? 1 : 0,
+            transition: 'max-height 0.35s ease, opacity 0.25s ease',
+          }}>
+            <div className="flex flex-col gap-5 mt-5">
+              {[
+                { num: 1, color: 'var(--color-orange)', title: 'Scan QR Checkpoints', desc: 'Find and scan 6 QR codes at different locations.' },
+                { num: 2, color: 'var(--color-green)',  title: 'Complete Mini Games',  desc: 'Play 5 unique mini games and earn scores.' },
+                { num: 3, color: 'var(--color-blue)',   title: 'Shop for Power-ups',   desc: 'Use your scores to buy hints, time boosts, and more.' },
+              ].map(({ num, color, title, desc }) => (
+                <div key={num} className="flex items-start gap-4">
+                  <span className="shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                    style={{ backgroundColor: color }}>
+                    {num}
+                  </span>
+                  <div className="flex flex-col gap-1">
+                    <p className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>{title}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+ {/* All Time Ranking */}
         <Card>
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
@@ -233,50 +277,6 @@ export default function LandingPage({ onLogout }) {
             </div>
           </div>
         </Card>
-
-        {/* How to play */}
-        <Card>
-          <button
-            onClick={() => setHowToOpen(v => !v)}
-            className="w-full flex items-center justify-between"
-          >
-            <div className="flex items-center gap-3">
-              <LayoutGrid size={22} style={{ color: 'var(--color-primary)' }} />
-              <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>How to play?</h2>
-            </div>
-            <ChevronDown size={18} style={{
-              color: 'var(--color-subtext)',
-              transform: howToOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s ease',
-            }} />
-          </button>
-          <div style={{
-            maxHeight: howToOpen ? '400px' : '0px',
-            overflow: 'hidden',
-            opacity: howToOpen ? 1 : 0,
-            transition: 'max-height 0.35s ease, opacity 0.25s ease',
-          }}>
-            <div className="flex flex-col gap-5 mt-5">
-              {[
-                { num: 1, color: 'var(--color-orange)', title: 'Scan QR Checkpoints', desc: 'Find and scan 6 QR codes at different locations.' },
-                { num: 2, color: 'var(--color-green)',  title: 'Complete Mini Games',  desc: 'Play 5 unique mini games and earn scores.' },
-                { num: 3, color: 'var(--color-blue)',   title: 'Shop for Power-ups',   desc: 'Use your scores to buy hints, time boosts, and more.' },
-              ].map(({ num, color, title, desc }) => (
-                <div key={num} className="flex items-start gap-4">
-                  <span className="shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                    style={{ backgroundColor: color }}>
-                    {num}
-                  </span>
-                  <div className="flex flex-col gap-1">
-                    <p className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>{title}</p>
-                    <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>{desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Card>
-
       </div>
     </PageLayout>
   );
