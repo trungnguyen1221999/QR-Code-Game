@@ -30,7 +30,7 @@ export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue â†
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+    <div className="fixed inset-0 z-50 flex flex-col" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' , backgroundColor: 'var(--color-bg)'}}>
       <div className="relative" style={{ flexShrink: 0 }}>
         {leaving !== null && (
           <img src={scenes[leaving].img} alt="" style={{
