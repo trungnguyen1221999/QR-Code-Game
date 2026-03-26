@@ -5,7 +5,7 @@ export const SHOP_ITEMS = [
     img: '/shop/x2time.png',
     label: 'Time Boost',
     desc: 'Extend the next game time limit by 10 seconds',
-    basePrice: 200,
+    basePrice: 100,
   },
   {
     id: 'life',
@@ -13,7 +13,7 @@ export const SHOP_ITEMS = [
     img: null,
     label: 'Extra Life',
     desc: 'Add one more life to your player',
-    basePrice: 200,
+    basePrice: 100,
   },
 ];
 
