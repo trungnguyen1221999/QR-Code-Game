@@ -270,7 +270,7 @@ export default function LandingPage({ onLogout }) {
                   <img src={p.avatar} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
                   <span className="flex-1 text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{p.name}</span>
                   <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
-                    {p.score > 0 ? p.score : p.checkpoint > 0 ? `CP${p.checkpoint}` : 0}
+                    {p.score > 0 ? p.score : p.checkpoint > 0 ? `${p.checkpoint}/6` : '0/6'}
                   </span>
                 </div>
               ))}
