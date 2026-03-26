@@ -10,6 +10,7 @@ import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
 import { playerAPI } from '../utils/api';
 import {
+  addCoinsToProgress,
   clearUnusedExtraLife,
   getInitialGameTime,
   getReplayGameTime,
