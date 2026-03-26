@@ -29,7 +29,7 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
       `}</style>
 
       <div
-        className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center overflow-hidden rounded-[24px] sm:rounded-[30px]"
+        className="relative flex h-36 w-36 sm:h-40 sm:w-40 items-center justify-center overflow-hidden rounded-[28px] sm:rounded-[36px]"
         style={{
           background:
             'radial-gradient(circle at 50% 40%, rgba(255,255,255,0.96) 0%, rgba(254,243,199,0.92) 45%, rgba(253,230,138,0.88) 100%)',
@@ -49,7 +49,7 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
         <img
           src={reward.image}
           alt={reward.name}
-          className="relative z-10 h-32 w-32 sm:h-36 sm:w-36 object-contain drop-shadow-[0_10px_20px_rgba(249,115,22,0.28)]"
+          className="relative z-10 h-40 object-contain drop-shadow-[0_10px_20px_rgba(249,115,22,0.28)]"
           style={{ animation: 'checkpoint-reward-float 2.4s ease-in-out infinite' }}
         />
       </div>
