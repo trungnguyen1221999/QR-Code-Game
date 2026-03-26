@@ -601,7 +601,7 @@ export default function FinalChallenge() {
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5"
           style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}>
           <p className="text-5xl">💀</p>
-          <p className="text-2xl font-black text-white">Game Over</p>
+          <p className="text-2xl font-black text-white">You failed to meet the prophecy of Tapio</p>
           <button
             onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => { e.stopPropagation(); goToLeaderboard(); }}
