@@ -168,6 +168,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
+  const lastQrDataRef = useRef(null); // debounce repeated QR detections
   const introKey = `introPlayed_${session?.id || session?._id}`;
 
   // Redirect to intro page if not yet played
@@ -327,6 +328,12 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
           (result) => {
             if (cancelled) return;
             const data = result?.data ?? '';
+
+            // Ignore if same QR already processed recently
+            if (data === lastQrDataRef.current) return;
+            lastQrDataRef.current = data;
+            setTimeout(() => { lastQrDataRef.current = null; }, 3000);
+
             const match = data.match(/\/checkpoint\/(\d+)/) || data.match(/^CHECKPOINT:(\d+)$/);
 
             if (!match) {
