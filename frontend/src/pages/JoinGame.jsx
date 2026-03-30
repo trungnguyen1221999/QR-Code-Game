@@ -49,7 +49,7 @@ export default function JoinGame({ onJoin }) {
       <div className="pt-4 pb-8">
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
+            
             {existingPlayer ? (
               <p className="font-bold text-base" style={{ color: 'var(--color-primary)' }}>
                 👋 Hello, {existingPlayer.username}!
@@ -120,7 +120,10 @@ export default function JoinGame({ onJoin }) {
             <Button type="submit" variant="green" disabled={loading}>
               {loading ? 'Joining...' : 'Join'}
             </Button>
-
+                {/* Signup GIF */}
+            <div className="flex justify-center">
+              <img src="/join.gif" alt="Sign Up" style={{ height: '180px', objectFit: 'contain' }} />
+            </div>
           </form>
         </Card>
       </div>
