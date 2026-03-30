@@ -2,29 +2,40 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
+import { getSessionDifficulty } from '../utils/constantMiniGame';
 
-const BASE_LIVES = 1;
-const MAX_LIVES  = 6;
-const MAX_BUDDY  = 15;
-const BASE_PRICE = 100;
-const PRICE_STEP = 50;
+const BASE_BUDDY  = 1;
+const MAX_LIVES   = 6;
+const MAX_BUDDY   = 15;
+const BASE_PRICE  = 100;
+const PRICE_STEP  = 50;
+
+function getBaseLives(difficulty) {
+  if (difficulty === 'easy')   return Infinity;
+  if (difficulty === 'normal') return 3;
+  return 2; // hard
+}
 
 const nextPrice = (bought) => BASE_PRICE + bought * PRICE_STEP;
 
 export default function FinalShop() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const baseCoins = location.state?.coins ?? 1000;
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const baseCoins  = location.state?.coins ?? 1000;
+  const difficulty = getSessionDifficulty();
+  const BASE_LIVES = getBaseLives(difficulty);
+  const isEasy     = difficulty === 'easy';
 
   const [coins, setCoins]             = useState(baseCoins);
   const [boughtLives, setBoughtLives] = useState(0);
   const [boughtBuddy, setBoughtBuddy] = useState(0);
 
-  const totalLives = BASE_LIVES + boughtLives;
+  const totalLives = BASE_LIVES === Infinity ? Infinity : BASE_LIVES + boughtLives;
+  const totalBuddy = BASE_BUDDY + boughtBuddy;
   const lifePrice  = nextPrice(boughtLives);
   const buddyPrice = nextPrice(boughtBuddy);
 
-  const canBuyLife  = totalLives < MAX_LIVES && coins >= lifePrice;
+  const canBuyLife  = !isEasy && totalLives < MAX_LIVES && coins >= lifePrice;
   const canBuyBuddy = boughtBuddy < MAX_BUDDY && coins >= buddyPrice;
 
   const buyLife = () => {
@@ -43,7 +54,7 @@ export default function FinalShop() {
     navigate('/final-intro', {
       state: {
         lives:      totalLives,
-        buddyCount: boughtBuddy,
+        buddyCount: totalBuddy,
       },
     });
   };
@@ -71,27 +82,29 @@ export default function FinalShop() {
         {/* Items */}
         <div className="flex flex-col gap-3">
 
-          {/* Extra Life */}
-          <div className="flex items-center gap-3 rounded-2xl px-4 py-3"
-            style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}>
-            <span className="text-3xl shrink-0">❤️</span>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Extra Life</p>
-              <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>Start with one more life.</p>
-              <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--color-primary)' }}>
-                Lives: {totalLives} / {MAX_LIVES}
-              </p>
-              <p className="text-sm font-bold mt-0.5" style={{ color: '#CA8A04' }}>🪙 {lifePrice}</p>
+            {/* Extra Life — hidden in easy mode */}
+          {!isEasy && (
+            <div className="flex items-center gap-3 rounded-2xl px-4 py-3"
+              style={{ backgroundColor: 'white', border: '1px solid var(--color-border)' }}>
+              <span className="text-3xl shrink-0">❤️</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Extra Life</p>
+                <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>Start with one more life.</p>
+                <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--color-primary)' }}>
+                  Lives: {totalLives} / {MAX_LIVES}
+                </p>
+                <p className="text-sm font-bold mt-0.5" style={{ color: '#CA8A04' }}>🪙 {lifePrice}</p>
+              </div>
+              <button
+                onClick={buyLife}
+                disabled={!canBuyLife}
+                className="rounded-xl px-4 py-2 text-sm font-bold shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}
+              >
+                Buy
+              </button>
             </div>
-            <button
-              onClick={buyLife}
-              disabled={!canBuyLife}
-              className="rounded-xl px-4 py-2 text-sm font-bold shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}
-            >
-              Buy
-            </button>
-          </div>
+          )}
 
           {/* Bridge Buddy */}
           <div className="flex items-center gap-3 rounded-2xl px-4 py-3"
@@ -101,7 +114,7 @@ export default function FinalShop() {
               <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Bridge Buddy</p>
               <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>Close misses are forgiven — each use saves 1 fall.</p>
               <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--color-primary)' }}>
-                Uses: {boughtBuddy} / {MAX_BUDDY}
+                Uses: {totalBuddy} / {MAX_BUDDY + BASE_BUDDY}
               </p>
               <p className="text-sm font-bold mt-0.5" style={{ color: '#CA8A04' }}>🪙 {buddyPrice}</p>
             </div>
