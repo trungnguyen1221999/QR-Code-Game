@@ -132,9 +132,9 @@ export default function HostSetup({ onLogout }) {
                 🎯 Game Level
               </label>
               {[
-                { value: 'easy',   label: 'Easy',   desc: 'Unlimited lives — players never reset progress', emoji: '😊' },
-                { value: 'normal', label: 'Normal', desc: 'Start with 5 lives', emoji: '😐' },
-                { value: 'hard',   label: 'Hard',   desc: 'Start with 3 lives', emoji: '💀' },
+                { value: 'easy',   label: 'Easy',   desc: 'Unlimited lives 🌈 — players never lose progress. Perfect for a fun, stress-free adventure!', emoji: '🐣' },
+                { value: 'normal', label: 'Normal', desc: 'Start with 5 lives 💛 — if all lives are lost, restart from checkpoint 1. Mini-games have lower goals and more forgiving time limits.', emoji: '🐾' },
+                { value: 'hard',   label: 'Hard',   desc: 'Start with 3 lives 🔥 — if all lives are lost, restart from checkpoint 1. Mini-games are stricter and time moves faster. For the bravest capybaras only!', emoji: '🌵' },
               ].map(opt => (
                 <button
                   key={opt.value}
