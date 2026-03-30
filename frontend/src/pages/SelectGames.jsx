@@ -197,8 +197,11 @@ export default function SelectGames() {
       });
 
       const img = new Image();
-      img.src = qrDataUrl;
-      await new Promise((res) => { img.onload = res; });
+      await new Promise((res, rej) => {
+        img.onload = res;
+        img.onerror = rej;
+        img.src = qrDataUrl;
+      });
 
       const canvas = document.createElement('canvas');
       canvas.width = QR_SIZE + PADDING * 2;
