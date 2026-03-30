@@ -6,15 +6,12 @@ import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
-import { sessionAPI } from '../utils/api';
-
 export default function HostSetup({ onLogout }) {
   const navigate = useNavigate();
   const host = JSON.parse(localStorage.getItem('host'));
   const [gameName, setGameName] = useState('');
   const [time, setTime] = useState(30);
   const [difficulty, setDifficulty] = useState('easy');
-  const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
     onLogout?.();
@@ -22,7 +19,7 @@ export default function HostSetup({ onLogout }) {
     navigate('/host-login');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!gameName.trim()) {
       toast.error('Please enter a game name');
@@ -33,21 +30,9 @@ export default function HostSetup({ onLogout }) {
       navigate('/host-login');
       return;
     }
-    setLoading(true);
-    try {
-      const session = await sessionAPI.create({
-        hostId: host._id,
-        name: gameName.trim(),
-        totalTime: time,
-        difficulty,
-      });
-      localStorage.setItem('session', JSON.stringify(session));
-      navigate('/host-dashboard');
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
+    navigate('/select-games', {
+      state: { name: gameName.trim(), time, difficulty },
+    });
   };
 
   return (
@@ -158,7 +143,7 @@ export default function HostSetup({ onLogout }) {
               ))}
             </div>
 
-            <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create game'}</Button>
+            <Button type="submit">Next: Select Games</Button>
 
           </form>
         </Card>

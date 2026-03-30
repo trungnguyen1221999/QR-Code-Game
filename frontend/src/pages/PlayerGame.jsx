@@ -18,15 +18,23 @@ function getLivesForDifficulty(difficulty) {
 }
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 
+const DEFAULT_GAME_ORDER = [
+  '/tower-builder',
+  '/whack-a-mole',
+  '/combined-word-quiz',
+  '/memory-game',
+  '/puzzle-game',
+  '/simon-game',
+];
+
 function getCheckpointRoute(checkpoint) {
-  // if (checkpoint === 1) return '/memory-game';
-  if (checkpoint === 1) return '/tower-builder';
-  if (checkpoint === 2) return '/whack-a-mole';
-  if (checkpoint === 3) return '/combined-word-quiz';
-  if (checkpoint === 4) return '/memory-game';
-  if (checkpoint === 5) return '/puzzle-game';
-  if (checkpoint === 6) return '/simon-game';
-  return '/memory-game';
+  try {
+    const session = JSON.parse(localStorage.getItem('session') || 'null');
+    const order = (session?.gameOrder?.length === 6) ? session.gameOrder : DEFAULT_GAME_ORDER;
+    return order[checkpoint - 1] ?? DEFAULT_GAME_ORDER[checkpoint - 1] ?? '/memory-game';
+  } catch {
+    return DEFAULT_GAME_ORDER[checkpoint - 1] ?? '/memory-game';
+  }
 }
 
 function formatTime(secs) {

@@ -6,6 +6,7 @@ import HostLogin from './pages/HostLogin';
 import HostSignUp from './pages/HostSignUp';
 import HostDashboard from './pages/HostDashboard';
 import HostSetup from './pages/HostSetup';
+import SelectGames from './pages/SelectGames';
 import HostGameInProgress from './pages/HostGameInProgress';
 import Leaderboard from './pages/Leaderboard';
 import JoinGame from './pages/JoinGame';
@@ -45,6 +46,7 @@ function App() {
         <Route path="/host-login" element={<HostLogin onLogin={handleLogin} />} />
         <Route path="/host-signup" element={<HostSignUp onLogin={handleLogin} />} />
         <Route path="/host-setup" element={<HostSetup onLogout={handleLogout} />} />
+        <Route path="/select-games" element={<SelectGames />} />
         <Route path="/host-dashboard" element={<HostDashboard onLogout={handleLogout} />} />
         <Route path="/host-game" element={<HostGameInProgress onLogout={handleLogout} />} />
         <Route path="/leaderboard" element={<Leaderboard />} />

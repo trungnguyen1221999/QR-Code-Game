@@ -1,0 +1,304 @@
+import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { X, Download, Check } from 'lucide-react';
+import QRCode from 'qrcode';
+import toast from 'react-hot-toast';
+import PageLayout from '../components/ui/PageLayout';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import { sessionAPI } from '../utils/api';
+
+const AVAILABLE_GAMES = [
+  {
+    id: 'memory',
+    route: '/memory-game',
+    label: 'Memory card game',
+    desc: 'Match pairs of cards by remembering their position',
+    emoji: '🃏',
+    bg: '#FEF3C7',
+  },
+  {
+    id: 'simon',
+    route: '/simon-game',
+    label: 'Simon game',
+    desc: 'Remember and repeat the pattern as long as possible.',
+    emoji: '🎯',
+    bg: '#DBEAFE',
+  },
+  {
+    id: 'puzzle',
+    route: '/puzzle-game',
+    label: 'Puzzle game',
+    desc: 'Arrange the puzzle pieces to form a meaningful picture',
+    emoji: '🧩',
+    bg: '#FCE7F3',
+  },
+  {
+    id: 'whack',
+    route: '/whack-a-mole',
+    label: 'Whack-a-Mole',
+    desc: 'Hit as many moles as possible in a limited time',
+    emoji: '🔨',
+    bg: '#D1FAE5',
+  },
+  {
+    id: 'tower',
+    route: '/tower-builder',
+    label: 'Tower builder',
+    desc: 'Build as high as possible without the tower falling',
+    emoji: '🏗️',
+    bg: '#FEE2E2',
+  },
+  {
+    id: 'quiz',
+    route: '/combined-word-quiz',
+    label: 'Quiz game',
+    desc: 'Guess the correct word or phrase they represent',
+    emoji: '📝',
+    bg: '#EDE9FE',
+  },
+];
+
+const REQUIRED = 6;
+
+export default function SelectGames() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { name, time, difficulty } = location.state ?? {};
+  const host = JSON.parse(localStorage.getItem('host') || 'null');
+
+  // ordered list of selected game ids
+  const [selected, setSelected] = useState([]);
+  const [showManage, setShowManage] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const toggle = (id) => {
+    setSelected((prev) => {
+      if (prev.includes(id)) return prev.filter((x) => x !== id);
+      if (prev.length >= REQUIRED) return prev;
+      return [...prev, id];
+    });
+  };
+
+  const remove = (id) => setSelected((prev) => prev.filter((x) => x !== id));
+
+  const handleDownloadQR = async (gameId) => {
+    const idx = selected.indexOf(gameId);
+    const checkpoint = idx + 1;
+    const qrText = `CHECKPOINT:${checkpoint}`;
+    try {
+      const dataUrl = await QRCode.toDataURL(qrText, { width: 300, margin: 2 });
+      const game = AVAILABLE_GAMES.find((g) => g.id === gameId);
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `checkpoint-${checkpoint}-${game?.id}.png`;
+      a.click();
+    } catch {
+      toast.error('Failed to generate QR');
+    }
+  };
+
+  const handleCreate = async () => {
+    if (selected.length < REQUIRED) {
+      toast.error(`Please select ${REQUIRED} games`);
+      return;
+    }
+    if (!host) {
+      toast.error('Not logged in');
+      navigate('/host-login');
+      return;
+    }
+    setLoading(true);
+    try {
+      const gameOrder = selected.map((id) => AVAILABLE_GAMES.find((g) => g.id === id)?.route);
+      const session = await sessionAPI.create({
+        hostId: host._id,
+        name,
+        totalTime: time,
+        difficulty,
+        gameOrder,
+      });
+      localStorage.setItem('session', JSON.stringify(session));
+      navigate('/host-dashboard');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <PageLayout back="/host-setup">
+      <div className="pt-4 pb-32 flex flex-col gap-4">
+
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Select 6 Games</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-primary)' }}>Choose games and set order</p>
+          </div>
+          <div className="rounded-xl px-3 py-1.5 font-bold text-sm"
+            style={{ backgroundColor: selected.length === REQUIRED ? '#D1FAE5' : '#FEF3E2', color: selected.length === REQUIRED ? '#065F46' : 'var(--color-primary)' }}>
+            {selected.length}/{REQUIRED}
+          </div>
+        </div>
+
+        {/* Instructions */}
+        <Card className="rounded-2xl p-3">
+          <p className="text-xs font-bold mb-1" style={{ color: 'var(--color-text)' }}>ℹ️ Instructions</p>
+          <ul className="text-xs flex flex-col gap-0.5" style={{ color: 'var(--color-subtext)' }}>
+            <li>• Tap games below to select (max {REQUIRED})</li>
+            <li>• View/Manage selected games in bottom panel</li>
+            <li>• Download QR codes for checkpoints</li>
+          </ul>
+        </Card>
+
+        {/* Game list */}
+        <div>
+          <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
+            Available Games ({AVAILABLE_GAMES.length})
+          </p>
+          <div className="flex flex-col gap-2">
+            {AVAILABLE_GAMES.map((game) => {
+              const isSelected = selected.includes(game.id);
+              const order = selected.indexOf(game.id) + 1;
+              return (
+                <button
+                  key={game.id}
+                  onClick={() => toggle(game.id)}
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3 text-left w-full transition-all"
+                  style={{
+                    backgroundColor: isSelected ? '#F0FDF4' : 'var(--color-card, white)',
+                    border: isSelected ? '2px solid #22C55E' : '1px solid var(--color-border, #E5E7EB)',
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                    style={{ backgroundColor: game.bg }}>
+                    {game.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{game.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)', lineHeight: '1.4' }}>{game.desc}</p>
+                  </div>
+                  <div className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: isSelected ? '#22C55E' : 'transparent', border: isSelected ? 'none' : '2px solid #D1D5DB' }}>
+                    {isSelected
+                      ? <Check size={14} color="white" strokeWidth={3} />
+                      : null}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky bottom panel */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4 pt-3"
+        style={{ backgroundColor: 'var(--color-bg, white)', borderTop: '1px solid var(--color-border, #E5E7EB)', maxWidth: 480, margin: '0 auto' }}>
+        {selected.length > 0 ? (
+          <>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+                ✅ Selected Games ({selected.length}/{REQUIRED})
+              </p>
+              <button
+                onClick={() => setShowManage(true)}
+                className="text-xs font-semibold px-3 py-1 rounded-full"
+                style={{ backgroundColor: 'var(--color-info-bg)', color: 'var(--color-primary)' }}
+              >
+                ▾ Manage
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {selected.map((id, idx) => {
+                const game = AVAILABLE_GAMES.find((g) => g.id === id);
+                return (
+                  <span key={id} className="flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1"
+                    style={{ backgroundColor: 'var(--color-info-bg)', color: 'var(--color-primary)' }}>
+                    {idx + 1}. {game?.emoji} {game?.label}
+                    <button onClick={(e) => { e.stopPropagation(); remove(id); }}
+                      className="ml-0.5 opacity-60 hover:opacity-100">
+                      <X size={11} />
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+            <Button variant="green" onClick={handleCreate} disabled={selected.length < REQUIRED || loading}>
+              {loading ? 'Creating...' : selected.length < REQUIRED ? `Select ${REQUIRED - selected.length} More Games` : 'Create Game ▶'}
+            </Button>
+          </>
+        ) : (
+          <p className="text-sm text-center py-1" style={{ color: 'var(--color-subtext)' }}>
+            Tap games above to select them
+          </p>
+        )}
+      </div>
+
+      {/* Manage modal */}
+      {showManage && (
+        <div className="fixed inset-0 z-40 flex items-end" style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
+          onClick={() => setShowManage(false)}>
+          <div className="w-full rounded-t-3xl p-5 flex flex-col gap-3"
+            style={{ backgroundColor: 'white', maxHeight: '80vh', overflowY: 'auto', maxWidth: 480, margin: '0 auto' }}
+            onClick={(e) => e.stopPropagation()}>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-bold text-base flex items-center gap-1.5" style={{ color: 'var(--color-text)' }}>
+                  <span className="text-green-500">✅</span> Selected Games ({selected.length}/{REQUIRED})
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)' }}>Set order and download QR codes</p>
+              </div>
+              <button onClick={() => setShowManage(false)}
+                className="w-7 h-7 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}>
+                <X size={14} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {selected.map((id, idx) => {
+                const game = AVAILABLE_GAMES.find((g) => g.id === id);
+                return (
+                  <Card key={id} className="rounded-2xl p-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
+                        style={{ backgroundColor: game?.bg }}>
+                        {game?.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+                          {idx + 1}. {game?.label}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)', lineHeight: '1.35' }}>
+                          {game?.desc}
+                        </p>
+                      </div>
+                      <button onClick={() => remove(id)}
+                        style={{ color: 'var(--color-red)' }}>
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="mt-2.5">
+                      <button
+                        onClick={() => handleDownloadQR(id)}
+                        className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold w-full justify-center"
+                        style={{ backgroundColor: '#1D4ED8', color: 'white' }}
+                      >
+                        <Download size={12} />
+                        Download QR (Checkpoint {idx + 1})
+                      </button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+
+          </div>
+        </div>
+      )}
+    </PageLayout>
+  );
+}

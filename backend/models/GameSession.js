@@ -45,6 +45,10 @@ const gameSessionSchema = new mongoose.Schema({
     type: String,
     enum: ['easy', 'normal', 'hard'],
     default: 'hard'
+  },
+  gameOrder: {
+    type: [String],
+    default: [],
   }
 }, {
   timestamps: true
