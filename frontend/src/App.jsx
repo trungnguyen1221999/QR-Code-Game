@@ -7,6 +7,7 @@ import HostSignUp from './pages/HostSignUp';
 import HostDashboard from './pages/HostDashboard';
 import HostSetup from './pages/HostSetup';
 import SelectGames from './pages/SelectGames';
+import CheckpointScan from './pages/CheckpointScan';
 import HostGameInProgress from './pages/HostGameInProgress';
 import Leaderboard from './pages/Leaderboard';
 import JoinGame from './pages/JoinGame';
@@ -61,6 +62,7 @@ function App() {
         <Route path="/puzzle-game" element={<PuzzleGame />} />
         <Route path="/simon-game" element={<SimonGame />} />
         <Route path="/tower-builder" element={<TowerBuilderGame />} />
+        <Route path="/checkpoint/:id" element={<CheckpointScan />} />
         <Route path="/challenge" element={<PlayerChallenge />} />
         <Route path="/shop" element={<PlayerShop />} />
         <Route path="/game-over" element={<GameOver />} />

@@ -327,7 +327,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
           (result) => {
             if (cancelled) return;
             const data = result?.data ?? '';
-            const match = data.match(/^CHECKPOINT:(\d+)$/);
+            const match = data.match(/\/checkpoint\/(\d+)/) || data.match(/^CHECKPOINT:(\d+)$/);
 
             if (!match) {
               toast.error('Invalid QR code. Please scan the correct checkpoint QR.');

@@ -191,7 +191,8 @@ export default function SelectGames() {
       const LABEL2 = game?.label ?? '';
 
       // Draw QR onto an offscreen canvas, add text below
-      const qrDataUrl = await QRCode.toDataURL(`CHECKPOINT:${checkpoint}`, {
+      const qrContent = `${window.location.origin}/checkpoint/${checkpoint}`;
+      const qrDataUrl = await QRCode.toDataURL(qrContent, {
         width: QR_SIZE,
         margin: 1,
       });
