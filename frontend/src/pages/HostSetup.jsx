@@ -13,6 +13,7 @@ export default function HostSetup({ onLogout }) {
   const host = JSON.parse(localStorage.getItem('host'));
   const [gameName, setGameName] = useState('');
   const [time, setTime] = useState(30);
+  const [difficulty, setDifficulty] = useState('hard');
   const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
@@ -38,6 +39,7 @@ export default function HostSetup({ onLogout }) {
         hostId: host._id,
         name: gameName.trim(),
         totalTime: time,
+        difficulty,
       });
       localStorage.setItem('session', JSON.stringify(session));
       navigate('/host-dashboard');
@@ -121,6 +123,38 @@ export default function HostSetup({ onLogout }) {
                 '1 Final game',
               ].map(item => (
                 <p key={item} className="text-sm" style={{ color: 'var(--color-subtext)' }}>• {item}</p>
+              ))}
+            </div>
+
+            {/* Game Level */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                🎯 Game Level
+              </label>
+              {[
+                { value: 'easy',   label: 'Easy',   desc: 'Unlimited lives — players never reset progress', emoji: '😊' },
+                { value: 'normal', label: 'Normal', desc: 'Start with 5 lives', emoji: '😐' },
+                { value: 'hard',   label: 'Hard',   desc: 'Start with 3 lives', emoji: '💀' },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setDifficulty(opt.value)}
+                  className="flex items-start gap-3 rounded-xl p-3 text-left transition-all"
+                  style={{
+                    border: difficulty === opt.value ? '2px solid var(--color-primary)' : '2px solid #E5E7EB',
+                    backgroundColor: difficulty === opt.value ? 'var(--color-info-bg)' : 'transparent',
+                  }}
+                >
+                  <div className="mt-0.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center"
+                    style={{ border: '2px solid var(--color-primary)', backgroundColor: difficulty === opt.value ? 'var(--color-primary)' : 'transparent' }}>
+                    {difficulty === opt.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>{opt.emoji} {opt.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)' }}>{opt.desc}</p>
+                  </div>
+                </button>
               ))}
             </div>
 

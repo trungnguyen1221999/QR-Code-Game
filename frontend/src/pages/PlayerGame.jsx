@@ -9,8 +9,13 @@ import Card from '../components/ui/Card';
 
 const TOTAL_SECONDS = 30 * 60;
 const TOTAL_CHECKPOINTS = 6;
-const DEFAULT_LIFE = 3;
 const DEFAULT_COINS = 0;
+
+function getLivesForDifficulty(difficulty) {
+  if (difficulty === 'easy')   return Infinity;
+  if (difficulty === 'normal') return 5;
+  return 3; // hard
+}
 const PLAYER_PROGRESS_KEY = 'playerGameProgress';
 
 function getCheckpointRoute(checkpoint) {
@@ -41,14 +46,14 @@ function getRemainingSessionSeconds(expiresAt, fallback = TOTAL_SECONDS) {
   return Number.isFinite(remainingSeconds) ? remainingSeconds : fallback;
 }
 
-function readSavedProgress() {
+function readSavedProgress(defaultLife) {
   const raw = localStorage.getItem(PLAYER_PROGRESS_KEY);
   if (!raw) {
     return {
       hasSavedProgress: false,
       completed: 0,
       current: 1,
-      life: DEFAULT_LIFE,
+      life: defaultLife,
       coins: DEFAULT_COINS,
     };
   }
@@ -59,7 +64,7 @@ function readSavedProgress() {
       hasSavedProgress: true,
       completed: parsed.completed ?? 0,
       current: parsed.current ?? 1,
-      life: parsed.life ?? DEFAULT_LIFE,
+      life: parsed.life ?? defaultLife,
       coins: parsed.coins ?? DEFAULT_COINS,
     };
   } catch {
@@ -67,7 +72,7 @@ function readSavedProgress() {
       hasSavedProgress: false,
       completed: 0,
       current: 1,
-      life: DEFAULT_LIFE,
+      life: defaultLife,
       coins: DEFAULT_COINS,
     };
   }
@@ -118,7 +123,8 @@ export default function PlayerGame() {
   const player = JSON.parse(localStorage.getItem('player') || 'null');
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
-  const initialProgress = readSavedProgress();
+  const DEFAULT_LIFE = getLivesForDifficulty(session?.difficulty);
+  const initialProgress = readSavedProgress(DEFAULT_LIFE);
   const shouldSkipProgressRefresh = !!(location.state?.justCompleted || location.state?.wrongAnswer);
 
   const [timeLeft, setTimeLeft] = useState(() => getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS));
@@ -160,7 +166,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
           const completedCount = playerSessionData.currentCheckpointIndex ?? 0;
           setCompleted(completedCount);
           setCurrent(Math.min(completedCount + 1, TOTAL_CHECKPOINTS + 1));
-          setLife(playerSessionData.lives ?? DEFAULT_LIFE);
+          setLife(DEFAULT_LIFE === Infinity ? Infinity : (playerSessionData.lives ?? DEFAULT_LIFE));
           setCoins(playerSessionData.money ?? DEFAULT_COINS);
         }
 
@@ -205,7 +211,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
       });
       setCoins(v => v + (state.rewardCoins ?? 50));
     }
-    if (state.wrongAnswer) {
+    if (state.wrongAnswer && DEFAULT_LIFE !== Infinity) {
       const nextLife = life - 1;
       if (nextLife > 0) {
         setLife(nextLife);
@@ -364,7 +370,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
         <div className="grid grid-cols-3 gap-2">
           {[
             { label: 'Time left', value: formatTime(timeLeft), color: '#3B82F6', icon: <Clock size={14} /> },
-            { label: 'Life',      value: `❤️ ${life}`,         color: '#DC2626', icon: null },
+            { label: 'Life',      value: DEFAULT_LIFE === Infinity ? '❤️ ∞' : `❤️ ${life}`, color: '#DC2626', icon: null },
             { label: 'Coins',     value: `🪙 ${coins}`,        color: '#CA8A04', icon: null },
           ].map(({ label, value, color, icon }) => (
             <Card key={label} className="rounded-xl py-4 px-2 flex flex-col items-center gap-1.5">

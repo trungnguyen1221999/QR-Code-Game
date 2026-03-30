@@ -40,6 +40,11 @@ const gameSessionSchema = new mongoose.Schema({
   expiresAt: {
     type: Date,
     default: null
+  },
+  difficulty: {
+    type: String,
+    enum: ['easy', 'normal', 'hard'],
+    default: 'hard'
   }
 }, {
   timestamps: true
