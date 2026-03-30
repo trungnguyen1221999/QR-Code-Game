@@ -84,7 +84,7 @@ export default function CheckpointShopPanel({
       </p>
 
       <div className="flex flex-col gap-2 mt-3">
-        {SHOP_ITEMS.map((item) => (
+        {SHOP_ITEMS.filter((item) => !(item.id === 'life' && getPlayerProgress().life === Infinity)).map((item) => (
           <Card
             key={item.id}
             className="flex items-center gap-2 rounded-2xl px-3 py-2.5"
