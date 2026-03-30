@@ -9,9 +9,9 @@ export const MINI_GAME_CONFIG = {
     hard:   { timeLimit:  90 },
   },
   whackAMole: {
-    easy:   { timeLimit: 150, goal: 2 },
-    normal: { timeLimit: 120, goal: 3 },
-    hard:   { timeLimit:  90, goal: 5 },
+    easy:   { timeLimit: 150, goal: 4 },
+    normal: { timeLimit: 120, goal: 6 },
+    hard:   { timeLimit:  90, goal: 8 },
   },
   simon: {
     easy:   { timeLimit: 180, goal: 4 },
@@ -24,14 +24,14 @@ export const MINI_GAME_CONFIG = {
     hard:   { timeLimit:  70 },
   },
   tower: {
-    easy:   { timeLimit: 240, goal: 4 },
-    normal: { timeLimit: 180, goal: 5 },
-    hard:   { timeLimit: 120, goal: 7 },
+    easy:   { timeLimit: 240, goal: 5 },
+    normal: { timeLimit: 180, goal: 8 },
+    hard:   { timeLimit: 120, goal: 11 },
   },
   wordQuiz: {
-    easy:   { timeLimit: 70, goal: 1 },
-    normal: { timeLimit: 50, goal: 2 },
-    hard:   { timeLimit: 35, goal: 3 },
+    easy:   { timeLimit: 180, goal: 3 },
+    normal: { timeLimit: 180, goal: 5 },
+    hard:   { timeLimit: 150, goal: 8 },
   },
 };
 
