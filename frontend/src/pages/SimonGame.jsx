@@ -26,7 +26,6 @@ import {
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
-const { timeLimit: SIMON_TIME_LIMIT, goal: SIMON_TARGET_ROUND } = getMiniGameConfig('simon', getSessionDifficulty());
 const COINS_PER_SECOND = 2;
 
 const COLORS = [
@@ -77,6 +76,7 @@ function formatTime(seconds) {
 }
 
 export default function SimonGame() {
+  const { timeLimit: SIMON_TIME_LIMIT, goal: SIMON_TARGET_ROUND } = getMiniGameConfig('simon', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();

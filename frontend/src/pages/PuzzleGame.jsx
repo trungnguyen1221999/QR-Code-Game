@@ -27,7 +27,6 @@ import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGa
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
-const { timeLimit: PUZZLE_TIME_LIMIT } = getMiniGameConfig('puzzle', getSessionDifficulty());
 const COINS_PER_SECOND = 2;
 const SNAP_DISTANCE = 90;
 
@@ -83,6 +82,7 @@ function getDistance(a, b) {
 }
 
 export default function PuzzlePlacementGame() {
+  const { timeLimit: PUZZLE_TIME_LIMIT } = getMiniGameConfig('puzzle', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();

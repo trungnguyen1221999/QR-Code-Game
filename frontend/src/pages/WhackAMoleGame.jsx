@@ -24,8 +24,6 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
-
-const { timeLimit: GAME_TIME_LIMIT, goal: WINNING_SCORE } = getMiniGameConfig('whackAMole', getSessionDifficulty());
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMAL_SPAWN_INTERVAL = 1300;
@@ -88,6 +86,7 @@ function removeKey(source, keyToRemove) {
 }
 
 export default function WhackAMoleGame() {
+  const { timeLimit: GAME_TIME_LIMIT, goal: WINNING_SCORE } = getMiniGameConfig('whackAMole', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();

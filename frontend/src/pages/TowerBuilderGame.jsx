@@ -23,8 +23,6 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
-
-const { timeLimit: GAME_TIME_LIMIT, goal: TARGET_FLOORS } = getMiniGameConfig('tower', getSessionDifficulty());
 const CANVAS_ID = 'tower-original-canvas';
 
 function formatTime(seconds) {
@@ -79,6 +77,7 @@ function safelyTogglePause(game, shouldPause, pausedRef) {
 }
 
 export default function TowerBuilderGame() {
+  const { timeLimit: GAME_TIME_LIMIT, goal: TARGET_FLOORS } = getMiniGameConfig('tower', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();

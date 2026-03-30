@@ -13,7 +13,7 @@ export default function HostSetup({ onLogout }) {
   const host = JSON.parse(localStorage.getItem('host'));
   const [gameName, setGameName] = useState('');
   const [time, setTime] = useState(30);
-  const [difficulty, setDifficulty] = useState('hard');
+  const [difficulty, setDifficulty] = useState('easy');
   const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {

@@ -24,41 +24,7 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
-import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
-
-const { timeLimit: QUIZ_TIME_LIMIT, goal: PASS_SCORE } = getMiniGameConfig('wordQuiz', getSessionDifficulty());
 const TOTAL_QUESTIONS = 10;
-
-const COPY = {
-  checkpoint: 'Checkpoint',
-  title: 'Combined word quiz',
-  subtitle: `Solve picture-word combinations. Get at least ${PASS_SCORE} correct out of ${TOTAL_QUESTIONS} before time runs out.`,
-  timeLeft: 'Time left',
-  score: 'Score',
-  question: 'Question',
-  hint: 'Hint',
-  answerLabel: 'Your answer',
-  answerPlaceholder: 'Type the combined word',
-  howToWin: 'How to win',
-  howToWinText: `Combine the picture clues into one word. You need at least ${PASS_SCORE} correct answers to clear checkpoint 3.`,
-  back: 'Back',
-  submit: 'Submit answer',
-  correct: (answer) => `Correct! ${answer}`,
-  wrong: (answer) => `Wrong! Correct answer: ${answer}`,
-  winTitle: 'Quiz cleared!',
-  winText: (coins) => `You reached the pass grade and earned ${coins} coins.`,
-  loseTitle: 'Quiz over',
-  loseNoLife: 'No lives left. Buy an extra life now to keep your current checkpoint.',
-  loseHasLife: (lives) => `One life was removed. ${lives} lives left.`,
-  backTitle: 'Leave this game?',
-  backText: 'If you go back now, one life will be lost.',
-  backResetText: 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.',
-  confirm: 'Confirm',
-  cancel: 'Cancel',
-  continue: 'Continue',
-  exitGame: 'Exit game',
-  playAgain: 'Play again',
-};
 
 const QUESTION_BANK = [
   { id: 'aurinkolasit', pictures: ['☀️', '🕶️'], answer: 'aurinkolasit', hint: 'Jotain, jota kaytat aurinkoisena paivana' },
@@ -112,6 +78,37 @@ function normalizeAnswer(value) {
 }
 
 export default function CombinedWordQuizGame() {
+  const { timeLimit: QUIZ_TIME_LIMIT, goal: PASS_SCORE } = getMiniGameConfig('wordQuiz', getSessionDifficulty());
+  const COPY = {
+    checkpoint: 'Checkpoint',
+    title: 'Combined word quiz',
+    subtitle: `Solve picture-word combinations. Get at least ${PASS_SCORE} correct out of ${TOTAL_QUESTIONS} before time runs out.`,
+    timeLeft: 'Time left',
+    score: 'Score',
+    question: 'Question',
+    hint: 'Hint',
+    answerLabel: 'Your answer',
+    answerPlaceholder: 'Type the combined word',
+    howToWin: 'How to win',
+    howToWinText: `Combine the picture clues into one word. You need at least ${PASS_SCORE} correct answers to clear checkpoint 3.`,
+    back: 'Back',
+    submit: 'Submit answer',
+    correct: (answer) => `Correct! ${answer}`,
+    wrong: (answer) => `Wrong! Correct answer: ${answer}`,
+    winTitle: 'Quiz cleared!',
+    winText: (coins) => `You reached the pass grade and earned ${coins} coins.`,
+    loseTitle: 'Quiz over',
+    loseNoLife: 'No lives left. Buy an extra life now to keep your current checkpoint.',
+    loseHasLife: (lives) => `One life was removed. ${lives} lives left.`,
+    backTitle: 'Leave this game?',
+    backText: 'If you go back now, one life will be lost.',
+    backResetText: 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    continue: 'Continue',
+    exitGame: 'Exit game',
+    playAgain: 'Play again',
+  };
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();

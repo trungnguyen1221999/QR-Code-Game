@@ -56,7 +56,8 @@ export const joinGame = async (req, res) => {
         id: gameSession._id,
         name: gameSession.name,
         status: gameSession.status,
-        expiresAt: gameSession.expiresAt
+        expiresAt: gameSession.expiresAt,
+        difficulty: gameSession.difficulty || 'hard'
       }
     });
   } catch (error) {
