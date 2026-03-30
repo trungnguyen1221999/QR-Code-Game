@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { QrCode, Camera, Trophy, LogOut, ScanLine, Clock } from 'lucide-react';
+import { QrCode, Camera, Trophy, LogOut, ScanLine, Clock, X } from 'lucide-react';
+import QrScanner from 'qr-scanner';
+import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
@@ -39,7 +41,7 @@ const DEFAULT_GAME_ORDER = [
 function getCheckpointRoute(checkpoint) {
   try {
     const session = JSON.parse(localStorage.getItem('session') || 'null');
-    const order = (session?.gameOrder?.length === 6) ? session.gameOrder : DEFAULT_GAME_ORDER;
+    const order = session?.gameOrder?.length > 0 ? session.gameOrder : DEFAULT_GAME_ORDER;
     return order[checkpoint - 1] ?? DEFAULT_GAME_ORDER[checkpoint - 1] ?? '/memory-game';
   } catch {
     return DEFAULT_GAME_ORDER[checkpoint - 1] ?? '/memory-game';
@@ -106,10 +108,10 @@ function clearProgress() {
   localStorage.removeItem(PLAYER_PROGRESS_KEY);
 }
 
-function ScanningOverlay() {
+function ScanningOverlay({ videoRef, onCancel }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6"
-      style={{ backgroundColor: 'rgba(0,0,0,0.85)' }}>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5"
+      style={{ backgroundColor: 'rgba(0,0,0,0.92)' }}>
       <style>{`
         @keyframes scan-line { 0%{top:5%} 50%{top:90%} 100%{top:5%} }
         .scan-line-full { position:absolute; left:0; right:0; height:3px; background:#22C55E; animation: scan-line 1.8s linear infinite; box-shadow: 0 0 12px #22C55E, 0 0 24px #22C55E; }
@@ -119,13 +121,16 @@ function ScanningOverlay() {
 
       <p className="text-white text-lg font-bold tracking-wide">Point at QR code</p>
 
-      {/* Large viewfinder */}
+      {/* Viewfinder with live camera */}
       <div className="relative rounded-2xl overflow-hidden"
         style={{ width: '84vw', maxWidth: 340, height: '84vw', maxHeight: 340, border: '2px solid rgba(255,255,255,0.3)' }}>
-        {/* Dark corners overlay */}
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }} />
+        <video
+          ref={videoRef}
+          className="absolute inset-0 w-full h-full object-cover"
+          playsInline
+          muted
+        />
         <div className="scan-line-full" />
-        {/* Corner accents */}
         <div className="corner-pulse absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg" style={{ borderColor: '#22C55E' }} />
         <div className="corner-pulse absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg" style={{ borderColor: '#22C55E' }} />
         <div className="corner-pulse absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg" style={{ borderColor: '#22C55E' }} />
@@ -133,6 +138,14 @@ function ScanningOverlay() {
       </div>
 
       <p className="text-sm font-semibold" style={{ color: '#22C55E' }}>Scanning... please wait</p>
+
+      <button
+        onClick={onCancel}
+        className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold"
+        style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
+      >
+        <X size={14} /> Cancel
+      </button>
     </div>
   );
 }
@@ -153,6 +166,8 @@ export default function PlayerGame() {
 const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [hostEndedCountdown, setHostEndedCountdown] = useState(5);
   const [scanning, setScanning] = useState(false);
+  const videoRef = useRef(null);
+  const qrScannerRef = useRef(null);
   const introKey = `introPlayed_${session?.id || session?._id}`;
 
   // Redirect to intro page if not yet played
@@ -287,13 +302,82 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
 
   const progress = completed / TOTAL_CHECKPOINTS;
 
-  const handleScan = () => {
-    setScanning(true);
-    setTimeout(() => {
-      setScanning(false);
-      navigate(getCheckpointRoute(current), { state: { checkpoint: current } });
-    }, 3000);
+  const stopScanner = () => {
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop();
+      qrScannerRef.current.destroy();
+      qrScannerRef.current = null;
+    }
   };
+
+  // Start/stop real QR scanner when scanning state changes
+  useEffect(() => {
+    if (!scanning) return;
+
+    let cancelled = false;
+
+    const start = async () => {
+      // Wait one tick for the video element to mount
+      await new Promise((r) => setTimeout(r, 50));
+      if (cancelled || !videoRef.current) return;
+
+      try {
+        const scanner = new QrScanner(
+          videoRef.current,
+          (result) => {
+            if (cancelled) return;
+            const data = result?.data ?? '';
+            const match = data.match(/^CHECKPOINT:(\d+)$/);
+
+            if (!match) {
+              toast.error('Invalid QR code. Please scan the correct checkpoint QR.');
+              return;
+            }
+
+            const scannedNum = parseInt(match[1], 10);
+
+            if (scannedNum < current) {
+              toast.error(`Checkpoint ${scannedNum} already completed! Move to checkpoint ${current}.`);
+              return;
+            }
+
+            if (scannedNum !== current) {
+              toast.error(`Wrong checkpoint! You need checkpoint ${current}.`);
+              return;
+            }
+
+            // Correct checkpoint — stop scanner and navigate
+            stopScanner();
+            cancelled = true;
+            setScanning(false);
+            navigate(getCheckpointRoute(current), { state: { checkpoint: current } });
+          },
+          { returnDetailedScanResult: true },
+        );
+
+        qrScannerRef.current = scanner;
+        await scanner.start();
+      } catch {
+        if (!cancelled) {
+          setScanning(false);
+          toast.error('Could not access camera. Please allow camera permission.');
+        }
+      }
+    };
+
+    start();
+
+    return () => {
+      cancelled = true;
+      stopScanner();
+    };
+  }, [scanning]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Clean up scanner on unmount
+  useEffect(() => () => stopScanner(), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleScan = () => setScanning(true);
+  const handleCancelScan = () => { stopScanner(); setScanning(false); };
 
   return (
     <PageLayout>
@@ -377,7 +461,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
               <Camera size={64} style={{ color: '#9CA3AF' }} />
               <p className="text-base font-semibold" style={{ color: '#6B7280' }}>Camera / QR scanner</p>
               <p className="text-xs" style={{ color: '#9CA3AF' }}>Tap "Scan QR" to start</p>
-              {scanning && <ScanningOverlay />}
+              {scanning && <ScanningOverlay videoRef={videoRef} onCancel={handleCancelScan} />}
             </Card>
 
             {/* Scan button */}
