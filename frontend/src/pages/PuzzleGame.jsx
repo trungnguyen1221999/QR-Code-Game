@@ -23,10 +23,11 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
-const PUZZLE_TIME_LIMIT = 100;
+const { timeLimit: PUZZLE_TIME_LIMIT } = getMiniGameConfig('puzzle', getSessionDifficulty());
 const COINS_PER_SECOND = 2;
 const SNAP_DISTANCE = 90;
 

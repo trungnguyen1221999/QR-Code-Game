@@ -22,9 +22,9 @@ import {
   INITIAL_LOSE_STATE,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
-const GAME_TIME_LIMIT = 180;
-const TARGET_FLOORS = 5;
+const { timeLimit: GAME_TIME_LIMIT, goal: TARGET_FLOORS } = getMiniGameConfig('tower', getSessionDifficulty());
 const CANVAS_ID = 'tower-original-canvas';
 
 function formatTime(seconds) {

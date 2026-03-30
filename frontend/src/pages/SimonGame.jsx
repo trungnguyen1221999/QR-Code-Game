@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useBlockBack from '../hooks/useBlockBack';
 import toast from 'react-hot-toast';
@@ -24,8 +24,9 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
-const SIMON_TIME_LIMIT = 120;
+const { timeLimit: SIMON_TIME_LIMIT, goal: SIMON_TARGET_ROUND } = getMiniGameConfig('simon', getSessionDifficulty());
 const COINS_PER_SECOND = 2;
 
 const COLORS = [
@@ -113,7 +114,7 @@ export default function SimonGame() {
     wrong: typeof Audio !== 'undefined' ? new Audio('/sounds/wrong.mp3') : null,
   });
 
-  const targetRound = useMemo(() => 5, []);
+  const targetRound = SIMON_TARGET_ROUND;
   const earnedCoins = Math.max(0, timeLeft * COINS_PER_SECOND);
 
   useEffect(() => {

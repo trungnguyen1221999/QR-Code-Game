@@ -23,9 +23,9 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
-const GAME_TIME_LIMIT = 120;
-const WINNING_SCORE = 3;
+const { timeLimit: GAME_TIME_LIMIT, goal: WINNING_SCORE } = getMiniGameConfig('whackAMole', getSessionDifficulty());
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMAL_SPAWN_INTERVAL = 1300;

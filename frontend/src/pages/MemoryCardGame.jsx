@@ -23,8 +23,9 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
-const MEMORY_TIME_LIMIT = 120;
+const { timeLimit: MEMORY_TIME_LIMIT } = getMiniGameConfig('memory', getSessionDifficulty());
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
 function shuffleCards() {
   return [...CARD_EMOJIS, ...CARD_EMOJIS]

@@ -24,9 +24,9 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
-const QUIZ_TIME_LIMIT = 50;
-const PASS_SCORE = 2;
+const { timeLimit: QUIZ_TIME_LIMIT, goal: PASS_SCORE } = getMiniGameConfig('wordQuiz', getSessionDifficulty());
 const TOTAL_QUESTIONS = 10;
 
 const COPY = {
