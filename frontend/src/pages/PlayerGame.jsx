@@ -8,7 +8,16 @@ import { playerAPI, sessionAPI } from '../utils/api';
 import Card from '../components/ui/Card';
 
 const TOTAL_SECONDS = 30 * 60;
-const TOTAL_CHECKPOINTS = 6;
+
+function getTotalCheckpoints() {
+  try {
+    const session = JSON.parse(localStorage.getItem('session') || 'null');
+    const len = session?.gameOrder?.length;
+    return (len && len > 0) ? len : 6;
+  } catch {
+    return 6;
+  }
+}
 const DEFAULT_COINS = 0;
 
 function getLivesForDifficulty(difficulty) {
@@ -129,6 +138,7 @@ function ScanningOverlay() {
 }
 
 export default function PlayerGame() {
+  const TOTAL_CHECKPOINTS = getTotalCheckpoints();
   const navigate = useNavigate();
   const location = useLocation();
   const player = JSON.parse(localStorage.getItem('player') || 'null');

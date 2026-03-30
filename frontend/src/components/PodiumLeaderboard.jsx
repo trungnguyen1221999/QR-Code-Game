@@ -8,7 +8,14 @@ const PODIUM = {
   3: { h: 36, size: 48, badge: '🥉', color: '#CD7C2F', ring: '#D97706' },
 };
 
-const TOTAL_CHECKPOINTS = 6;
+function getTotalCheckpoints() {
+  try {
+    const session = JSON.parse(localStorage.getItem('session') || 'null');
+    const len = session?.gameOrder?.length;
+    return (len && len > 0) ? len : 6;
+  } catch { return 6; }
+}
+const TOTAL_CHECKPOINTS = getTotalCheckpoints();
 
 function ScoreOrProgress({ player }) {
   if (player.score > 0) {

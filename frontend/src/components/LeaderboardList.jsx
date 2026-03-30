@@ -3,7 +3,14 @@
 //  2. No score: sort by currentCheckpointIndex DESC, tiebreak lastCheckpointAt ASC
 //     Progress shown as X/6
 
-const TOTAL_CHECKPOINTS = 6;
+function getTotalCheckpoints() {
+  try {
+    const session = JSON.parse(localStorage.getItem('session') || 'null');
+    const len = session?.gameOrder?.length;
+    return (len && len > 0) ? len : 6;
+  } catch { return 6; }
+}
+const TOTAL_CHECKPOINTS = getTotalCheckpoints();
 
 export function rankPlayers(players = []) {
   const withScore = players.filter(p => p.score > 0)
