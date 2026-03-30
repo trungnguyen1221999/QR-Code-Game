@@ -183,14 +183,48 @@ export default function SelectGames() {
 
   const handleDownloadQR = async (gameId, idx) => {
     const checkpoint = idx + 1;
+    const game = AVAILABLE_GAMES.find((g) => g.id === gameId);
     try {
-      const dataUrl = await QRCode.toDataURL(`CHECKPOINT:${checkpoint}`, {
-        width: 300,
-        margin: 2,
+      const QR_SIZE = 300;
+      const PADDING = 20;
+      const LABEL1 = `Checkpoint ${checkpoint}`;
+      const LABEL2 = game?.label ?? '';
+
+      // Draw QR onto an offscreen canvas, add text below
+      const qrDataUrl = await QRCode.toDataURL(`CHECKPOINT:${checkpoint}`, {
+        width: QR_SIZE,
+        margin: 1,
       });
-      const game = AVAILABLE_GAMES.find((g) => g.id === gameId);
+
+      const img = new Image();
+      img.src = qrDataUrl;
+      await new Promise((res) => { img.onload = res; });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = QR_SIZE + PADDING * 2;
+      canvas.height = QR_SIZE + PADDING * 2 + 52; // extra room for two text lines
+      const ctx = canvas.getContext('2d');
+
+      // White background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // QR image
+      ctx.drawImage(img, PADDING, PADDING, QR_SIZE, QR_SIZE);
+
+      // "Checkpoint N" — bold, larger
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(LABEL1, canvas.width / 2, QR_SIZE + PADDING + 30);
+
+      // Game name — smaller, grey
+      ctx.fillStyle = '#555555';
+      ctx.font = '16px sans-serif';
+      ctx.fillText(LABEL2, canvas.width / 2, QR_SIZE + PADDING + 54);
+
       const a = document.createElement('a');
-      a.href = dataUrl;
+      a.href = canvas.toDataURL('image/png');
       a.download = `checkpoint-${checkpoint}-${game?.id}.png`;
       a.click();
     } catch {
