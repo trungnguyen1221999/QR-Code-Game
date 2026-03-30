@@ -176,7 +176,7 @@ export default function HostDashboard({ onLogout }) {
         {/* Game settings */}
         <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
           <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>Game Settings:</p>
-          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• 6 QR Checkpoints to discover</p>
+          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• {session?.gameOrder?.length || 6} QR Checkpoints to discover</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
             • Total play time is {session?.totalTime || 30} minutes.
           </p>

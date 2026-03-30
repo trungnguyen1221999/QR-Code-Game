@@ -212,7 +212,7 @@ export default function HostGameInProgress({ onLogout }) {
                 })
                 .map((p, i) => {
                   const cp = p.checkpointsCompleted ?? 0;
-                  const total = 6;
+                  const total = sessionData?.gameOrder?.length || 6;
                   const done = p.status === 'finished';
                   const out  = p.status === 'eliminated';
                   return (
@@ -266,7 +266,7 @@ export default function HostGameInProgress({ onLogout }) {
         {/* Game settings */}
         <Card className="rounded-xl p-4" >
           <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>Game Settings:</p>
-          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• 6 QR Checkpoints to discover</p>
+          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>• {sessionData?.gameOrder?.length || 6} QR Checkpoints to discover</p>
           <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
             • Total play time is {sessionData?.totalTime || 30} minutes.
           </p>
