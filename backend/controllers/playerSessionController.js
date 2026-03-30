@@ -62,6 +62,7 @@ export const joinGame = async (req, res) => {
         expiresAt: gameSession.expiresAt,
         difficulty: gameSession.difficulty || 'hard',
         gameOrder: gameSession.gameOrder ?? [],
+        gameMode: gameSession.gameMode || 'ordered',
       }
     });
   } catch (error) {

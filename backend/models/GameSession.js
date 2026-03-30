@@ -49,7 +49,12 @@ const gameSessionSchema = new mongoose.Schema({
   gameOrder: {
     type: [String],
     default: [],
-  }
+  },
+  gameMode: {
+    type: String,
+    enum: ['ordered', 'random'],
+    default: 'ordered',
+  },
 }, {
   timestamps: true
 });

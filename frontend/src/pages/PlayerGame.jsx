@@ -74,6 +74,7 @@ function readSavedProgress(defaultLife) {
       current: 1,
       life: defaultLife,
       coins: DEFAULT_COINS,
+      completedList: [],
     };
   }
 
@@ -87,6 +88,7 @@ function readSavedProgress(defaultLife) {
       current: parsed.current ?? 1,
       life,
       coins: parsed.coins ?? DEFAULT_COINS,
+      completedList: parsed.completedList ?? [],
     };
   } catch {
     return {
@@ -95,6 +97,7 @@ function readSavedProgress(defaultLife) {
       current: 1,
       life: defaultLife,
       coins: DEFAULT_COINS,
+      completedList: [],
     };
   }
 }
@@ -158,6 +161,7 @@ export default function PlayerGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
   const DEFAULT_LIFE = getLivesForDifficulty(session?.difficulty);
+  const GAME_MODE = session?.gameMode || 'ordered';
   const initialProgress = readSavedProgress(DEFAULT_LIFE);
   const shouldSkipProgressRefresh = !!(location.state?.justCompleted || location.state?.wrongAnswer);
 
@@ -183,10 +187,11 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [current, setCurrent] = useState(initialProgress.current);
   const [life, setLife] = useState(initialProgress.life);
   const [coins, setCoins] = useState(initialProgress.coins);
+  const [completedList, setCompletedList] = useState(initialProgress.completedList);
 
   useEffect(() => {
-    saveProgress({ completed, current, life, coins });
-  }, [coins, completed, current, life]);
+    saveProgress({ completed, current, life, coins, completedList });
+  }, [coins, completed, current, life, completedList]);
 
   useEffect(() => {
     const playerSessionId = playerSession?._id || playerSession?.id;
@@ -238,14 +243,20 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
       sessionStorage.setItem(processedKey, '1');
     }
     if (state.justCompleted) {
-      setCompleted((value) => {
-        const nextCompleted = state.completedCheckpoint ?? (value + 1);
-        return Math.min(Math.max(value, nextCompleted), TOTAL_CHECKPOINTS);
-      });
-      setCurrent((value) => {
-        const nextCurrent = state.nextCheckpoint ?? (value + 1);
-        return Math.min(Math.max(value, nextCurrent), TOTAL_CHECKPOINTS + 1);
-      });
+      if (GAME_MODE === 'random') {
+        const cp = state.completedCheckpoint;
+        if (cp) setCompletedList(prev => prev.includes(cp) ? prev : [...prev, cp]);
+        setCompleted(prev => Math.min(prev + 1, TOTAL_CHECKPOINTS));
+      } else {
+        setCompleted((value) => {
+          const nextCompleted = state.completedCheckpoint ?? (value + 1);
+          return Math.min(Math.max(value, nextCompleted), TOTAL_CHECKPOINTS);
+        });
+        setCurrent((value) => {
+          const nextCurrent = state.nextCheckpoint ?? (value + 1);
+          return Math.min(Math.max(value, nextCurrent), TOTAL_CHECKPOINTS + 1);
+        });
+      }
       setCoins(v => v + (state.rewardCoins ?? 50));
     }
     if (state.wrongAnswer && DEFAULT_LIFE !== Infinity) {
@@ -343,6 +354,23 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
 
             const scannedNum = parseInt(match[1], 10);
 
+            if (GAME_MODE === 'random') {
+              if (completedList.includes(scannedNum)) {
+                toast.error(`Checkpoint ${scannedNum} already done! Scan a different one.`);
+                return;
+              }
+              if (scannedNum < 1 || scannedNum > TOTAL_CHECKPOINTS) {
+                toast.error(`Invalid checkpoint!`);
+                return;
+              }
+              stopScanner();
+              cancelled = true;
+              setScanning(false);
+              navigate(getCheckpointRoute(scannedNum), { state: { checkpoint: scannedNum } });
+              return;
+            }
+
+            // Ordered mode
             if (scannedNum < current) {
               toast.error(`Checkpoint ${scannedNum} already completed! Move to checkpoint ${current}.`);
               return;
@@ -438,9 +466,14 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
               style={{ width: `${progress * 100}%`, backgroundColor: 'var(--color-primary)' }}
             />
           </div>
-          {completed < TOTAL_CHECKPOINTS && (
+          {completed < TOTAL_CHECKPOINTS && GAME_MODE === 'ordered' && (
             <p className="text-xs mt-2" style={{ color: 'var(--color-subtext)' }}>
               Current checkpoint: <span className="font-bold" style={{ color: 'var(--color-text)' }}>{current}</span>
+            </p>
+          )}
+          {completed < TOTAL_CHECKPOINTS && GAME_MODE === 'random' && (
+            <p className="text-xs mt-2" style={{ color: 'var(--color-subtext)' }}>
+              Scan any remaining checkpoint QR code
             </p>
           )}
         </Card>

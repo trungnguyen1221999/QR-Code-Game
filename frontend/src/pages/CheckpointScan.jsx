@@ -46,13 +46,32 @@ export default function CheckpointScan() {
     }
 
     const progress = getPlayerProgress();
-    const current = progress.current ?? 1;
+    const gameMode = session?.gameMode || 'ordered';
+    const totalCheckpoints = session?.gameOrder?.length || 6;
 
+    if (gameMode === 'random') {
+      if (checkpointNum > totalCheckpoints) {
+        setStatus('wrong');
+        return;
+      }
+      const completedList = progress.completedList ?? [];
+      if (completedList.includes(checkpointNum)) {
+        setStatus('done');
+        return;
+      }
+      navigate(getCheckpointRoute(checkpointNum), {
+        replace: true,
+        state: { checkpoint: checkpointNum },
+      });
+      return;
+    }
+
+    // Ordered mode
+    const current = progress.current ?? 1;
     if (checkpointNum < current) {
       setStatus('done');
       return;
     }
-
     if (checkpointNum > current) {
       setStatus('wrong');
       return;
@@ -66,6 +85,8 @@ export default function CheckpointScan() {
   }, [checkpointNum]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const progress = getPlayerProgress();
+  const session = JSON.parse(localStorage.getItem('session') || 'null');
+  const gameMode = session?.gameMode || 'ordered';
   const current = progress.current ?? 1;
 
   if (status === 'checking') {
@@ -109,8 +130,9 @@ export default function CheckpointScan() {
               Already completed!
             </h2>
             <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
-              You already passed Checkpoint {checkpointNum}. Please move to{' '}
-              <strong>Checkpoint {current}</strong>.
+              {gameMode === 'random'
+                ? `You already completed Checkpoint ${checkpointNum}. Find another QR code to scan.`
+                : `You already passed Checkpoint ${checkpointNum}. Please move to Checkpoint ${current}.`}
             </p>
             <Button variant="green" onClick={() => navigate('/game')}>
               Back to game

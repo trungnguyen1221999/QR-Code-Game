@@ -12,6 +12,7 @@ export default function HostSetup({ onLogout }) {
   const [gameName, setGameName] = useState('');
   const [time, setTime] = useState(30);
   const [difficulty, setDifficulty] = useState('easy');
+  const [gameMode, setGameMode] = useState('ordered');
 
   const handleLogout = () => {
     onLogout?.();
@@ -31,7 +32,7 @@ export default function HostSetup({ onLogout }) {
       return;
     }
     navigate('/select-games', {
-      state: { name: gameName.trim(), time, difficulty },
+      state: { name: gameName.trim(), time, difficulty, gameMode },
     });
   };
 
@@ -108,6 +109,47 @@ export default function HostSetup({ onLogout }) {
                 '1 Final game',
               ].map(item => (
                 <p key={item} className="text-sm" style={{ color: 'var(--color-subtext)' }}>• {item}</p>
+              ))}
+            </div>
+
+            {/* Game Mode */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
+                🗺️ Game Mode
+              </label>
+              {[
+                {
+                  value: 'ordered',
+                  label: 'Ordered Mode',
+                  desc: 'Players must complete games sequentially (1→2→3→...)',
+                  emoji: '🔢',
+                },
+                {
+                  value: 'random',
+                  label: 'Random Mode',
+                  desc: 'Players can complete games in any order',
+                  emoji: '🔀',
+                },
+              ].map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setGameMode(opt.value)}
+                  className="flex items-start gap-3 rounded-xl p-3 text-left transition-all"
+                  style={{
+                    border: gameMode === opt.value ? '2px solid var(--color-primary)' : '2px solid #E5E7EB',
+                    backgroundColor: gameMode === opt.value ? 'var(--color-info-bg)' : 'transparent',
+                  }}
+                >
+                  <div className="mt-0.5 w-4 h-4 rounded-full shrink-0 flex items-center justify-center"
+                    style={{ border: '2px solid var(--color-primary)', backgroundColor: gameMode === opt.value ? 'var(--color-primary)' : 'transparent' }}>
+                    {gameMode === opt.value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>{opt.emoji} {opt.label}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)' }}>{opt.desc}</p>
+                  </div>
+                </button>
               ))}
             </div>
 

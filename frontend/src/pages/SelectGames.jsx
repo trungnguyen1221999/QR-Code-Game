@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, Download, Check, GripVertical } from 'lucide-react';
+import { X, Download, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import {
   SortableContext,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
   useSortable,
   arrayMove,
 } from '@dnd-kit/sortable';
@@ -76,8 +76,8 @@ export const AVAILABLE_GAMES = [
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
 
-// ── Sortable card inside Manage panel ────────────────────────
-function SortableGameCard({ id, idx, onRemove, onDownloadQR }) {
+// ── Sortable chip inside the bottom panel ─────────────────────
+function SortableChip({ id, idx, onRemove }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
 
@@ -86,60 +86,27 @@ function SortableGameCard({ id, idx, onRemove, onDownloadQR }) {
   return (
     <div
       ref={setNodeRef}
+      className="flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1 cursor-grab active:cursor-grabbing touch-none"
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
-        opacity: isDragging ? 0.5 : 1,
+        opacity: isDragging ? 0.4 : 1,
         zIndex: isDragging ? 50 : undefined,
+        backgroundColor: 'var(--color-info-bg)',
+        color: 'var(--color-primary)',
+        userSelect: 'none',
       }}
+      {...attributes}
+      {...listeners}
     >
-      <Card className="rounded-2xl p-3">
-        <div className="flex items-center gap-3">
-          {/* Drag handle */}
-          <button
-            className="shrink-0 cursor-grab active:cursor-grabbing touch-none p-1"
-            style={{ color: '#9CA3AF' }}
-            {...attributes}
-            {...listeners}
-          >
-            <GripVertical size={18} />
-          </button>
-
-          <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-            style={{ backgroundColor: game?.bg }}
-          >
-            {game?.emoji}
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-              {idx + 1}. {game?.label}
-            </p>
-            <p
-              className="text-xs mt-0.5"
-              style={{ color: 'var(--color-subtext)', lineHeight: '1.35' }}
-            >
-              {game?.desc}
-            </p>
-          </div>
-
-          <button onClick={() => onRemove(id)} style={{ color: 'var(--color-red)' }}>
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="mt-2.5">
-          <button
-            onClick={() => onDownloadQR(id, idx)}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold w-full justify-center"
-            style={{ backgroundColor: '#1D4ED8', color: 'white' }}
-          >
-            <Download size={12} />
-            Download QR — Checkpoint {idx + 1}
-          </button>
-        </div>
-      </Card>
+      {idx + 1}. {game?.emoji} {game?.label}
+      <button
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); onRemove(id); }}
+        className="ml-0.5 opacity-60"
+      >
+        <X size={11} />
+      </button>
     </div>
   );
 }
@@ -148,12 +115,13 @@ function SortableGameCard({ id, idx, onRemove, onDownloadQR }) {
 export default function SelectGames() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { name, time, difficulty } = location.state ?? {};
+  const { name, time, difficulty, gameMode } = location.state ?? {};
   const host = JSON.parse(localStorage.getItem('host') || 'null');
 
   const [selected, setSelected] = useState([]); // ordered array of game ids
-  const [showManage, setShowManage] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [showChips, setShowChips] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -164,6 +132,7 @@ export default function SelectGames() {
     setSelected((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       if (prev.length >= MAX_GAMES) return prev;
+      setShowChips(true);
       return [...prev, id];
     });
   };
@@ -181,58 +150,50 @@ export default function SelectGames() {
     }
   };
 
-  const handleDownloadQR = async (gameId, idx) => {
+  const buildQRCanvas = async (gameId, idx) => {
     const checkpoint = idx + 1;
     const game = AVAILABLE_GAMES.find((g) => g.id === gameId);
+    const QR_SIZE = 300;
+    const PADDING = 20;
+    const qrDataUrl = await QRCode.toDataURL(
+      `${window.location.origin}/checkpoint/${checkpoint}`,
+      { width: QR_SIZE, margin: 1 },
+    );
+    const img = new Image();
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = qrDataUrl; });
+    const canvas = document.createElement('canvas');
+    canvas.width = QR_SIZE + PADDING * 2;
+    canvas.height = QR_SIZE + PADDING * 2 + 52;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, PADDING, PADDING, QR_SIZE, QR_SIZE);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Checkpoint ${checkpoint}`, canvas.width / 2, QR_SIZE + PADDING + 30);
+    ctx.fillStyle = '#555555';
+    ctx.font = '16px sans-serif';
+    ctx.fillText(game?.label ?? '', canvas.width / 2, QR_SIZE + PADDING + 54);
+    return { canvas, game, checkpoint };
+  };
+
+  const handleDownloadAllQR = async () => {
+    if (selected.length === 0) return;
+    setDownloading(true);
     try {
-      const QR_SIZE = 300;
-      const PADDING = 20;
-      const LABEL1 = `Checkpoint ${checkpoint}`;
-      const LABEL2 = game?.label ?? '';
-
-      // Draw QR onto an offscreen canvas, add text below
-      const qrContent = `${window.location.origin}/checkpoint/${checkpoint}`;
-      const qrDataUrl = await QRCode.toDataURL(qrContent, {
-        width: QR_SIZE,
-        margin: 1,
-      });
-
-      const img = new Image();
-      await new Promise((res, rej) => {
-        img.onload = res;
-        img.onerror = rej;
-        img.src = qrDataUrl;
-      });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = QR_SIZE + PADDING * 2;
-      canvas.height = QR_SIZE + PADDING * 2 + 52; // extra room for two text lines
-      const ctx = canvas.getContext('2d');
-
-      // White background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // QR image
-      ctx.drawImage(img, PADDING, PADDING, QR_SIZE, QR_SIZE);
-
-      // "Checkpoint N" — bold, larger
-      ctx.fillStyle = '#1a1a1a';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(LABEL1, canvas.width / 2, QR_SIZE + PADDING + 30);
-
-      // Game name — smaller, grey
-      ctx.fillStyle = '#555555';
-      ctx.font = '16px sans-serif';
-      ctx.fillText(LABEL2, canvas.width / 2, QR_SIZE + PADDING + 54);
-
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      a.download = `checkpoint-${checkpoint}-${game?.id}.png`;
-      a.click();
+      for (let i = 0; i < selected.length; i++) {
+        const { canvas, game, checkpoint } = await buildQRCanvas(selected[i], i);
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `checkpoint-${checkpoint}-${game?.id}.png`;
+        a.click();
+        if (i < selected.length - 1) await new Promise((r) => setTimeout(r, 400));
+      }
     } catch {
-      toast.error('Failed to generate QR');
+      toast.error('Failed to generate QR codes');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -255,6 +216,7 @@ export default function SelectGames() {
         totalTime: time,
         difficulty,
         gameOrder,
+        gameMode: gameMode || 'ordered',
       });
       localStorage.setItem('session', JSON.stringify(session));
       navigate('/host-dashboard');
@@ -299,7 +261,7 @@ export default function SelectGames() {
           </p>
           <ul className="text-xs flex flex-col gap-0.5" style={{ color: 'var(--color-subtext)' }}>
             <li>• Tap games below to select (max {MAX_GAMES})</li>
-            <li>• Drag ≡ in the Manage panel to reorder checkpoints</li>
+            <li>• Drag ≡ in the selected list to reorder checkpoints</li>
             <li>• Number of checkpoints = number of games selected</li>
             <li>• Download QR codes for each checkpoint</li>
           </ul>
@@ -372,50 +334,50 @@ export default function SelectGames() {
       >
         {selected.length > 0 ? (
           <>
-            <div className="flex items-center justify-between mb-2">
+            {/* Title row — tap to expand/collapse chips */}
+            <button
+              className="flex items-center justify-between w-full mb-2"
+              onClick={() => setShowChips((v) => !v)}
+            >
               <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
                 ✅ Selected ({selected.length} checkpoint{selected.length > 1 ? 's' : ''})
-              </p>
-              <button
-                onClick={() => setShowManage(true)}
-                className="text-xs font-semibold px-3 py-1 rounded-full"
-                style={{
-                  backgroundColor: 'var(--color-info-bg)',
-                  color: 'var(--color-primary)',
-                }}
-              >
-                ▾ Manage
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {selected.map((id, idx) => {
-                const game = AVAILABLE_GAMES.find((g) => g.id === id);
-                return (
-                  <span
-                    key={id}
-                    className="flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1"
-                    style={{
-                      backgroundColor: 'var(--color-info-bg)',
-                      color: 'var(--color-primary)',
-                    }}
-                  >
-                    {idx + 1}. {game?.emoji} {game?.label}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        remove(id);
-                      }}
-                      className="ml-0.5 opacity-60 hover:opacity-100"
-                    >
-                      <X size={11} />
-                    </button>
+                {!showChips && (
+                  <span className="ml-2 text-xs font-normal" style={{ color: 'var(--color-subtext)' }}>
+                    — tap to view & reorder
                   </span>
-                );
-              })}
+                )}
+              </p>
+              {showChips ? <ChevronDown size={16} style={{ color: 'var(--color-subtext)' }} /> : <ChevronUp size={16} style={{ color: 'var(--color-subtext)' }} />}
+            </button>
+
+            {/* Sortable chips — collapsible */}
+            {showChips && (
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={selected} strategy={rectSortingStrategy}>
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {selected.map((id, idx) => (
+                      <SortableChip key={id} id={id} idx={idx} onRemove={remove} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+
+            {/* Download QR + Create */}
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={handleDownloadAllQR}
+                disabled={downloading}
+                className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-bold disabled:opacity-50"
+                style={{ backgroundColor: '#1D4ED8', color: 'white' }}
+              >
+                <Download size={14} />
+                {downloading ? 'Downloading...' : 'Download QR codes'}
+              </button>
+              <Button variant="green" onClick={handleCreate} disabled={!canCreate || loading}>
+                {loading ? 'Creating...' : `Create Game (${selected.length} checkpoints) ▶`}
+              </Button>
             </div>
-            <Button variant="green" onClick={handleCreate} disabled={!canCreate || loading}>
-              {loading ? 'Creating...' : `Create Game (${selected.length} checkpoints) ▶`}
-            </Button>
           </>
         ) : (
           <p className="text-sm text-center py-1" style={{ color: 'var(--color-subtext)' }}>
@@ -423,68 +385,6 @@ export default function SelectGames() {
           </p>
         )}
       </div>
-
-      {/* Manage panel — drag-to-reorder */}
-      {showManage && (
-        <div
-          className="fixed inset-0 z-40 flex items-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}
-          onClick={() => setShowManage(false)}
-        >
-          <div
-            className="w-full rounded-t-3xl p-5 flex flex-col gap-3"
-            style={{
-              backgroundColor: 'white',
-              maxHeight: '80vh',
-              overflowY: 'auto',
-              maxWidth: 480,
-              margin: '0 auto',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p
-                  className="font-bold text-base flex items-center gap-1.5"
-                  style={{ color: 'var(--color-text)' }}
-                >
-                  <span className="text-green-500">✅</span> Selected Games ({selected.length})
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)' }}>
-                  Drag ≡ to reorder · Download QR for each checkpoint
-                </p>
-              </div>
-              <button
-                onClick={() => setShowManage(false)}
-                className="w-7 h-7 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
-              >
-                <X size={14} />
-              </button>
-            </div>
-
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={selected} strategy={verticalListSortingStrategy}>
-                <div className="flex flex-col gap-2">
-                  {selected.map((id, idx) => (
-                    <SortableGameCard
-                      key={id}
-                      id={id}
-                      idx={idx}
-                      onRemove={remove}
-                      onDownloadQR={handleDownloadQR}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-            </DndContext>
-          </div>
-        </div>
-      )}
     </PageLayout>
   );
 }

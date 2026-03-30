@@ -15,7 +15,7 @@ const generateCode = () => {
 // POST /api/sessions - host creates a game session
 export const createSession = async (req, res) => {
   try {
-    const { hostId, name, totalTime, difficulty, gameOrder } = req.body;
+    const { hostId, name, totalTime, difficulty, gameOrder, gameMode } = req.body;
 
     if (!hostId || !name || !totalTime) {
       return res.status(400).json({ message: 'hostId, name, and totalTime are required' });
@@ -33,6 +33,7 @@ export const createSession = async (req, res) => {
       hostId, name, code, totalTime,
       difficulty: difficulty || 'hard',
       gameOrder: Array.isArray(gameOrder) ? gameOrder : [],
+      gameMode: gameMode || 'ordered',
     });
     await session.save();
 
