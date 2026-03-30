@@ -46,7 +46,7 @@ export default function HostLogin({ onLogin }) {
 
             {/* Login GIF */}
             <div className="flex justify-center">
-              <img src="/login.gif" alt="Login" style={{ height: '120px', objectFit: 'contain' }} />
+              <img src="/hi.gif.gif" alt="Login" style={{ height: '180px', objectFit: 'contain' }} />
             </div>
 
             <div className="flex items-center gap-2">

@@ -93,7 +93,7 @@ export default function LandingPage({ onLogout }) {
 
       {/* Mascot + Title */}
       <div className="flex flex-col items-center gap-2 pt-2 pb-6">
-        <img src="/capy.gif" alt="Capybara mascot" style={{ height: '100px', objectFit: 'contain' }} />
+        <img src="/brown-bear.gif" alt="Brown bear mascot" style={{ height: '150px', objectFit: 'contain' }} />
         <h1 className="text-4xl font-bold text-center" style={{ color: 'var(--color-primary)' }}>The prophecy of Mystery X</h1>
         <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>Find QR codes. Play games. Win!</p>
       </div>
