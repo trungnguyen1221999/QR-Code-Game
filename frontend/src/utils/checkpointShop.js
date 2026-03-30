@@ -31,14 +31,17 @@ function readJson(key, fallback) {
   if (!raw) return fallback;
 
   try {
-    return { ...fallback, ...JSON.parse(raw) };
+    const parsed = { ...fallback, ...JSON.parse(raw) };
+    if (parsed.life === 'inf') parsed.life = Infinity;
+    return parsed;
   } catch {
     return fallback;
   }
 }
 
 function writeJson(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  const toSave = value?.life === Infinity ? { ...value, life: 'inf' } : value;
+  localStorage.setItem(key, JSON.stringify(toSave));
 }
 
 export function getPlayerProgress() {
@@ -51,6 +54,9 @@ export function setPlayerProgress(progress) {
 
 export function applyLossToStoredProgress() {
   const progress = getPlayerProgress();
+  if (progress.life === Infinity) {
+    return { remainingLives: Infinity, needsLifePurchase: false };
+  }
   const nextLife = Math.max(0, (progress.life ?? DEFAULT_PROGRESS.life) - 1);
   const updated = { ...progress, life: nextLife };
   const powerups = getStoredPowerups();

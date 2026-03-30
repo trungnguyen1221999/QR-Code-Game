@@ -38,10 +38,13 @@ export const joinGame = async (req, res) => {
     let playerSession = await PlayerSession.findOne({ userId: user._id, sessionId: gameSession._id });
     if (!playerSession) {
       const initialStatus = gameSession.status === 'in_progress' ? 'active' : 'waiting';
+      const livesMap = { easy: 9999, normal: 5, hard: 3 };
+      const initialLives = livesMap[gameSession.difficulty] ?? 3;
       playerSession = await PlayerSession.create({
         userId: user._id,
         sessionId: gameSession._id,
-        status: initialStatus
+        status: initialStatus,
+        lives: initialLives,
       });
     }
 
@@ -147,11 +150,13 @@ export const loseLife = async (req, res) => {
 
     if (!ps) return res.status(404).json({ message: 'Player session not found' });
 
-    ps.lives = Math.max(0, ps.lives - 1);
-    if (ps.lives === 0) {
-      ps.status = 'eliminated';
+    if (ps.lives < 9999) {
+      ps.lives = Math.max(0, ps.lives - 1);
+      if (ps.lives === 0) {
+        ps.status = 'eliminated';
+      }
+      await ps.save();
     }
-    await ps.save();
 
     res.json(ps);
   } catch (error) {
@@ -166,8 +171,11 @@ export const resetToStart = async (req, res) => {
 
     if (!ps) return res.status(404).json({ message: 'Player session not found' });
 
+    const gameSession = await GameSession.findById(ps.sessionId);
+    const livesMap = { easy: 9999, normal: 5, hard: 3 };
+    const resetLives = livesMap[gameSession?.difficulty] ?? 3;
     ps.currentCheckpointIndex = 0;
-    ps.lives = 3;
+    ps.lives = resetLives;
     ps.money = 0;
     ps.status = 'active';
     await ps.save();

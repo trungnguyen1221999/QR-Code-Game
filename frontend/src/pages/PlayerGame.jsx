@@ -60,11 +60,13 @@ function readSavedProgress(defaultLife) {
 
   try {
     const parsed = JSON.parse(raw);
+    const rawLife = parsed.life;
+    const life = rawLife === 'inf' ? Infinity : (rawLife ?? defaultLife);
     return {
       hasSavedProgress: true,
       completed: parsed.completed ?? 0,
       current: parsed.current ?? 1,
-      life: parsed.life ?? defaultLife,
+      life,
       coins: parsed.coins ?? DEFAULT_COINS,
     };
   } catch {
@@ -79,7 +81,8 @@ function readSavedProgress(defaultLife) {
 }
 
 function saveProgress(progress) {
-  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(progress));
+  const toSave = { ...progress, life: progress.life === Infinity ? 'inf' : progress.life };
+  localStorage.setItem(PLAYER_PROGRESS_KEY, JSON.stringify(toSave));
 }
 
 function clearProgress() {
