@@ -173,6 +173,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
   const lastQrDataRef = useRef(null); // debounce repeated QR detections
+  const lastScanTimeRef = useRef(0);  // 1s any-scan cooldown
   const introKey = `introPlayed_${session?.id || session?._id}`;
 
   // Redirect to intro page if not yet played
@@ -244,7 +245,9 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
     }
     if (state.justCompleted) {
       if (GAME_MODE === 'random') {
-        const cp = state.completedCheckpoint;
+        const pending = parseInt(sessionStorage.getItem('pendingCheckpoint') || '0', 10) || undefined;
+        const cp = state.completedCheckpoint ?? pending;
+        sessionStorage.removeItem('pendingCheckpoint');
         if (cp) setCompletedList(prev => prev.includes(cp) ? prev : [...prev, cp]);
         setCompleted(prev => Math.min(prev + 1, TOTAL_CHECKPOINTS));
       } else {
@@ -340,10 +343,15 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
             if (cancelled) return;
             const data = result?.data ?? '';
 
-            // Ignore if same QR already processed recently
+            // 1s cooldown after any scan attempt
+            const now = Date.now();
+            if (now - lastScanTimeRef.current < 1000) return;
+            lastScanTimeRef.current = now;
+
+            // 5s debounce for same QR code
             if (data === lastQrDataRef.current) return;
             lastQrDataRef.current = data;
-            setTimeout(() => { lastQrDataRef.current = null; }, 3000);
+            setTimeout(() => { lastQrDataRef.current = null; }, 5000);
 
             const match = data.match(/\/checkpoint\/(\d+)/) || data.match(/^CHECKPOINT:(\d+)$/);
 
@@ -356,13 +364,14 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
 
             if (GAME_MODE === 'random') {
               if (completedList.includes(scannedNum)) {
-                toast.error(`Checkpoint ${scannedNum} already done! Scan a different one.`);
+                toast.error(`Checkpoint ${scannedNum} already completed! Try another one.`);
                 return;
               }
               if (scannedNum < 1 || scannedNum > TOTAL_CHECKPOINTS) {
-                toast.error(`Invalid checkpoint!`);
-                return;
+                return; // silently ignore out-of-range
               }
+              // Valid — store checkpoint so completedList can be updated on return
+              sessionStorage.setItem('pendingCheckpoint', String(scannedNum));
               stopScanner();
               cancelled = true;
               setScanning(false);
