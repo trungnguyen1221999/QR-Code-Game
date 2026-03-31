@@ -499,7 +499,9 @@ export default function FinalChallenge() {
 
       {/* Lives + Score */}
       <div className="absolute top-6 left-6 flex flex-col gap-1">
-        <div className="text-xl tracking-wide">{'❤️'.repeat(Math.max(0, lives))}</div>
+        <div className="text-xl tracking-wide">
+          {lives === Infinity ? '❤️ ∞' : '❤️'.repeat(Math.max(0, lives))}
+        </div>
         <div className="text-sm font-black px-3 py-1 rounded-full w-fit"
           style={{ backgroundColor: 'rgba(0,0,0,0.45)', color: '#FFD700' }}>
           ⭐ {score}
