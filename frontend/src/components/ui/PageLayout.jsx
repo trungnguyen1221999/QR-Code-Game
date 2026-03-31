@@ -218,7 +218,7 @@ export default function PageLayout({ children, back, className = '' }) {
 
       {/* Overlay */}
       <div className="absolute inset-0"
-        style={{ backgroundColor: 'rgba(240, 255, 230, 0.1)' }} />
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }} />
 
       {/* Clouds */}
       {CLOUDS.map(c => (
