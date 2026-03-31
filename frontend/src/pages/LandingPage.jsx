@@ -95,7 +95,7 @@ export default function LandingPage({ onLogout }) {
       <div className="flex flex-col items-center gap-2 pt-2 pb-6">
         <img src="/brown-bear.gif" alt="Brown bear mascot" style={{ height: '150px', objectFit: 'contain' }} />
         <h1 className="text-4xl font-bold text-center" style={{ color: 'var(--color-primary)' }}>The prophecy of Mystery X</h1>
-        <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>Find QR codes. Play games. Win!</p>
+        <p className="text-sm" >Find QR codes. Play games. Win!</p>
       </div>
 
       <div className="flex flex-col gap-5">
@@ -187,9 +187,10 @@ export default function LandingPage({ onLogout }) {
           }}>
             <div className="flex flex-col gap-5 mt-5">
               {[
-                { num: 1, color: 'var(--color-orange)', title: 'Scan QR Checkpoints', desc: 'Find and scan 6 QR codes at different locations.' },
-                { num: 2, color: 'var(--color-green)',  title: 'Complete Mini Games',  desc: 'Play 5 unique mini games and earn scores.' },
-                { num: 3, color: 'var(--color-blue)',   title: 'Shop for Power-ups',   desc: 'Use your scores to buy hints, time boosts, and more.' },
+                { num: 1, color: 'var(--color-orange)', title: 'Scan QR Checkpoints',  desc: 'Find and scan QR codes hidden at different locations.' },
+                { num: 2, color: 'var(--color-green)',  title: 'Complete Mini Games',   desc: 'Play mini games at each checkpoint and earn coins.' },
+                { num: 3, color: 'var(--color-blue)',   title: 'Shop for Power-ups',    desc: 'Use your coins to buy time boosts, extra lives, and more.' },
+                { num: 4, color: '#8B5CF6',             title: 'Final Challenge',        desc: 'Complete all checkpoints to unlock the epic final challenge!' },
               ].map(({ num, color, title, desc }) => (
                 <div key={num} className="flex items-start gap-4">
                   <span className="shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
