@@ -23,6 +23,7 @@ import SimonGame from './pages/SimonGame';
 import TowerBuilderGame from './pages/TowerBuilderGame';
 import ClickCounterGame from './pages/ClickCounterGame';
 import RandomColorClickerGame from './pages/RandomColorClickerGame';
+import SnakeGame from './pages/SnakeGame';
 import GameOver from './pages/GameOver';
 import FinalShop from './pages/FinalShop';
 import FinalChallenge from './pages/FinalChallenge';
@@ -66,6 +67,7 @@ function App() {
         <Route path="/tower-builder" element={<TowerBuilderGame />} />
         <Route path="/click-counter-game" element={<ClickCounterGame />} />
         <Route path="/random-color-clicker" element={<RandomColorClickerGame />} />
+        <Route path="/snake-game" element={<SnakeGame />} />
         <Route path="/checkpoint/:id" element={<CheckpointScan />} />
         <Route path="/challenge" element={<PlayerChallenge />} />
         <Route path="/shop" element={<PlayerShop />} />

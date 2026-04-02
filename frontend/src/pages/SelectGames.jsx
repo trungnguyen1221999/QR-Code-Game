@@ -88,6 +88,14 @@ export const AVAILABLE_GAMES = [
     emoji: '🎨',
     bg: '#FDE68A',
   },
+  {
+    id: 'snake',
+    route: '/snake-game',
+    label: 'Snake game',
+    desc: 'Collect apples, avoid walls, and survive the fading snake challenge',
+    emoji: '🐍',
+    bg: '#BBF7D0',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;

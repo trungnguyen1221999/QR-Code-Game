@@ -43,6 +43,11 @@ export const MINI_GAME_CONFIG = {
     normal: { timeLimit: 35, goal: 10 },
     hard:   { timeLimit: 25, goal: 12 },
   },
+  snake: {
+    easy:   { timeLimit: 120, goal: 4 },
+    normal: { timeLimit: 100, goal: 6 },
+    hard:   { timeLimit: 80, goal: 8 },
+  },
 };
 
 /** Returns config for a given game + difficulty. Falls back to 'hard' if unknown. */

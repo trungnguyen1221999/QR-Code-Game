@@ -14,6 +14,7 @@ const DEFAULT_GAME_ORDER = [
   '/simon-game',
   '/click-counter-game',
   '/random-color-clicker',
+  '/snake-game',
 ];
 
 function getCheckpointRoute(checkpoint) {
