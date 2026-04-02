@@ -38,6 +38,11 @@ export const MINI_GAME_CONFIG = {
     normal: { timeLimit: 25, goal: 50 },
     hard:   { timeLimit: 20, goal: 60 },
   },
+  randomColorClicker: {
+    easy:   { timeLimit: 45, goal: 8 },
+    normal: { timeLimit: 35, goal: 10 },
+    hard:   { timeLimit: 25, goal: 12 },
+  },
 };
 
 /** Returns config for a given game + difficulty. Falls back to 'hard' if unknown. */

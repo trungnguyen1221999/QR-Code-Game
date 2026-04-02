@@ -80,6 +80,14 @@ export const AVAILABLE_GAMES = [
     emoji: 'ðŸ–±ï¸',
     bg: '#FEF3C7',
   },
+  {
+    id: 'random-color-clicker',
+    route: '/random-color-clicker',
+    label: 'Random Color Clicker',
+    desc: 'Tap the button that matches the text color, not the written word',
+    emoji: '🎨',
+    bg: '#FDE68A',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
