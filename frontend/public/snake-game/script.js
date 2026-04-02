@@ -77,9 +77,17 @@ window.addEventListener("DOMContentLoaded", function (event) {
   const noteElement = document.querySelector("footer");
   const contrastElement = document.querySelector(".contrast");
   const scoreElement = document.querySelector(".score");
+  const startTargets = [containerElement, grid, document.body];
 
   // Initialize layout
   resetGame();
+
+  startTargets.forEach((target) => {
+    target.addEventListener("pointerdown", function () {
+      window.focus();
+      if (!gameStarted) startGame();
+    });
+  });
 
   // Resets game variables and layouts but does not start the game (game starts on keypress)
   function resetGame() {
@@ -157,7 +165,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
       hardMode = true;
       fadeSpeed = 4000;
       fadeExponential = 1.025;
-      noteElement.innerHTML = `Hard mode. Press space to start!`;
+      noteElement.innerHTML = `Hard mode. Tap the game screen to start!`;
       noteElement.style.opacity = 1;
       resetGame();
       return;
@@ -168,7 +176,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
       hardMode = false;
       fadeSpeed = 5000;
       fadeExponential = 1.024;
-      noteElement.innerHTML = `Easy mode. Press space to start!`;
+      noteElement.innerHTML = `Easy mode. Tap the game screen to start!`;
       noteElement.style.opacity = 1;
       resetGame();
       return;
@@ -289,9 +297,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
       const changeMode = hardMode
         ? "Back to easy mode? Press the letter E."
         : "Ready for hard more? Press the letter H.";
-      const followMe =
-        'Follow me <a href="https://twitter.com/HunorBorbely" , target="_top">@HunorBorbely</a>';
-      noteElement.innerHTML = `${error.message}. ${pressSpaceToStart} <div>${changeMode}</div> ${followMe}`;
+      noteElement.innerHTML = `${error.message}. ${pressSpaceToStart} <div>${changeMode}</div>`;
       noteElement.style.opacity = 1;
       containerElement.style.opacity = 1;
       gameStarted = false;

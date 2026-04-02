@@ -266,7 +266,7 @@ export default function SnakeGame() {
             title="Snake Game"
             src="/snake-game/index.html"
             className="block w-full border-0"
-            style={{ height: 520, backgroundColor: 'transparent' }}
+            style={{ height: 460, backgroundColor: 'transparent' }}
           />
         </div>
 
