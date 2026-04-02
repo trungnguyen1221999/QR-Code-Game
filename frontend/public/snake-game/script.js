@@ -77,6 +77,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
   const noteElement = document.querySelector("footer");
   const contrastElement = document.querySelector(".contrast");
   const scoreElement = document.querySelector(".score");
+  const controlButtons = document.querySelectorAll("[data-direction]");
   const startTargets = [containerElement, grid, document.body];
 
   // Initialize layout
@@ -88,6 +89,54 @@ window.addEventListener("DOMContentLoaded", function (event) {
       if (!gameStarted) startGame();
     });
   });
+
+  controlButtons.forEach((button) => {
+    button.addEventListener("pointerdown", function (event) {
+      event.preventDefault();
+      const direction = event.currentTarget.getAttribute("data-direction");
+      handleDirection(direction);
+    });
+  });
+
+  function handleDirection(direction) {
+    if (!["left", "up", "right", "down"].includes(direction)) return;
+
+    if (
+      direction == "left" &&
+      inputs[inputs.length - 1] != "left" &&
+      headDirection() != "right"
+    ) {
+      inputs.push("left");
+      if (!gameStarted) startGame();
+      return;
+    }
+    if (
+      direction == "up" &&
+      inputs[inputs.length - 1] != "up" &&
+      headDirection() != "down"
+    ) {
+      inputs.push("up");
+      if (!gameStarted) startGame();
+      return;
+    }
+    if (
+      direction == "right" &&
+      inputs[inputs.length - 1] != "right" &&
+      headDirection() != "left"
+    ) {
+      inputs.push("right");
+      if (!gameStarted) startGame();
+      return;
+    }
+    if (
+      direction == "down" &&
+      inputs[inputs.length - 1] != "down" &&
+      headDirection() != "up"
+    ) {
+      inputs.push("down");
+      if (!gameStarted) startGame();
+    }
+  }
 
   // Resets game variables and layouts but does not start the game (game starts on keypress)
   function resetGame() {
@@ -186,40 +235,20 @@ window.addEventListener("DOMContentLoaded", function (event) {
     // Do not allow to add the same direction twice consecutively
     // The snake can't do a full turn either
     // Also start the game if it hasn't started yet
-    if (
-      event.key == "ArrowLeft" &&
-      inputs[inputs.length - 1] != "left" &&
-      headDirection() != "right"
-    ) {
-      inputs.push("left");
-      if (!gameStarted) startGame();
+    if (event.key == "ArrowLeft") {
+      handleDirection("left");
       return;
     }
-    if (
-      event.key == "ArrowUp" &&
-      inputs[inputs.length - 1] != "up" &&
-      headDirection() != "down"
-    ) {
-      inputs.push("up");
-      if (!gameStarted) startGame();
+    if (event.key == "ArrowUp") {
+      handleDirection("up");
       return;
     }
-    if (
-      event.key == "ArrowRight" &&
-      inputs[inputs.length - 1] != "right" &&
-      headDirection() != "left"
-    ) {
-      inputs.push("right");
-      if (!gameStarted) startGame();
+    if (event.key == "ArrowRight") {
+      handleDirection("right");
       return;
     }
-    if (
-      event.key == "ArrowDown" &&
-      inputs[inputs.length - 1] != "down" &&
-      headDirection() != "up"
-    ) {
-      inputs.push("down");
-      if (!gameStarted) startGame();
+    if (event.key == "ArrowDown") {
+      handleDirection("down");
       return;
     }
   });

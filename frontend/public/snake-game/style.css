@@ -55,6 +55,40 @@ header {
   height: 100%;
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 46px;
+}
+
+.control-btn {
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.78);
+  color: #111827;
+  font-size: 1.35rem;
+  font-weight: 900;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.control-btn:active {
+  transform: scale(0.94);
+  box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.16);
+}
+
 footer {
   max-width: calc(var(--size) * 17);
   text-align: center;
