@@ -46,7 +46,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
   const width = 15; // Grid width
   const height = 15; // Grid height
 
-  const speed = 200; // Milliseconds it takes for the snake to take a step in the grid
+  const speed = 280; // Milliseconds it takes for the snake to take a step in the grid
   let fadeSpeed = 5000; // milliseconds it takes the grid to disappear (initially)
   let fadeExponential = 1.024; // after each score it will gradually take more time for the grid to fade
   const contrastIncrease = 0.5; // contrast you gain after each score
