@@ -264,7 +264,7 @@ export default function SnakeGame() {
             key={iframeKey}
             ref={iframeRef}
             title="Snake Game"
-            src="/snake-original/fading-snake/dist/index.html"
+            src="/snake-game/index.html"
             className="block w-full border-0"
             style={{ height: 520, backgroundColor: 'transparent' }}
           />
