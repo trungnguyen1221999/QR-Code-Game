@@ -12,6 +12,7 @@ const DEFAULT_GAME_ORDER = [
   '/memory-game',
   '/puzzle-game',
   '/simon-game',
+  '/click-counter-game',
 ];
 
 function getCheckpointRoute(checkpoint) {
@@ -47,7 +48,7 @@ export default function CheckpointScan() {
 
     const progress = getPlayerProgress();
     const gameMode = session?.gameMode || 'ordered';
-    const totalCheckpoints = session?.gameOrder?.length || 6;
+    const totalCheckpoints = session?.gameOrder?.length || DEFAULT_GAME_ORDER.length;
 
     if (gameMode === 'random') {
       if (checkpointNum > totalCheckpoints) {

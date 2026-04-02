@@ -15,9 +15,9 @@ function getTotalCheckpoints() {
   try {
     const session = JSON.parse(localStorage.getItem('session') || 'null');
     const len = session?.gameOrder?.length;
-    return (len && len > 0) ? len : 6;
+    return (len && len > 0) ? len : 7;
   } catch {
-    return 6;
+    return 7;
   }
 }
 const DEFAULT_COINS = 0;
@@ -36,6 +36,7 @@ const DEFAULT_GAME_ORDER = [
   '/memory-game',
   '/puzzle-game',
   '/simon-game',
+  '/click-counter-game',
 ];
 
 function getCheckpointRoute(checkpoint) {

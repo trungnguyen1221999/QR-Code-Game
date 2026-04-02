@@ -72,6 +72,14 @@ export const AVAILABLE_GAMES = [
     emoji: '📝',
     bg: '#EDE9FE',
   },
+  {
+    id: 'click-counter',
+    route: '/click-counter-game',
+    label: 'Click Counter Game',
+    desc: 'Tap as fast as you can and reach the target count before time runs out',
+    emoji: 'ðŸ–±ï¸',
+    bg: '#FEF3C7',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
@@ -156,7 +164,7 @@ export default function SelectGames() {
     const QR_SIZE = 300;
     const PADDING = 20;
     const qrDataUrl = await QRCode.toDataURL(
-      `${window.location.origin}/checkpoint/${checkpoint}`,
+      `CHECKPOINT:${checkpoint}`,
       { width: QR_SIZE, margin: 1 },
     );
     const img = new Image();

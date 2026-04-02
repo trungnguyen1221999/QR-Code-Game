@@ -14,7 +14,7 @@ async function buildQRCanvas(route, idx) {
   const QR_SIZE = 300;
   const PADDING = 20;
   const qrDataUrl = await QRCode.toDataURL(
-    `${window.location.origin}/checkpoint/${checkpoint}`,
+    `CHECKPOINT:${checkpoint}`,
     { width: QR_SIZE, margin: 1 },
   );
   const img = new Image();
@@ -79,7 +79,7 @@ export default function GameSettingsCard({ session }) {
         <div className="rounded-xl px-3 py-2" style={{ backgroundColor: 'var(--color-info-bg)' }}>
           <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Checkpoints</p>
           <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>
-            {session?.gameOrder?.length || 6} QR codes
+            {session?.gameOrder?.length || AVAILABLE_GAMES.length} QR codes
           </p>
         </div>
         <div className="rounded-xl px-3 py-2" style={{ backgroundColor: 'var(--color-info-bg)' }}>
