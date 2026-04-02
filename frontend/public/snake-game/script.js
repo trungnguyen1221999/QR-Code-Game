@@ -35,8 +35,6 @@ window.addEventListener("DOMContentLoaded", function (event) {
   let lastTimestamp; // The previous timestamp of the animation
   let stepsTaken; // How many steps did the snake take
   let score;
-  let contrast;
-
   let inputs; // A list of directions the snake still has to take in order
 
   let gameStarted = false;
@@ -47,9 +45,6 @@ window.addEventListener("DOMContentLoaded", function (event) {
   const height = 15; // Grid height
 
   const speed = 280; // Milliseconds it takes for the snake to take a step in the grid
-  let fadeSpeed = 5000; // milliseconds it takes the grid to disappear (initially)
-  let fadeExponential = 1.024; // after each score it will gradually take more time for the grid to fade
-  const contrastIncrease = 0.5; // contrast you gain after each score
   const color = "black"; // Primary color
 
   // Setup: Build up the grid
@@ -149,13 +144,11 @@ window.addEventListener("DOMContentLoaded", function (event) {
     lastTimestamp = undefined;
     stepsTaken = -1; // It's -1 because then the snake will start with a step
     score = 0;
-    contrast = 1;
-
     // Reset inputs
     inputs = [];
 
     // Reset header
-    contrastElement.innerText = `${Math.floor(contrast * 100)}%`;
+    contrastElement.innerText = "100%";
     scoreElement.innerText = hardMode ? `H ${score}` : score;
     publish("reset", { score, hardMode });
 
@@ -212,8 +205,6 @@ window.addEventListener("DOMContentLoaded", function (event) {
     // Set Hard mode
     if (event.key == "H" || event.key == "h") {
       hardMode = true;
-      fadeSpeed = 4000;
-      fadeExponential = 1.025;
       noteElement.innerHTML = `Hard mode. Tap the game screen to start!`;
       noteElement.style.opacity = 1;
       resetGame();
@@ -223,8 +214,6 @@ window.addEventListener("DOMContentLoaded", function (event) {
     // Set Easy mode
     if (event.key == "E" || event.key == "e") {
       hardMode = false;
-      fadeSpeed = 5000;
-      fadeExponential = 1.024;
       noteElement.innerHTML = `Easy mode. Tap the game screen to start!`;
       noteElement.style.opacity = 1;
       resetGame();
@@ -289,35 +278,14 @@ window.addEventListener("DOMContentLoaded", function (event) {
           // Generate another apple
           addNewApple();
 
-          // Increase the contrast after each score
-          // Don't let the contrast go above 1
-          contrast = Math.min(1, contrast + contrastIncrease);
-
-          // Debugging
-          console.log(`Contrast increased by ${contrastIncrease * 100}%`);
-          console.log(
-            "New fade speed (from 100% to 0% in milliseconds)",
-            Math.pow(fadeExponential, score) * fadeSpeed
-          );
         }
 
         stepsTaken++;
       } else {
         transition(percentageOfStep);
       }
-
-      if (lastTimestamp) {
-        // Decrease the contrast based on the time passed an the current score
-        // With a higher score the contrast decreases slower
-        const contrastDecrease =
-          timeElapsedSinceLastCall /
-          (Math.pow(fadeExponential, score) * fadeSpeed);
-        // Don't let the contrast drop below zero
-        contrast = Math.max(0, contrast - contrastDecrease);
-      }
-
-      contrastElement.innerText = `${Math.floor(contrast * 100)}%`;
-      containerElement.style.opacity = contrast;
+      contrastElement.innerText = "100%";
+      containerElement.style.opacity = 1;
 
       window.requestAnimationFrame(main);
     } catch (error) {
