@@ -59,7 +59,6 @@ export default function ClickToShootTargetsGame() {
     getInitialGameTime(timeLimit, 'click-to-shoot-targets', location.key)
   );
   const [hits, setHits] = useState(0);
-  const [misses, setMisses] = useState(0);
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
@@ -67,7 +66,7 @@ export default function ClickToShootTargetsGame() {
   const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const [target, setTarget] = useState(() => getRandomTarget());
   const [flash, setFlash] = useState(null);
-  const [message, setMessage] = useState('Lock on and tap the moving target.');
+  const [hitBurst, setHitBurst] = useState(null);
   const lossHandledRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
@@ -105,26 +104,32 @@ export default function ClickToShootTargetsGame() {
   const handleTargetHit = () => {
     if (busy || showWin || showLose) return;
 
+    const burst = {
+      key: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      x: target.x,
+      y: target.y,
+      size: target.size,
+      hue: target.hue,
+    };
+
     setHits((value) => value + 1);
-    setTarget(getRandomTarget());
+    setHitBurst(burst);
     setFlash('hit');
-    setMessage('Direct hit! New target incoming.');
-    window.setTimeout(() => setFlash(null), 140);
+    setTarget(getRandomTarget());
+    window.setTimeout(() => setFlash(null), 160);
+    window.setTimeout(() => setHitBurst(null), 320);
   };
 
   const handleArenaMiss = (event) => {
     if (event.target !== event.currentTarget || busy || showWin || showLose) return;
 
-    setMisses((value) => value + 1);
     setFlash('miss');
-    setMessage('Missed shot. Stay focused.');
     window.setTimeout(() => setFlash(null), 180);
   };
 
   const handleRetry = () => {
     setTimeLeft(getReplayGameTime(timeLimit));
     setHits(0);
-    setMisses(0);
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -132,7 +137,7 @@ export default function ClickToShootTargetsGame() {
     setLoseState(INITIAL_LOSE_STATE);
     setTarget(getRandomTarget());
     setFlash(null);
-    setMessage('Lock on and tap the moving target.');
+    setHitBurst(null);
     lossHandledRef.current = false;
   };
 
@@ -205,6 +210,33 @@ export default function ClickToShootTargetsGame() {
   return (
     <PageLayout>
       <div className="pt-5 pb-6 flex flex-col gap-4">
+        <style>{`
+          @keyframes target-hit-ring {
+            0% {
+              opacity: 0.95;
+              transform: scale(0.7);
+            }
+            100% {
+              opacity: 0;
+              transform: scale(1.55);
+            }
+          }
+
+          @keyframes target-hit-score {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.9);
+            }
+            20% {
+              opacity: 1;
+            }
+            100% {
+              opacity: 0;
+              transform: translateY(-18px) scale(1.08);
+            }
+          }
+        `}</style>
+
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
             Checkpoint {checkpoint}
@@ -218,7 +250,7 @@ export default function ClickToShootTargetsGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
@@ -231,19 +263,10 @@ export default function ClickToShootTargetsGame() {
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#15803D' }}>
-              Hits
+              Hit
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#166534' }}>
               {hits}/{goal}
-            </p>
-          </Card>
-
-          <Card>
-            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Misses
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
-              {misses}
             </p>
           </Card>
         </div>
@@ -281,6 +304,37 @@ export default function ClickToShootTargetsGame() {
             }}
           />
 
+          {hitBurst && (
+            <>
+              <div
+                key={`${hitBurst.key}-ring`}
+                className="pointer-events-none absolute rounded-full border-4"
+                style={{
+                  width: hitBurst.size,
+                  height: hitBurst.size,
+                  left: `calc(${hitBurst.x}% - ${hitBurst.size / 2}px)`,
+                  top: `calc(${hitBurst.y}% - ${hitBurst.size / 2}px)`,
+                  borderColor: `hsla(${hitBurst.hue} 95% 48% / 0.9)`,
+                  boxShadow: `0 0 24px hsla(${hitBurst.hue} 100% 50% / 0.55)`,
+                  animation: 'target-hit-ring 320ms ease-out forwards',
+                }}
+              />
+              <div
+                key={`${hitBurst.key}-score`}
+                className="pointer-events-none absolute font-black text-xl"
+                style={{
+                  left: `calc(${hitBurst.x}% - 16px)`,
+                  top: `calc(${hitBurst.y}% - ${hitBurst.size / 2}px - 18px)`,
+                  color: '#166534',
+                  textShadow: '0 8px 18px rgba(22,101,52,0.22)',
+                  animation: 'target-hit-score 320ms ease-out forwards',
+                }}
+              >
+                +1
+              </div>
+            </>
+          )}
+
           <button
             type="button"
             onClick={(event) => {
@@ -299,18 +353,6 @@ export default function ClickToShootTargetsGame() {
               boxShadow: '0 16px 24px rgba(15,23,42,0.2)',
             }}
           />
-
-          <div
-            className="absolute bottom-4 left-4 right-4 rounded-2xl px-4 py-3"
-            style={{ backgroundColor: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(8px)' }}
-          >
-            <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-              {message}
-            </p>
-            <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-              Missed taps do not end the game, but they show how accurate your run was.
-            </p>
-          </div>
         </div>
 
         <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
@@ -323,7 +365,7 @@ export default function ClickToShootTargetsGame() {
           <CheckpointWinReward
             checkpoint={checkpoint}
             title="Targets cleared!"
-            message={`You landed ${hits} hits with ${misses} misses and earned ${earnedCoins} coins from the time left.`}
+            message={`You landed ${hits} hits and earned ${earnedCoins} coins from the time left.`}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
