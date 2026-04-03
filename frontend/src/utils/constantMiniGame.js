@@ -48,6 +48,11 @@ export const MINI_GAME_CONFIG = {
     normal: { timeLimit: 100, goal: 6 },
     hard:   { timeLimit: 80, goal: 8 },
   },
+  clickToShootTargets: {
+    easy:   { timeLimit: 40, goal: 8 },
+    normal: { timeLimit: 30, goal: 10 },
+    hard:   { timeLimit: 24, goal: 12 },
+  },
 };
 
 /** Returns config for a given game + difficulty. Falls back to 'hard' if unknown. */

@@ -1,0 +1,394 @@
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Clock, Crosshair } from 'lucide-react';
+import toast from 'react-hot-toast';
+import useBlockBack from '../hooks/useBlockBack';
+import PageLayout from '../components/ui/PageLayout';
+import Button from '../components/ui/Button';
+import Popup from '../components/ui/Popup';
+import Card from '../components/ui/Card';
+import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
+import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import { playerAPI } from '../utils/api';
+import {
+  clearUnusedExtraLife,
+  getInitialGameTime,
+  getPlayerProgress,
+  getReplayGameTime,
+} from '../utils/checkpointShop';
+import {
+  applyLosePurchase,
+  handleCheckpointLoseExit,
+  handleCheckpointLosePrimaryAction,
+  INITIAL_LOSE_STATE,
+  registerCheckpointLifeLoss,
+} from '../utils/checkpointLoseFlow';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const secs = (seconds % 60).toString().padStart(2, '0');
+  return `${mins}:${secs}`;
+}
+
+function getRandomTarget() {
+  const size = Math.floor(Math.random() * 36) + 68;
+  const halfSizePercent = size / 6.8;
+
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    x: Math.min(100 - halfSizePercent, Math.max(halfSizePercent, Math.floor(Math.random() * 100))),
+    y: Math.min(100 - halfSizePercent, Math.max(halfSizePercent, Math.floor(Math.random() * 100))),
+    size,
+    hue: Math.floor(Math.random() * 120) + 10,
+  };
+}
+
+export default function ClickToShootTargetsGame() {
+  const { timeLimit, goal } = getMiniGameConfig('clickToShootTargets', getSessionDifficulty());
+
+  useBlockBack();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const checkpoint = location.state?.checkpoint ?? 10;
+  const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
+  const playerSessionId = playerSession?._id || playerSession?.id;
+
+  const [timeLeft, setTimeLeft] = useState(() =>
+    getInitialGameTime(timeLimit, 'click-to-shoot-targets', location.key)
+  );
+  const [hits, setHits] = useState(0);
+  const [misses, setMisses] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [showWin, setShowWin] = useState(false);
+  const [showLose, setShowLose] = useState(false);
+  const [showBackConfirm, setShowBackConfirm] = useState(false);
+  const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
+  const [target, setTarget] = useState(() => getRandomTarget());
+  const [flash, setFlash] = useState(null);
+  const [message, setMessage] = useState('Lock on and tap the moving target.');
+  const lossHandledRef = useRef(false);
+  const earnedCoins = Math.max(0, timeLeft * 2);
+
+  useEffect(() => {
+    if (showWin || showLose || showBackConfirm) return;
+
+    if (timeLeft <= 0) {
+      void handleLoss();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((value) => value - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [showBackConfirm, showLose, showWin, timeLeft]);
+
+  useEffect(() => {
+    if (hits >= goal) {
+      setShowWin(true);
+    }
+  }, [goal, hits]);
+
+  useEffect(() => {
+    if (showWin || showLose || showBackConfirm) return undefined;
+
+    const mover = setInterval(() => {
+      setTarget(getRandomTarget());
+    }, 900);
+
+    return () => clearInterval(mover);
+  }, [showBackConfirm, showLose, showWin]);
+
+  const handleTargetHit = () => {
+    if (busy || showWin || showLose) return;
+
+    setHits((value) => value + 1);
+    setTarget(getRandomTarget());
+    setFlash('hit');
+    setMessage('Direct hit! New target incoming.');
+    window.setTimeout(() => setFlash(null), 140);
+  };
+
+  const handleArenaMiss = (event) => {
+    if (event.target !== event.currentTarget || busy || showWin || showLose) return;
+
+    setMisses((value) => value + 1);
+    setFlash('miss');
+    setMessage('Missed shot. Stay focused.');
+    window.setTimeout(() => setFlash(null), 180);
+  };
+
+  const handleRetry = () => {
+    setTimeLeft(getReplayGameTime(timeLimit));
+    setHits(0);
+    setMisses(0);
+    setBusy(false);
+    setShowWin(false);
+    setShowLose(false);
+    setShowBackConfirm(false);
+    setLoseState(INITIAL_LOSE_STATE);
+    setTarget(getRandomTarget());
+    setFlash(null);
+    setMessage('Lock on and tap the moving target.');
+    lossHandledRef.current = false;
+  };
+
+  const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
+
+  const registerLifeLoss = async () => {
+    try {
+      return await registerCheckpointLifeLoss(playerSessionId);
+    } catch (error) {
+      toast.error(error.message);
+      return INITIAL_LOSE_STATE;
+    }
+  };
+
+  const handleLoss = async () => {
+    if (lossHandledRef.current) return;
+    lossHandledRef.current = true;
+    setBusy(true);
+
+    const summary = await registerLifeLoss();
+    setLoseState(summary);
+    setBusy(false);
+    setShowLose(true);
+  };
+
+  const handleBackExit = async () => {
+    setBusy(true);
+    const summary = await registerLifeLoss();
+
+    if (summary.needsLifePurchase) {
+      handleCheckpointLoseExit({ needsLifePurchase: true }, navigate, playerSessionId);
+      return;
+    }
+
+    navigate('/game');
+  };
+
+  const handleLosePrimaryAction = () =>
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry, playerSessionId);
+
+  const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
+
+  const handleWinContinue = async () => {
+    const resultId = `click-to-shoot-targets-win-${Date.now()}`;
+    setBusy(true);
+
+    try {
+      if (playerSessionId) {
+        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      clearUnusedExtraLife();
+      navigate('/game', {
+        state: {
+          justCompleted: true,
+          completedCheckpoint: checkpoint,
+          nextCheckpoint: checkpoint + 1,
+          rewardCoins: 0,
+          resultId,
+        },
+      });
+    }
+  };
+
+  const currentLives = getPlayerProgress().life ?? 0;
+  const backWillResetToStart = currentLives <= 1;
+
+  return (
+    <PageLayout>
+      <div className="pt-5 pb-6 flex flex-col gap-4">
+        <div>
+          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
+            Checkpoint {checkpoint}
+          </p>
+          <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
+            <Crosshair size={20} />
+            Click-to-Shoot Targets
+          </h2>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
+            Tap the moving target before the timer runs out.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Card>
+            <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
+              <Clock size={14} />
+              Time left
+            </p>
+            <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
+              {formatTime(timeLeft)}
+            </p>
+          </Card>
+
+          <Card>
+            <p className="text-xs font-semibold" style={{ color: '#15803D' }}>
+              Hits
+            </p>
+            <p className="text-lg font-bold mt-1" style={{ color: '#166534' }}>
+              {hits}/{goal}
+            </p>
+          </Card>
+
+          <Card>
+            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
+              Misses
+            </p>
+            <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
+              {misses}
+            </p>
+          </Card>
+        </div>
+
+        <Card className="text-center">
+          <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+            Sharpshooter mode
+          </p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
+            Goal: land {goal} clean hits. The target relocates every moment, so keep tracking it.
+          </p>
+        </Card>
+
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={handleArenaMiss}
+          onKeyDown={() => {}}
+          className="relative overflow-hidden rounded-[32px] border"
+          style={{
+            height: 340,
+            borderColor: flash === 'miss' ? '#EF4444' : '#BFDBFE',
+            background: flash === 'miss'
+              ? 'radial-gradient(circle at center, rgba(254,202,202,0.9) 0%, rgba(191,219,254,0.75) 52%, rgba(224,242,254,0.95) 100%)'
+              : 'radial-gradient(circle at center, rgba(255,255,255,0.98) 0%, rgba(219,234,254,0.92) 48%, rgba(224,242,254,0.98) 100%)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.8), 0 18px 34px rgba(37,99,235,0.14)',
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(59,130,246,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.08) 1px, transparent 1px)',
+              backgroundSize: '36px 36px',
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleTargetHit();
+            }}
+            disabled={busy || showWin || showLose}
+            className="absolute rounded-full transition-[left,top,transform] duration-300 ease-out"
+            style={{
+              width: target.size,
+              height: target.size,
+              left: `calc(${target.x}% - ${target.size / 2}px)`,
+              top: `calc(${target.y}% - ${target.size / 2}px)`,
+              transform: flash === 'hit' ? 'scale(0.9)' : 'scale(1)',
+              background: `radial-gradient(circle, white 0 18%, #111827 18% 26%, white 26% 42%, hsl(${target.hue} 90% 54%) 42% 64%, #111827 64% 72%, white 72% 100%)`,
+              boxShadow: '0 16px 24px rgba(15,23,42,0.2)',
+            }}
+          />
+
+          <div
+            className="absolute bottom-4 left-4 right-4 rounded-2xl px-4 py-3"
+            style={{ backgroundColor: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(8px)' }}
+          >
+            <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+              {message}
+            </p>
+            <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
+              Missed taps do not end the game, but they show how accurate your run was.
+            </p>
+          </div>
+        </div>
+
+        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
+          Back
+        </Button>
+      </div>
+
+      <Popup open={showWin} onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <CheckpointWinReward
+            checkpoint={checkpoint}
+            title="Targets cleared!"
+            message={`You landed ${hits} hits with ${misses} misses and earned ${earnedCoins} coins from the time left.`}
+          />
+          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
+          <Button variant="green" onClick={handleWinContinue} disabled={busy}>
+            Continue
+          </Button>
+        </div>
+      </Popup>
+
+      <Popup open={showLose} onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">⏰</span>
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              Time is up
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {loseState.needsLifePurchase
+                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
+                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+            </p>
+          </div>
+          <CheckpointShopPanel
+            isOpen={showLose}
+            checkpoint={checkpoint}
+            warningMessage={
+              loseState.needsLifePurchase
+                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                : ''
+            }
+            onPurchase={handleLoseShopPurchase}
+          />
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
+              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+            </Button>
+            <Button variant="green" onClick={handleLoseExit} disabled={busy}>
+              Exit game
+            </Button>
+          </div>
+        </div>
+      </Popup>
+
+      <Popup open={showBackConfirm} onClose={() => setShowBackConfirm(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">!</span>
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              Leave this game?
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {backWillResetToStart
+                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
+                : 'If you go back now, one life will be lost.'}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleBackExit} disabled={busy}>
+              Confirm
+            </Button>
+            <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </Popup>
+    </PageLayout>
+  );
+}

@@ -96,6 +96,14 @@ export const AVAILABLE_GAMES = [
     emoji: '🐍',
     bg: '#BBF7D0',
   },
+  {
+    id: 'click-to-shoot-targets',
+    route: '/click-to-shoot-targets',
+    label: 'Click-to-Shoot Targets',
+    desc: 'Tap the moving target quickly and clear the hit goal before time runs out',
+    emoji: 'Target',
+    bg: '#DBEAFE',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
