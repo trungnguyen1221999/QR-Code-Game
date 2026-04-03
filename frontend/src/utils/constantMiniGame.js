@@ -53,6 +53,11 @@ export const MINI_GAME_CONFIG = {
     normal: { timeLimit: 30, goal: 10 },
     hard:   { timeLimit: 24, goal: 12 },
   },
+  maze: {
+    easy:   { timeLimit: 75, size: 7, enemies: 0, enemySpeed: 0 },
+    normal: { timeLimit: 90, size: 8, enemies: 1, enemySpeed: 1000 },
+    hard:   { timeLimit: 90, size: 9, enemies: 2, enemySpeed: 750 },
+  },
 };
 
 /** Returns config for a given game + difficulty. Falls back to 'hard' if unknown. */

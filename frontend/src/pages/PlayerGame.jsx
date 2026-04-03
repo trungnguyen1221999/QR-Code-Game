@@ -15,9 +15,9 @@ function getTotalCheckpoints() {
   try {
     const session = JSON.parse(localStorage.getItem('session') || 'null');
     const len = session?.gameOrder?.length;
-    return (len && len > 0) ? len : 10;
+    return (len && len > 0) ? len : 11;
   } catch {
-    return 10;
+    return 11;
   }
 }
 const DEFAULT_COINS = 0;
@@ -40,6 +40,7 @@ const DEFAULT_GAME_ORDER = [
   '/random-color-clicker',
   '/snake-game',
   '/click-to-shoot-targets',
+  '/maze-game',
 ];
 
 function getCheckpointRoute(checkpoint) {

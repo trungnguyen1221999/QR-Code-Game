@@ -104,6 +104,14 @@ export const AVAILABLE_GAMES = [
     emoji: 'Target',
     bg: '#DBEAFE',
   },
+  {
+    id: 'maze',
+    route: '/maze-game',
+    label: 'Maze game',
+    desc: 'Navigate a random maze, avoid roaming enemies on higher difficulties, and find the exit',
+    emoji: 'Maze',
+    bg: '#E9D5FF',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
