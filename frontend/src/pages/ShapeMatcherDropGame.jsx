@@ -115,9 +115,19 @@ export default function ShapeMatcherDropGame() {
   const lossHandledRef = useRef(false);
   const resolvingRef = useRef(false);
   const dragStartRef = useRef(null);
+  const fallingShapeRef = useRef(fallingShape);
+  const containerShapeRef = useRef(containerShape);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   const containerShape = SHAPES[containerIndex];
+
+  useEffect(() => {
+    fallingShapeRef.current = fallingShape;
+  }, [fallingShape]);
+
+  useEffect(() => {
+    containerShapeRef.current = containerShape;
+  }, [containerShape]);
 
   useEffect(() => {
     if (showWin || showLose || showBackConfirm) return;
@@ -197,18 +207,20 @@ export default function ShapeMatcherDropGame() {
     if (resolvingRef.current || showWin || showLose) return;
     resolvingRef.current = true;
 
-    const matched = containerShape.id === fallingShape.id;
+    const activeContainerShape = containerShapeRef.current;
+    const activeFallingShape = fallingShapeRef.current;
+    const matched = activeContainerShape.id === activeFallingShape.id;
 
     if (matched) {
       setScore((value) => value + 1);
-      setFeedback(`Perfect catch! ${fallingShape.label} matched.`);
+      setFeedback(`Perfect catch! ${activeFallingShape.label} matched.`);
       setHitFlash('good');
       window.setTimeout(() => setHitFlash(null), 220);
       spawnNextShape();
       return;
     }
 
-    setFeedback(`Wrong catch. ${fallingShape.label} did not fit the ${containerShape.label.toLowerCase()} catcher.`);
+    setFeedback(`Wrong catch. ${activeFallingShape.label} did not fit the ${activeContainerShape.label.toLowerCase()} catcher.`);
     setHitFlash('bad');
     window.setTimeout(() => setHitFlash(null), 240);
     setBusy(true);
@@ -361,9 +373,9 @@ export default function ShapeMatcherDropGame() {
         </Card>
 
         <div
-          className="relative overflow-hidden rounded-[30px] border px-4 pt-4 pb-5"
+          className="relative overflow-hidden rounded-[30px] border px-4 pt-4 pb-4"
           style={{
-            minHeight: 430,
+            minHeight: 500,
             borderColor: hitFlash === 'bad' ? '#FCA5A5' : '#BFDBFE',
             background: hitFlash === 'bad'
               ? 'linear-gradient(180deg, #FEE2E2 0%, #DBEAFE 100%)'
@@ -390,7 +402,7 @@ export default function ShapeMatcherDropGame() {
             {renderShape(fallingShape)}
           </div>
 
-          <div className="absolute left-4 right-4 bottom-5 z-20">
+          <div className="absolute left-4 right-4 bottom-28 z-20">
             <div className="flex items-end justify-center gap-3">
               {SHAPES.map((shape, index) => {
                 const isActive = index === containerIndex;
@@ -418,7 +430,7 @@ export default function ShapeMatcherDropGame() {
             </div>
           </div>
 
-          <div className="absolute left-4 right-4 bottom-0 translate-y-[56%] z-30">
+          <div className="absolute left-4 right-4 bottom-4 z-30">
             <button
               type="button"
               onPointerDown={(event) => {
