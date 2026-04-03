@@ -77,7 +77,7 @@ export const AVAILABLE_GAMES = [
     route: '/click-counter-game',
     label: 'Click Counter Game',
     desc: 'Tap as fast as you can and reach the target count before time runs out',
-    emoji: 'ðŸ–±ï¸',
+    emoji: '👆',
     bg: '#FEF3C7',
   },
   {
@@ -101,7 +101,7 @@ export const AVAILABLE_GAMES = [
     route: '/click-to-shoot-targets',
     label: 'Click-to-Shoot Targets',
     desc: 'Tap the moving target quickly and clear the hit goal before time runs out',
-    emoji: 'Target',
+    emoji: '🎯',
     bg: '#DBEAFE',
   },
   {
@@ -109,7 +109,7 @@ export const AVAILABLE_GAMES = [
     route: '/maze-game',
     label: 'Maze game',
     desc: 'Navigate a random maze, avoid roaming enemies on higher difficulties, and find the exit',
-    emoji: 'Maze',
+    emoji: '🧭',
     bg: '#E9D5FF',
   },
   {
@@ -117,7 +117,7 @@ export const AVAILABLE_GAMES = [
     route: '/shape-matcher',
     label: 'Shape Matcher',
     desc: 'Spot the target shape and tap the matching option before time runs out',
-    emoji: 'Shape',
+    emoji: '⏺️',
     bg: '#FBCFE8',
   },
 ];
