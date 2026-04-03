@@ -116,10 +116,10 @@ export default function ShapeMatcherDropGame() {
   const resolvingRef = useRef(false);
   const dragStartRef = useRef(null);
   const fallingShapeRef = useRef(fallingShape);
-  const containerShapeRef = useRef(containerShape);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   const containerShape = SHAPES[containerIndex];
+  const containerShapeRef = useRef(containerShape);
 
   useEffect(() => {
     fallingShapeRef.current = fallingShape;
