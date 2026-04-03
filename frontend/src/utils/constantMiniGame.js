@@ -58,6 +58,11 @@ export const MINI_GAME_CONFIG = {
     normal: { timeLimit: 90, size: 8, enemies: 1, enemySpeed: 1000 },
     hard:   { timeLimit: 90, size: 9, enemies: 2, enemySpeed: 750 },
   },
+  shapeMatcher: {
+    easy:   { timeLimit: 45, goal: 6 },
+    normal: { timeLimit: 35, goal: 8 },
+    hard:   { timeLimit: 28, goal: 10 },
+  },
 };
 
 /** Returns config for a given game + difficulty. Falls back to 'hard' if unknown. */

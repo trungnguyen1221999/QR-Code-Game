@@ -112,6 +112,14 @@ export const AVAILABLE_GAMES = [
     emoji: 'Maze',
     bg: '#E9D5FF',
   },
+  {
+    id: 'shape-matcher',
+    route: '/shape-matcher',
+    label: 'Shape Matcher',
+    desc: 'Spot the target shape and tap the matching option before time runs out',
+    emoji: 'Shape',
+    bg: '#FBCFE8',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;

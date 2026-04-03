@@ -10,6 +10,7 @@ export const CHECKPOINT_SECRET_REWARDS = {
   9: { name: 'Totem', image: '/storyItem/sacredtotem(tower).png' },
   10: { name: 'Stone', image: '/storyItem/sacredstone(puzzle).png' },
   11: { name: 'Necklace', image: '/storyItem/sacrednecklace(simon).png' },
+  12: { name: 'Scroll', image: '/storyItem/sacredscroll(quiz).png' },
 };
 
 export function getCheckpointSecretReward(checkpoint) {
