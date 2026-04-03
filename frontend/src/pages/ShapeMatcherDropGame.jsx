@@ -108,10 +108,10 @@ export default function ShapeMatcherDropGame() {
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const [fallingShape, setFallingShape] = useState(() => getRandomShape());
+  const [fallingShapeSpawn, setFallingShapeSpawn] = useState(0);
   const [containerIndex, setContainerIndex] = useState(0);
   const [fallProgress, setFallProgress] = useState(0);
   const [hitFlash, setHitFlash] = useState(null);
-  const [round, setRound] = useState(1);
   const lossHandledRef = useRef(false);
   const resolvingRef = useRef(false);
   const dragStartRef = useRef(null);
@@ -167,7 +167,7 @@ export default function ShapeMatcherDropGame() {
     }, 60);
 
     return () => clearInterval(interval);
-  }, [busy, fallDuration, fallingShape.id, showBackConfirm, showLose, showWin]);
+  }, [busy, fallDuration, fallingShapeSpawn, showBackConfirm, showLose, showWin]);
 
   const rotateContainer = (direction = 1) => {
     if (busy || showWin || showLose) return;
@@ -176,8 +176,8 @@ export default function ShapeMatcherDropGame() {
 
   const spawnNextShape = () => {
     setFallingShape(getRandomShape());
+    setFallingShapeSpawn((value) => value + 1);
     setFallProgress(0);
-    setRound((value) => value + 1);
     resolvingRef.current = false;
   };
 
@@ -252,10 +252,10 @@ export default function ShapeMatcherDropGame() {
     setShowBackConfirm(false);
     setLoseState(INITIAL_LOSE_STATE);
     setFallingShape(getRandomShape());
+    setFallingShapeSpawn((value) => value + 1);
     setContainerIndex(0);
     setFallProgress(0);
     setHitFlash(null);
-    setRound(1);
     lossHandledRef.current = false;
     resolvingRef.current = false;
   };
@@ -327,7 +327,7 @@ export default function ShapeMatcherDropGame() {
           </p>
         </div>
 
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
@@ -344,24 +344,6 @@ export default function ShapeMatcherDropGame() {
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#7E22CE' }}>
               {score}/{goal}
-            </p>
-          </Card>
-
-          <Card>
-            <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Lives
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
-              {currentLives === Infinity ? '∞' : currentLives}
-            </p>
-          </Card>
-
-          <Card>
-            <p className="text-xs font-semibold" style={{ color: '#047857' }}>
-              Round
-            </p>
-            <p className="text-lg font-bold mt-1" style={{ color: '#047857' }}>
-              {round}
             </p>
           </Card>
         </div>
