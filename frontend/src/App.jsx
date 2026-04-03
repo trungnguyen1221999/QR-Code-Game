@@ -26,7 +26,7 @@ import RandomColorClickerGame from './pages/RandomColorClickerGame';
 import SnakeGame from './pages/SnakeGame';
 import ClickToShootTargetsGame from './pages/ClickToShootTargetsGame';
 import MazeGame from './pages/MazeGame';
-import ShapeMatcherGame from './pages/ShapeMatcherGame';
+import ShapeMatcherDropGame from './pages/ShapeMatcherDropGame';
 import GameOver from './pages/GameOver';
 import FinalShop from './pages/FinalShop';
 import FinalChallenge from './pages/FinalChallenge';
@@ -73,7 +73,7 @@ function App() {
         <Route path="/snake-game" element={<SnakeGame />} />
         <Route path="/click-to-shoot-targets" element={<ClickToShootTargetsGame />} />
         <Route path="/maze-game" element={<MazeGame />} />
-        <Route path="/shape-matcher" element={<ShapeMatcherGame />} />
+        <Route path="/shape-matcher" element={<ShapeMatcherDropGame />} />
         <Route path="/checkpoint/:id" element={<CheckpointScan />} />
         <Route path="/challenge" element={<PlayerChallenge />} />
         <Route path="/shop" element={<PlayerShop />} />

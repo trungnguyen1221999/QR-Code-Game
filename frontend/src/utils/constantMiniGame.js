@@ -59,9 +59,9 @@ export const MINI_GAME_CONFIG = {
     hard:   { timeLimit: 90, size: 9, enemies: 2, enemySpeed: 750 },
   },
   shapeMatcher: {
-    easy:   { timeLimit: 45, goal: 6 },
-    normal: { timeLimit: 35, goal: 8 },
-    hard:   { timeLimit: 28, goal: 10 },
+    easy:   { timeLimit: 45, goal: 6, fallDuration: 2.8 },
+    normal: { timeLimit: 35, goal: 8, fallDuration: 2.2 },
+    hard:   { timeLimit: 28, goal: 10, fallDuration: 1.7 },
   },
 };
 
