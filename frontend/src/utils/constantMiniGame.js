@@ -63,6 +63,11 @@ export const MINI_GAME_CONFIG = {
     normal: { timeLimit: 35, goal: 8, fallDuration: 2.2 },
     hard:   { timeLimit: 28, goal: 10, fallDuration: 1.7 },
   },
+  crossRoad: {
+    easy:   { timeLimit: 45, rows: 8, cols: 6, moveInterval: 850 },
+    normal: { timeLimit: 40, rows: 9, cols: 7, moveInterval: 650 },
+    hard:   { timeLimit: 35, rows: 10, cols: 7, moveInterval: 500 },
+  },
 };
 
 /** Returns config for a given game + difficulty. Falls back to 'hard' if unknown. */

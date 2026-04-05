@@ -120,6 +120,14 @@ export const AVAILABLE_GAMES = [
     emoji: '⏺️',
     bg: '#FBCFE8',
   },
+  {
+    id: 'cross-road',
+    route: '/cross-road-game',
+    label: 'Cross Road',
+    desc: 'Cross busy traffic lanes on mobile controls and reach the goal at the top',
+    emoji: '🚗',
+    bg: '#BBF7D0',
+  },
 ];
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
