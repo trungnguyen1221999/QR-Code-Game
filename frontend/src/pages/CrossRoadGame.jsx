@@ -91,8 +91,9 @@ function hasCollision(player, lanes) {
 
 export default function CrossRoadGame() {
   const difficulty = getSessionDifficulty();
-  const { timeLimit, rows, cols, moveInterval } = getMiniGameConfig('crossRoad', difficulty);
+  const { timeLimit, cols, moveInterval } = getMiniGameConfig('crossRoad', difficulty);
   const lanePattern = getLanePattern(difficulty);
+  const rows = lanePattern.length;
 
   useBlockBack();
 
