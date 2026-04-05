@@ -606,6 +606,12 @@ export default function SimonGame() {
             title="You win"
             message={`You completed the Simon game and earned ${earnedCoins} coins from the time left.`}
           />
+          <CheckpointShopPanel
+            earnedCoins={earnedCoins}
+            grantCoins={showWin}
+            isOpen={showWin}
+            checkpoint={checkpoint}
+          />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
             Continue
           </Button>
