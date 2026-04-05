@@ -43,9 +43,11 @@ function getInitialPlayer(rows, cols) {
 }
 
 function getBandType(row, rows) {
+  if (row === 0) return 'goal';
   if (row === rows - 1) return 'start';
-  if (row % 3 === 0) return 'safe';
-  return 'road';
+
+  const offsetFromGoal = row - 1;
+  return offsetFromGoal % 2 === 0 ? 'safe' : 'road';
 }
 
 function buildLanes(rows, cols) {
@@ -55,7 +57,7 @@ function buildLanes(rows, cols) {
       return { row, bandType, direction: 0, cars: [] };
     }
 
-    const roadIndex = Math.floor(row / 3);
+    const roadIndex = Math.floor((row - 2) / 2);
     const direction = roadIndex % 2 === 0 ? 1 : -1;
     const spacing = 2 + (roadIndex % 2);
     const carCount = Math.max(2, Math.floor(cols / spacing) - 1);
@@ -99,7 +101,7 @@ export default function CrossRoadGame() {
   const [player, setPlayer] = useState(initialPlayer);
   const [lanes, setLanes] = useState(() => buildLanes(rows, cols));
   const [steps, setSteps] = useState(0);
-  const [statusText, setStatusText] = useState('Reach the top goal row before time runs out.');
+  const [statusText, setStatusText] = useState('Cross grass and road bands to reach the top goal row.');
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
@@ -217,7 +219,7 @@ export default function CrossRoadGame() {
     playerRef.current = resetPlayer;
     setLanes(buildLanes(rows, cols));
     setSteps(0);
-    setStatusText('Reach the top goal row before time runs out.');
+    setStatusText('Cross grass and road bands to reach the top goal row.');
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -285,7 +287,7 @@ export default function CrossRoadGame() {
             Cross Road
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Dodge moving cars, use grass as safe zones, and reach the top row.
+            Cross alternating grass and road lanes, avoid cars, and reach the top row.
           </p>
         </div>
 
@@ -330,11 +332,11 @@ export default function CrossRoadGame() {
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
             background: flash === 'bad'
-              ? 'linear-gradient(180deg, #FEE2E2 0%, #FDE68A 100%)'
+              ? 'linear-gradient(180deg, #FEE2E2 0%, #FED7AA 100%)'
               : flash === 'good'
                 ? 'linear-gradient(180deg, #DCFCE7 0%, #BBF7D0 100%)'
-                : 'linear-gradient(180deg, #DCFCE7 0%, #FEF3C7 100%)',
-            borderColor: '#A7F3D0',
+                : 'linear-gradient(180deg, #E0F2FE 0%, #DCFCE7 100%)',
+            borderColor: '#86EFAC',
             boxShadow: '0 18px 30px rgba(21,128,61,0.14)',
           }}
         >
@@ -343,7 +345,7 @@ export default function CrossRoadGame() {
               const lane = lanes.find((entry) => entry.row === row);
               const bandType = lane?.bandType ?? getBandType(row, rows);
               const isRoad = bandType === 'road';
-              const isSafeZone = bandType === 'safe' || bandType === 'start';
+              const isSafeZone = bandType === 'safe' || bandType === 'start' || bandType === 'goal';
               const hasCar = lane?.cars.includes(col);
               const isPlayer = player.row === row && player.col === col;
 
@@ -352,17 +354,32 @@ export default function CrossRoadGame() {
                   key={`${row}-${col}`}
                   className="relative flex aspect-square items-center justify-center rounded-xl"
                   style={{
-                    backgroundColor: isRoad
-                        ? '#94A3B8'
-                        : isSafeZone
-                          ? '#86EFAC'
-                          : '#22C55E',
+                    background: bandType === 'road'
+                      ? 'linear-gradient(180deg, #94A3B8 0%, #64748B 100%)'
+                      : bandType === 'goal'
+                        ? 'linear-gradient(180deg, #4ADE80 0%, #22C55E 100%)'
+                        : bandType === 'start'
+                          ? 'linear-gradient(180deg, #BBF7D0 0%, #86EFAC 100%)'
+                          : 'linear-gradient(180deg, #86EFAC 0%, #4ADE80 100%)',
                   }}
                 >
+                  {!isRoad && (
+                    <div
+                      className="absolute inset-0 rounded-xl opacity-40"
+                      style={{
+                        backgroundImage:
+                          'radial-gradient(circle at 20% 25%, rgba(255,255,255,0.18) 0 10%, transparent 11%), radial-gradient(circle at 75% 70%, rgba(22,163,74,0.22) 0 9%, transparent 10%)',
+                      }}
+                    />
+                  )}
                   {hasCar && (
                     <div
                       className="flex h-[72%] w-[86%] items-center justify-center rounded-lg text-[10px] font-black"
-                      style={{ backgroundColor: '#DC2626', color: 'white' }}
+                      style={{
+                        background: 'linear-gradient(160deg, #EF4444 0%, #B91C1C 100%)',
+                        color: 'white',
+                        boxShadow: '0 8px 14px rgba(127,29,29,0.26)',
+                      }}
                     >
                       CAR
                     </div>
@@ -370,14 +387,29 @@ export default function CrossRoadGame() {
                   {isPlayer && (
                     <div
                       className="absolute flex h-[70%] w-[70%] items-center justify-center rounded-full text-xs font-black"
-                      style={{ backgroundColor: '#1D4ED8', color: 'white', border: '3px solid white' }}
+                      style={{
+                        background: 'linear-gradient(180deg, #60A5FA 0%, #2563EB 100%)',
+                        color: 'white',
+                        border: '3px solid white',
+                        boxShadow: '0 8px 14px rgba(37,99,235,0.24)',
+                      }}
                     >
                       U
                     </div>
                   )}
-                  {isSafeZone && !hasCar && !isPlayer && (
+                  {bandType === 'goal' && !hasCar && !isPlayer && (
+                    <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#052E16' }}>
+                      GOAL
+                    </span>
+                  )}
+                  {bandType === 'safe' && !hasCar && !isPlayer && (
                     <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#052E16' }}>
                       SAFE
+                    </span>
+                  )}
+                  {bandType === 'start' && !hasCar && !isPlayer && (
+                    <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#14532D' }}>
+                      START
                     </span>
                   )}
                 </div>
