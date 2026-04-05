@@ -65,8 +65,8 @@ export const MINI_GAME_CONFIG = {
   },
   crossRoad: {
     easy:   { timeLimit: 45, rows: 8, cols: 6, moveInterval: 850 },
-    normal: { timeLimit: 40, rows: 9, cols: 7, moveInterval: 650 },
-    hard:   { timeLimit: 35, rows: 10, cols: 7, moveInterval: 500 },
+    normal: { timeLimit: 40, rows: 8, cols: 7, moveInterval: 650 },
+    hard:   { timeLimit: 35, rows: 8, cols: 7, moveInterval: 500 },
   },
 };
 

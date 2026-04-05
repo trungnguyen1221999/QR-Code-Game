@@ -42,23 +42,28 @@ function getInitialPlayer(rows, cols) {
   return { row: rows - 1, col: Math.floor(cols / 2) };
 }
 
-function getBandType(row, rows) {
-  if (row === 0) return 'goal';
-  if (row === rows - 1) return 'start';
-  if (row === 1 || row === 2) return 'road';
+function getLanePattern(difficulty) {
+  if (difficulty === 'easy') {
+    return ['goal', 'road', 'safe', 'road', 'safe', 'road', 'start'];
+  }
 
-  const offsetFromGoal = row - 3;
-  return offsetFromGoal % 2 === 0 ? 'road' : 'safe';
+  return ['goal', 'road', 'road', 'safe', 'road', 'safe', 'road', 'start'];
 }
 
-function buildLanes(rows, cols) {
+function getBandType(row, rows, lanePattern) {
+  return lanePattern[row] ?? (row === rows - 1 ? 'start' : 'safe');
+}
+
+function buildLanes(rows, cols, lanePattern) {
   return Array.from({ length: rows }, (_, row) => {
-    const bandType = getBandType(row, rows);
+    const bandType = getBandType(row, rows, lanePattern);
     if (bandType !== 'road') {
       return { row, bandType, direction: 0, cars: [] };
     }
 
-    const roadIndex = row <= 2 ? row - 1 : 1 + Math.floor((row - 3) / 2);
+    const roadRowsBefore = Array.from({ length: row }, (_, index) => getBandType(index, rows, lanePattern))
+        .filter((bandType) => bandType === 'road').length;
+    const roadIndex = Math.max(0, roadRowsBefore);
     const direction = roadIndex % 2 === 0 ? 1 : -1;
     const spacing = 2 + (roadIndex % 2);
     const carCount = Math.max(2, Math.floor(cols / spacing) - 1);
@@ -85,7 +90,9 @@ function hasCollision(player, lanes) {
 }
 
 export default function CrossRoadGame() {
-  const { timeLimit, rows, cols, moveInterval } = getMiniGameConfig('crossRoad', getSessionDifficulty());
+  const difficulty = getSessionDifficulty();
+  const { timeLimit, rows, cols, moveInterval } = getMiniGameConfig('crossRoad', difficulty);
+  const lanePattern = getLanePattern(difficulty);
 
   useBlockBack();
 
@@ -100,7 +107,7 @@ export default function CrossRoadGame() {
     getInitialGameTime(timeLimit, 'cross-road', location.key)
   );
   const [player, setPlayer] = useState(initialPlayer);
-  const [lanes, setLanes] = useState(() => buildLanes(rows, cols));
+  const [lanes, setLanes] = useState(() => buildLanes(rows, cols, lanePattern));
   const [steps, setSteps] = useState(0);
   const [statusText, setStatusText] = useState('Cross grass and road bands to reach the top goal row.');
   const [busy, setBusy] = useState(false);
@@ -205,7 +212,7 @@ export default function CrossRoadGame() {
       return;
     }
 
-    const bandType = getBandType(nextPlayer.row, rows);
+    const bandType = getBandType(nextPlayer.row, rows, lanePattern);
     setStatusText(
       bandType === 'safe'
         ? 'Safe zone. Take a breath and plan the next road.'
@@ -218,7 +225,7 @@ export default function CrossRoadGame() {
     setTimeLeft(getReplayGameTime(timeLimit));
     setPlayer(resetPlayer);
     playerRef.current = resetPlayer;
-    setLanes(buildLanes(rows, cols));
+    setLanes(buildLanes(rows, cols, lanePattern));
     setSteps(0);
     setStatusText('Cross grass and road bands to reach the top goal row.');
     setBusy(false);
@@ -344,7 +351,7 @@ export default function CrossRoadGame() {
           {Array.from({ length: rows }, (_, row) =>
             Array.from({ length: cols }, (_, col) => {
               const lane = lanes.find((entry) => entry.row === row);
-              const bandType = lane?.bandType ?? getBandType(row, rows);
+              const bandType = lane?.bandType ?? getBandType(row, rows, lanePattern);
               const isRoad = bandType === 'road';
               const isSafeZone = bandType === 'safe' || bandType === 'start' || bandType === 'goal';
               const hasCar = lane?.cars.includes(col);
