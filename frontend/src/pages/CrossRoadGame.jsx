@@ -45,9 +45,10 @@ function getInitialPlayer(rows, cols) {
 function getBandType(row, rows) {
   if (row === 0) return 'goal';
   if (row === rows - 1) return 'start';
+  if (row === 1 || row === 2) return 'road';
 
-  const offsetFromGoal = row - 1;
-  return offsetFromGoal % 2 === 0 ? 'safe' : 'road';
+  const offsetFromGoal = row - 3;
+  return offsetFromGoal % 2 === 0 ? 'road' : 'safe';
 }
 
 function buildLanes(rows, cols) {
@@ -57,7 +58,7 @@ function buildLanes(rows, cols) {
       return { row, bandType, direction: 0, cars: [] };
     }
 
-    const roadIndex = Math.floor((row - 2) / 2);
+    const roadIndex = row <= 2 ? row - 1 : 1 + Math.floor((row - 3) / 2);
     const direction = roadIndex % 2 === 0 ? 1 : -1;
     const spacing = 2 + (roadIndex % 2);
     const carCount = Math.max(2, Math.floor(cols / spacing) - 1);
