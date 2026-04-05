@@ -6,7 +6,7 @@ import {
   getPlayerProgress,
   SHOP_ITEMS,
 } from '../../utils/checkpointShop';
-import Button from './Button';
+import { isFinalCheckpointClear } from '../../utils/finalCheckpointFlow';
 import Card from './Card';
 
 export default function CheckpointShopPanel({
@@ -25,6 +25,7 @@ export default function CheckpointShopPanel({
   const [purchasedItems, setPurchasedItems] = useState({});
   const coinsGrantedRef = useRef(false);
   const wasOpenRef = useRef(false);
+  const finalCheckpointCleared = isFinalCheckpointClear(checkpoint);
 
   useEffect(() => {
     if (!isOpen || wasOpenRef.current) {
@@ -64,6 +65,10 @@ export default function CheckpointShopPanel({
     setMessage('Purchased. It will apply automatically on your next game.');
     onPurchase?.(result);
   };
+
+  if (finalCheckpointCleared) {
+    return null;
+  }
 
   return (
     <div className="w-full rounded-2xl p-3 mt-2" style={{ backgroundColor: '#FFF7ED' }}>
