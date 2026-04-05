@@ -39,6 +39,7 @@ import IntroPage from './pages/IntroPage';
 import FinalWinPage from './pages/FinalWinPage';
 import FinalIntroPage from './pages/FinalIntroPage';
 import BackgroundMusic from './components/BackgroundMusic';
+import FloatingMenu from './components/FloatingMenu';
 
 function App() {
   const [player, setPlayer] = useState(null);
@@ -88,7 +89,7 @@ function App() {
         <Route path="/champion" element={<Champion />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <BackgroundMusic />
+      <FloatingMenu />
       <Toaster position="top-center" />
     </Router>
   );

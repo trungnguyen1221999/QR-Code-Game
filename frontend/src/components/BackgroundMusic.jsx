@@ -115,7 +115,7 @@ export default function BackgroundMusic() {
         onClick={handleToggle}
         title={muted ? 'Unmute music' : 'Mute music'}
         style={{
-          position: 'fixed', bottom: 20, right: 20, zIndex: 9999,
+          //position: 'fixed', bottom: 20, right: 20, zIndex: 9999,
           backgroundColor: 'var(--color-primary)', color: 'white',
           border: 'none', borderRadius: '999px', padding: '8px 14px',
           fontSize: 18, cursor: 'pointer',
