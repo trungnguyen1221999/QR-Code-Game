@@ -42,22 +42,34 @@ function getInitialPlayer(rows, cols) {
   return { row: rows - 1, col: Math.floor(cols / 2) };
 }
 
+function getBandType(row, rows) {
+  if (row === rows - 1) return 'start';
+  if (row % 3 === 0) return 'safe';
+  return 'road';
+}
+
 function buildLanes(rows, cols) {
-  return Array.from({ length: rows - 2 }, (_, index) => {
-    const row = index + 1;
-    const direction = index % 2 === 0 ? 1 : -1;
-    const spacing = 2 + (index % 2);
+  return Array.from({ length: rows }, (_, row) => {
+    const bandType = getBandType(row, rows);
+    if (bandType !== 'road') {
+      return { row, bandType, direction: 0, cars: [] };
+    }
+
+    const roadIndex = Math.floor(row / 3);
+    const direction = roadIndex % 2 === 0 ? 1 : -1;
+    const spacing = 2 + (roadIndex % 2);
     const carCount = Math.max(2, Math.floor(cols / spacing) - 1);
-    const offset = (index * 2) % cols;
+    const offset = (roadIndex * 2) % cols;
 
     return {
       row,
+      bandType,
       direction,
       cars: Array.from({ length: carCount }, (_, carIndex) =>
         (offset + (carIndex * spacing)) % cols
       ),
     };
-  });
+  }).filter(Boolean);
 }
 
 function shiftColumn(col, direction, cols) {
@@ -66,7 +78,7 @@ function shiftColumn(col, direction, cols) {
 
 function hasCollision(player, lanes) {
   const lane = lanes.find((entry) => entry.row === player.row);
-  return lane ? lane.cars.includes(player.col) : false;
+  return lane?.bandType === 'road' ? lane.cars.includes(player.col) : false;
 }
 
 export default function CrossRoadGame() {
@@ -87,7 +99,7 @@ export default function CrossRoadGame() {
   const [player, setPlayer] = useState(initialPlayer);
   const [lanes, setLanes] = useState(() => buildLanes(rows, cols));
   const [steps, setSteps] = useState(0);
-  const [statusText, setStatusText] = useState('Cross the road and reach the goal row at the top.');
+  const [statusText, setStatusText] = useState('Reach the top goal row before time runs out.');
   const [busy, setBusy] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
@@ -124,7 +136,9 @@ export default function CrossRoadGame() {
       setLanes((currentLanes) => {
         const nextLanes = currentLanes.map((lane) => ({
           ...lane,
-          cars: lane.cars.map((car) => shiftColumn(car, lane.direction, cols)),
+          cars: lane.bandType === 'road'
+            ? lane.cars.map((car) => shiftColumn(car, lane.direction, cols))
+            : lane.cars,
         }));
 
         if (hasCollision(playerRef.current, nextLanes)) {
@@ -176,7 +190,7 @@ export default function CrossRoadGame() {
     setSteps((value) => value + 1);
 
     if (nextPlayer.row === 0) {
-      setStatusText('You reached the goal!');
+      setStatusText('You reached the top goal row!');
       setFlash('good');
       window.setTimeout(() => setFlash(null), 240);
       setShowWin(true);
@@ -188,7 +202,12 @@ export default function CrossRoadGame() {
       return;
     }
 
-    setStatusText('Keep moving. Watch the traffic lanes.');
+    const bandType = getBandType(nextPlayer.row, rows);
+    setStatusText(
+      bandType === 'safe'
+        ? 'Safe zone. Take a breath and plan the next road.'
+        : 'Traffic ahead. Move carefully through the road.'
+    );
   };
 
   const handleRetry = () => {
@@ -198,7 +217,7 @@ export default function CrossRoadGame() {
     playerRef.current = resetPlayer;
     setLanes(buildLanes(rows, cols));
     setSteps(0);
-    setStatusText('Cross the road and reach the goal row at the top.');
+    setStatusText('Reach the top goal row before time runs out.');
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -266,7 +285,7 @@ export default function CrossRoadGame() {
             Cross Road
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Dodge the traffic and reach the top row.
+            Dodge moving cars, use grass as safe zones, and reach the top row.
           </p>
         </div>
 
@@ -286,7 +305,7 @@ export default function CrossRoadGame() {
               Goal
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#047857' }}>
-              Row {player.row}
+              {player.row === 0 ? 'Reached' : 'Top row'}
             </p>
           </Card>
 
@@ -322,21 +341,22 @@ export default function CrossRoadGame() {
           {Array.from({ length: rows }, (_, row) =>
             Array.from({ length: cols }, (_, col) => {
               const lane = lanes.find((entry) => entry.row === row);
-              const isRoad = !!lane;
+              const bandType = lane?.bandType ?? getBandType(row, rows);
+              const isRoad = bandType === 'road';
+              const isSafeZone = bandType === 'safe' || bandType === 'start';
               const hasCar = lane?.cars.includes(col);
               const isPlayer = player.row === row && player.col === col;
-              const isGoal = row === 0;
 
               return (
                 <div
                   key={`${row}-${col}`}
                   className="relative flex aspect-square items-center justify-center rounded-xl"
                   style={{
-                    backgroundColor: isGoal
-                      ? '#22C55E'
-                      : isRoad
+                    backgroundColor: isRoad
                         ? '#94A3B8'
-                        : '#86EFAC',
+                        : isSafeZone
+                          ? '#86EFAC'
+                          : '#22C55E',
                   }}
                 >
                   {hasCar && (
@@ -355,9 +375,9 @@ export default function CrossRoadGame() {
                       U
                     </div>
                   )}
-                  {isGoal && !hasCar && !isPlayer && (
+                  {isSafeZone && !hasCar && !isPlayer && (
                     <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#052E16' }}>
-                      GO
+                      SAFE
                     </span>
                   )}
                 </div>
@@ -418,7 +438,7 @@ export default function CrossRoadGame() {
           <CheckpointWinReward
             checkpoint={checkpoint}
             title="Road crossed!"
-            message={`You reached the top in ${steps} steps and earned ${earnedCoins} coins from the time left.`}
+            message={`You reached the top row in ${steps} steps and earned ${earnedCoins} coins from the time left.`}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
