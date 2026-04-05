@@ -51,6 +51,16 @@ const QUESTIONS = [
   },
 ];
 
+function getTotalCheckpoints() {
+  try {
+    const session = JSON.parse(localStorage.getItem('session') || 'null');
+    const len = session?.gameOrder?.length;
+    return (len && len > 0) ? len : 13;
+  } catch {
+    return 13;
+  }
+}
+
 export default function PlayerChallenge() {
   useBlockBack();
   const navigate = useNavigate();
@@ -58,12 +68,15 @@ export default function PlayerChallenge() {
   const checkpointIndex = location.state?.checkpoint ?? 3;
   const initialTime = location.state?.timeLeft ?? 0;
   const q = QUESTIONS[(checkpointIndex - 1) % QUESTIONS.length];
+  const totalCheckpoints = getTotalCheckpoints();
+  const isFinalCheckpoint = checkpointIndex >= totalCheckpoints;
 
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [showTimeUp, setShowTimeUp] = useState(false);
+  const [showFinalCheckpointPopup, setShowFinalCheckpointPopup] = useState(false);
 
   useEffect(() => {
     if (initialTime <= 0) return; // no timer passed, skip
@@ -84,6 +97,10 @@ export default function PlayerChallenge() {
 
   const handleContinue = () => {
     if (isCorrect) {
+      if (isFinalCheckpoint) {
+        setShowFinalCheckpointPopup(true);
+        return;
+      }
       navigate('/shop', { state: { checkpoint: checkpointIndex, coins: 200 } });
     } else {
       navigate('/game', { state: { wrongAnswer: true } });
@@ -194,6 +211,25 @@ export default function PlayerChallenge() {
           </p>
           <Button onClick={() => navigate('/game-over')}>
             Got it
+          </Button>
+        </div>
+      </Popup>
+
+      <Popup open={showFinalCheckpointPopup} onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-4 py-2 text-center">
+          <img
+            src="/beforeFinalGame.png"
+            alt="All checkpoints cleared"
+            className="w-36 h-36 object-contain"
+          />
+          <p className="text-base font-bold" style={{ color: 'var(--color-text)', lineHeight: '1.6' }}>
+            All checkpoints cleared! Get ready for the final challenge.
+          </p>
+          <Button
+            variant="green"
+            onClick={() => navigate('/game', { state: { justCompleted: checkpointIndex, rewardCoins: 50 } })}
+          >
+            Continue
           </Button>
         </div>
       </Popup>
