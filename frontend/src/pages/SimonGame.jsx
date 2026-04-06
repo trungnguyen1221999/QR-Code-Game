@@ -303,6 +303,10 @@ export default function SimonGame() {
   };
 
   const handleBackExit = async () => {
+    if (!gameStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -588,7 +592,9 @@ export default function SimonGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!gameStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

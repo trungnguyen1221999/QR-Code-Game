@@ -123,6 +123,7 @@ export default function CombinedWordQuizGame() {
   const [feedback, setFeedback] = useState(null);
   const [submittedIds, setSubmittedIds] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -135,7 +136,7 @@ export default function CombinedWordQuizGame() {
   const canStillPass = score + remainingQuestions >= PASS_SCORE;
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
     if (timeLeft <= 0) {
       void handleLoss();
       return;
@@ -149,7 +150,7 @@ export default function CombinedWordQuizGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (showWin || showLose) return;
+    if (!hasStarted || showWin || showLose) return;
     if (score >= PASS_SCORE) {
       outcomeLockedRef.current = true;
       setShowWin(true);
@@ -158,7 +159,7 @@ export default function CombinedWordQuizGame() {
     if (submittedIds.length >= TOTAL_QUESTIONS || !canStillPass) {
       void handleLoss();
     }
-  }, [canStillPass, score, showLose, showWin, submittedIds.length]);
+  }, [canStillPass, score, showLose, showWin, submittedIds.length, hasStarted]);
 
   useEffect(() => {
     if (!feedback) return;
@@ -176,6 +177,7 @@ export default function CombinedWordQuizGame() {
 
   const resetGame = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setQuestions(shuffle(QUESTION_BANK).slice(0, TOTAL_QUESTIONS));
     setTimeLeft(getReplayGameTime(QUIZ_TIME_LIMIT));
     setCurrentIndex(0);
@@ -221,6 +223,10 @@ export default function CombinedWordQuizGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
@@ -234,6 +240,7 @@ export default function CombinedWordQuizGame() {
   const backWillResetToStart = currentLives <= 1;
 
   const handleSubmitAnswer = () => {
+    if (!hasStarted) return;
     if (!currentQuestion || !answer.trim()) return;
     if (submittedIds.includes(currentQuestion.id)) return;
 
@@ -290,9 +297,15 @@ export default function CombinedWordQuizGame() {
             {COPY.title}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {COPY.subtitle}
+            {hasStarted ? COPY.subtitle : `Press Start when you are ready to begin ${COPY.title.toLowerCase()}.`}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Card>
@@ -369,7 +382,7 @@ export default function CombinedWordQuizGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {COPY.back}
           </Button>
-          <Button variant="green" onClick={handleSubmitAnswer} disabled={!answer.trim() || showWin || showLose}>
+          <Button variant="green" onClick={handleSubmitAnswer} disabled={!hasStarted || !answer.trim() || showWin || showLose}>
             {COPY.submit}
           </Button>
         </div>
@@ -431,7 +444,9 @@ export default function CombinedWordQuizGame() {
               {COPY.backTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart ? COPY.backResetText : COPY.backText}
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart ? COPY.backResetText : COPY.backText}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">

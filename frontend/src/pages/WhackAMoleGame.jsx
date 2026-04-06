@@ -104,6 +104,7 @@ export default function WhackAMoleGame() {
   const [activeAnimals, setActiveAnimals] = useState({});
   const [hitAnimals, setHitAnimals] = useState({});
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -133,7 +134,7 @@ export default function WhackAMoleGame() {
   useEffect(() => () => clearVisualTimeouts(), []);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
     if (timeLeft <= 0) {
       hasEndedRef.current = true;
       setActiveAnimals({});
@@ -149,7 +150,7 @@ export default function WhackAMoleGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     const spawnRound = () => {
       const selectedHoles = shuffle(holes).slice(0, ACTIVE_ANIMAL_COUNT);
@@ -172,7 +173,7 @@ export default function WhackAMoleGame() {
   }, [holes, showBackConfirm, showLose, showWin, targetAnimalKey]);
 
   useEffect(() => {
-    if (hasEndedRef.current || score < WINNING_SCORE) return;
+    if (!hasStarted || hasEndedRef.current || score < WINNING_SCORE) return;
     hasEndedRef.current = true;
     outcomeLockedRef.current = true;
     setShowWin(true);
@@ -237,7 +238,7 @@ export default function WhackAMoleGame() {
   };
 
   const handleWhack = (holeIndex, event) => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
 
     const animalKey = activeAnimals[holeIndex];
     if (!animalKey) return;
@@ -264,6 +265,7 @@ export default function WhackAMoleGame() {
 
   const resetGame = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     clearVisualTimeouts();
     setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
     setScore(0);
@@ -317,6 +319,10 @@ export default function WhackAMoleGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
@@ -391,9 +397,17 @@ export default function WhackAMoleGame() {
             Whack-A-Mole
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Your target animal is random for this game. Hit only that animal to gain points and avoid the wrong one.
+            {hasStarted
+              ? 'Your target animal is random for this game. Hit only that animal to gain points and avoid the wrong one.'
+              : `Press Start when you are ready to reach ${WINNING_SCORE} good hits.`}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Card>
@@ -484,7 +498,7 @@ export default function WhackAMoleGame() {
                     type="button"
                     onClick={(event) => handleWhack(holeIndex, event)}
                     onMouseMove={(event) => updateHammerPosition(event.clientX, event.clientY)}
-                    disabled={busy || showWin || showLose || !activeAnimalKey}
+                    disabled={!hasStarted || busy || showWin || showLose || !activeAnimalKey}
                     className="aspect-square rounded-[32px] border-[5px] relative overflow-hidden"
                     style={{
                       borderColor: '#7C3AED',
@@ -659,7 +673,9 @@ export default function WhackAMoleGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

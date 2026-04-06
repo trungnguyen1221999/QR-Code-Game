@@ -89,6 +89,7 @@ export default function TowerBuilderGame() {
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'tower-builder', location.key));
   const [floors, setFloors] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -119,7 +120,7 @@ export default function TowerBuilderGame() {
   }, []);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
     if (timeLeft <= 0) {
       void handleLoss();
       return;
@@ -253,8 +254,9 @@ export default function TowerBuilderGame() {
   };
 
   useEffect(() => {
+    if (!hasStarted) return;
     void initializeGame(false);
-  }, [canvasDomId, canvasSize.height, canvasSize.width]);
+  }, [canvasDomId, canvasSize.height, canvasSize.width, hasStarted]);
 
   const playerSessionId = playerSession?._id || playerSession?.id;
 
@@ -262,10 +264,17 @@ export default function TowerBuilderGame() {
 
   const handleLosePrimaryAction = () =>
     handleCheckpointLosePrimaryAction(loseState, navigate, () => {
-      void initializeGame(true, true);
+      stopGame();
+      setHasStarted(false);
+      setCanvasVersion((v) => v + 1);
+      setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
     }, playerSessionId);
 
   const handleBackExit = () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = registerLifeLoss();
     if (summary.needsLifePurchase) {
@@ -315,9 +324,24 @@ export default function TowerBuilderGame() {
             Tower builder
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Stack {TARGET_FLOORS} floors with the original crane-drop tower game before time runs out.
+            {hasStarted
+              ? `Stack ${TARGET_FLOORS} floors with the original crane-drop tower game before time runs out.`
+              : `Press Start when you are ready to stack ${TARGET_FLOORS} floors.`}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button
+            variant="green"
+            onClick={() => {
+              setHasStarted(true);
+              setCanvasVersion((v) => v + 1);
+            }}
+            disabled={busy}
+          >
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Card className="rounded-2xl p-3">
@@ -352,6 +376,7 @@ export default function TowerBuilderGame() {
               maxWidth: '100%',
               display: 'block',
               backgroundColor: '#E5E7EB',
+              opacity: hasStarted ? 1 : 0.45,
             }}
           />
         </div>
@@ -426,7 +451,9 @@ export default function TowerBuilderGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

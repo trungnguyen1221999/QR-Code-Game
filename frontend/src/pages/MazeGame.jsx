@@ -201,6 +201,7 @@ export default function MazeGame() {
   const [enemyPositions, setEnemyPositions] = useState(initialState.enemiesState);
   const [moves, setMoves] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -209,7 +210,7 @@ export default function MazeGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       hitReasonRef.current = 'Time is up';
@@ -225,7 +226,7 @@ export default function MazeGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm || enemies === 0) return undefined;
+    if (!hasStarted || showWin || showLose || showBackConfirm || enemies === 0) return undefined;
 
     const interval = setInterval(() => {
       setEnemyPositions((currentEnemies) => {
@@ -253,11 +254,11 @@ export default function MazeGame() {
     }, enemySpeed);
 
     return () => clearInterval(interval);
-  }, [enemies, enemySpeed, exit, maze, player, showBackConfirm, showLose, showWin]);
+  }, [enemies, enemySpeed, exit, maze, player, showBackConfirm, showLose, showWin, hasStarted]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (showWin || showLose || showBackConfirm) return;
+      if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
       if (event.key === 'ArrowUp') {
         event.preventDefault();
@@ -279,7 +280,7 @@ export default function MazeGame() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, enemyPositions, showBackConfirm, showLose, showWin]);
+  }, [player, enemyPositions, showBackConfirm, showLose, showWin, hasStarted]);
 
   const registerLifeLoss = async () => {
     try {
@@ -304,7 +305,7 @@ export default function MazeGame() {
   };
 
   const handleMove = (direction) => {
-    if (busy || showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || busy || showWin || showLose || showBackConfirm) return;
     if (!canMove(maze, player, direction)) return;
 
     const nextPlayer = nextCell(player, direction);
@@ -329,6 +330,7 @@ export default function MazeGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     const nextState = buildState();
     setTimeLeft(getReplayGameTime(timeLimit));
     setMaze(nextState.maze);
@@ -349,6 +351,10 @@ export default function MazeGame() {
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -404,9 +410,15 @@ export default function MazeGame() {
             Maze Game
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Move one cell at a time to reach the glowing exit.
+            {hasStarted ? 'Move one cell at a time to reach the glowing exit.' : 'Press Start when you are ready to enter the maze.'}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card>
@@ -440,7 +452,7 @@ export default function MazeGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            {statusText}
+            {hasStarted ? statusText : 'Press Start when you are ready to move.'}
           </p>
         </Card>
 
@@ -606,7 +618,9 @@ export default function MazeGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

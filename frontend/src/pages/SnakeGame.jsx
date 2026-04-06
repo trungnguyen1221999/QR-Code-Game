@@ -52,6 +52,7 @@ export default function SnakeGame() {
   const [statusText, setStatusText] = useState('Tap the game area and use arrow keys to control the snake.');
   const [iframeKey, setIframeKey] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -59,7 +60,7 @@ export default function SnakeGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss('Time is up');
@@ -74,11 +75,11 @@ export default function SnakeGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (score >= goal) {
+    if (hasStarted && score >= goal) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [goal, score]);
+  }, [goal, score, hasStarted]);
 
   useEffect(() => {
     if (showWin || showLose || showBackConfirm) {
@@ -94,7 +95,7 @@ export default function SnakeGame() {
 
       if (data.event === 'reset') {
         setScore(data.score ?? 0);
-        setStatusText('Press any arrow key inside the snake game to start.');
+        setStatusText(hasStarted ? 'Press any arrow key inside the snake game to start.' : 'Press Start when you are ready to play snake.');
         lossHandledRef.current = false;
         return;
       }
@@ -119,7 +120,7 @@ export default function SnakeGame() {
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, []);
+  }, [hasStarted]);
 
   useEffect(() => {
     const focusTimer = setTimeout(() => {
@@ -153,6 +154,7 @@ export default function SnakeGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
     setStatusText('Tap the game area and use arrow keys to control the snake.');
@@ -168,6 +170,10 @@ export default function SnakeGame() {
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -223,9 +229,25 @@ export default function SnakeGame() {
             Snake Game
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Reach {goal} apples before time runs out. Use arrow keys after tapping the game area.
+            {hasStarted
+              ? `Reach ${goal} apples before time runs out. Use arrow keys after tapping the game area.`
+              : `Press Start when you are ready to reach ${goal} apples.`}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button
+            variant="green"
+            onClick={() => {
+              setHasStarted(true);
+              setIframeKey((value) => value + 1);
+              setStatusText('Tap the game area and use arrow keys to control the snake.');
+            }}
+            disabled={busy}
+          >
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card>
@@ -260,7 +282,7 @@ export default function SnakeGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            {statusText}
+            {hasStarted ? statusText : 'Press Start to load the snake game.'}
           </p>
         </Card>
 
@@ -272,14 +294,20 @@ export default function SnakeGame() {
             boxShadow: '0 18px 30px rgba(225, 29, 72, 0.16)',
           }}
         >
-          <iframe
-            key={iframeKey}
-            ref={iframeRef}
-            title="Snake Game"
-            src="/snake-game/index.html"
-            className="block w-full border-0"
-            style={{ height: 460, backgroundColor: 'transparent' }}
-          />
+          {hasStarted ? (
+            <iframe
+              key={iframeKey}
+              ref={iframeRef}
+              title="Snake Game"
+              src="/snake-game/index.html"
+              className="block w-full border-0"
+              style={{ height: 460, backgroundColor: 'transparent' }}
+            />
+          ) : (
+            <div className="flex h-[460px] items-center justify-center text-center px-6" style={{ color: 'var(--color-text)' }}>
+              Press Start to load the checkpoint game.
+            </div>
+          )}
         </div>
 
         <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
@@ -343,7 +371,9 @@ export default function SnakeGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

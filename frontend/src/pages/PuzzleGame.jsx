@@ -105,6 +105,7 @@ export default function PuzzlePlacementGame() {
     getInitialGameTime(PUZZLE_TIME_LIMIT, 'puzzle', location.key)
   );
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -120,7 +121,7 @@ export default function PuzzlePlacementGame() {
   const selectedPiece = trayPieces.find((piece) => piece.id === selectedPieceId) || null;
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss();
@@ -139,11 +140,11 @@ export default function PuzzlePlacementGame() {
       (piece, index) => piece && piece.correctIndex === index
     );
 
-    if (isComplete) {
+    if (hasStarted && isComplete) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [placedPieces]);
+  }, [placedPieces, hasStarted]);
 
   useEffect(() => {
     if (shakeSlotIndex === null) return;
@@ -201,13 +202,13 @@ export default function PuzzlePlacementGame() {
   };
 
   const handleSlotClick = (slotIndex) => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
     if (!selectedPiece) return;
     placePieceIntoSlot(selectedPiece, slotIndex);
   };
 
   const startPointerDrag = (event, piece) => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
 
     setSelectedPieceId(piece.id);
     setDragState({
@@ -248,6 +249,7 @@ export default function PuzzlePlacementGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setSelectedImage(pickRandomImage());
     setPlacedPieces(Array(TOTAL_PIECES).fill(null));
     setTrayPieces(shuffleArray(createPieces()));
@@ -285,6 +287,10 @@ export default function PuzzlePlacementGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -360,9 +366,15 @@ export default function PuzzlePlacementGame() {
             Piece Placement Puzzle
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Drag the pieces into the correct places.
+            {hasStarted ? 'Drag the pieces into the correct places.' : 'Press Start when you are ready to solve the puzzle.'}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-2 gap-2">
           <Card>
@@ -411,7 +423,7 @@ export default function PuzzlePlacementGame() {
                 ref={(el) => {
                   slotRefs.current[slotIndex] = el;
                 }}
-                onClick={() => handleSlotClick(slotIndex)}
+                  onClick={() => handleSlotClick(slotIndex)}
                 className="aspect-square rounded-md flex items-center justify-center relative z-10 transition-transform"
                 style={{
                   border: piece ? '1.5px solid #22C55E' : '1.5px dashed rgba(156,163,175,0.95)',
@@ -451,9 +463,10 @@ export default function PuzzlePlacementGame() {
                   onPointerMove={movePointerDrag}
                   onPointerUp={endPointerDrag}
                   onPointerCancel={() => setDragState(null)}
-                  onClick={() =>
-                    setSelectedPieceId((current) => (current === piece.id ? null : piece.id))
-                  }
+                  onClick={() => {
+                    if (!hasStarted || busy || showWin || showLose) return;
+                    setSelectedPieceId((current) => (current === piece.id ? null : piece.id));
+                  }}
                   className="touch-none select-none"
                   style={{
                     ...getPieceStyle(piece.correctIndex, selectedImage),
@@ -526,7 +539,9 @@ export default function PuzzlePlacementGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

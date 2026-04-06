@@ -112,6 +112,7 @@ export default function CrossRoadGame() {
   const [steps, setSteps] = useState(0);
   const [statusText, setStatusText] = useState('Cross grass and road bands to reach the top goal row.');
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -127,7 +128,7 @@ export default function CrossRoadGame() {
   }, [player]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss('Time is up.');
@@ -142,7 +143,7 @@ export default function CrossRoadGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm || busy) return undefined;
+    if (!hasStarted || showWin || showLose || showBackConfirm || busy) return undefined;
 
     const interval = setInterval(() => {
       setLanes((currentLanes) => {
@@ -162,7 +163,7 @@ export default function CrossRoadGame() {
     }, moveInterval);
 
     return () => clearInterval(interval);
-  }, [busy, cols, moveInterval, showBackConfirm, showLose, showWin]);
+  }, [busy, cols, moveInterval, showBackConfirm, showLose, showWin, hasStarted]);
 
   const registerLifeLoss = async () => {
     try {
@@ -189,7 +190,7 @@ export default function CrossRoadGame() {
   };
 
   const handleMove = (direction) => {
-    if (busy || showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || busy || showWin || showLose || showBackConfirm) return;
 
     const offset = DIRECTIONS[direction];
     const nextPlayer = {
@@ -226,6 +227,7 @@ export default function CrossRoadGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     const resetPlayer = getInitialPlayer(rows, cols);
     setTimeLeft(getReplayGameTime(timeLimit));
     setPlayer(resetPlayer);
@@ -245,6 +247,10 @@ export default function CrossRoadGame() {
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -300,9 +306,15 @@ export default function CrossRoadGame() {
             Cross Road
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Cross alternating grass and road lanes, avoid cars, and reach the top row.
+            {hasStarted ? 'Cross alternating grass and road lanes, avoid cars, and reach the top row.' : 'Press Start when you are ready to cross the road.'}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card>
@@ -336,7 +348,7 @@ export default function CrossRoadGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            {statusText}
+            {hasStarted ? statusText : 'Press Start when you are ready to move.'}
           </p>
         </Card>
 
@@ -534,7 +546,9 @@ export default function CrossRoadGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

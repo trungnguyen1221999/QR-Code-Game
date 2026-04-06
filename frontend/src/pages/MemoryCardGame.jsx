@@ -53,6 +53,7 @@ export default function MemoryCardGame() {
   const [flippedIds, setFlippedIds] = useState([]);
   const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(MEMORY_TIME_LIMIT, 'memory', location.key));
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -63,7 +64,7 @@ export default function MemoryCardGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
     if (timeLeft <= 0) {
       void handleLoss();
       return;
@@ -110,14 +111,14 @@ export default function MemoryCardGame() {
   }, [cards, flippedIds]);
 
   useEffect(() => {
-    if (cards.length > 0 && cards.every((card) => card.matched)) {
+    if (hasStarted && cards.length > 0 && cards.every((card) => card.matched)) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [cards]);
+  }, [cards, hasStarted]);
 
   const handleCardClick = (cardId) => {
-    if (busy || showWin || showLose || resolvingRef.current) return;
+    if (!hasStarted || busy || showWin || showLose || resolvingRef.current) return;
 
     const card = cards.find((entry) => entry.id === cardId);
     if (!card || card.matched || flippedIds.includes(cardId) || flippedIds.length === 2) return;
@@ -127,6 +128,7 @@ export default function MemoryCardGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setCards(shuffleCards());
     setFlippedIds([]);
     setTimeLeft(getReplayGameTime(MEMORY_TIME_LIMIT));
@@ -169,6 +171,10 @@ export default function MemoryCardGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
     if (summary.needsLifePurchase) {
@@ -218,9 +224,15 @@ export default function MemoryCardGame() {
             Memory card game
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Match every pair before the 2-minute timer ends.
+            {hasStarted ? 'Match every pair before the 2-minute timer ends.' : 'Press Start when you are ready to begin matching pairs.'}
           </p>
         </div>
+
+          {!hasStarted && (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          )}
 
           <Card>
            <div className='flex justify-between items-center' > 
@@ -246,7 +258,7 @@ export default function MemoryCardGame() {
                   key={card.id}
                   type="button"
                   onClick={() => handleCardClick(card.id)}
-                  disabled={busy || card.matched}
+                  disabled={!hasStarted || busy || card.matched}
                   className="aspect-square rounded-2xl border-2 text-3xl font-bold transition-transform disabled:opacity-100"
                   style={{
                     borderColor: isOpen ? '#22C55E' : '#F59E0B',
@@ -340,7 +352,9 @@ export default function MemoryCardGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

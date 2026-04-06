@@ -48,6 +48,7 @@ export default function ClickCounterGame() {
   );
   const [clicks, setClicks] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -58,7 +59,7 @@ export default function ClickCounterGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss();
@@ -73,14 +74,14 @@ export default function ClickCounterGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (clicks >= TARGET_CLICKS) {
+    if (hasStarted && clicks >= TARGET_CLICKS) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [clicks, TARGET_CLICKS]);
+  }, [clicks, TARGET_CLICKS, hasStarted]);
 
   const handleTap = () => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
 
     setClicks((value) => value + 1);
     setPressed(true);
@@ -89,6 +90,7 @@ export default function ClickCounterGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setTimeLeft(getReplayGameTime(CLICK_TIME_LIMIT));
     setClicks(0);
     setBusy(false);
@@ -124,6 +126,10 @@ export default function ClickCounterGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -206,17 +212,23 @@ export default function ClickCounterGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            Keep tapping the button
+            {hasStarted ? 'Keep tapping the button' : 'Press Start to begin'}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Goal: reach {TARGET_CLICKS} taps in time.
+            {hasStarted ? `Goal: reach ${TARGET_CLICKS} taps in time.` : `Tap Start when you're ready to reach ${TARGET_CLICKS} taps.`}
           </p>
         </Card>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <button
           type="button"
           onClick={handleTap}
-          disabled={busy || showWin || showLose}
+          disabled={!hasStarted || busy || showWin || showLose}
           className="w-full rounded-[32px] py-12 px-6 text-white font-extrabold text-2xl transition-transform"
           style={{
             background: 'radial-gradient(circle at 30% 25%, #FB923C 0%, #F97316 45%, #C2410C 100%)',
@@ -299,7 +311,9 @@ export default function ClickCounterGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

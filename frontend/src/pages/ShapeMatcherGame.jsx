@@ -76,6 +76,7 @@ export default function ShapeMatcherGame() {
   const [options, setOptions] = useState(initialRound.options);
   const [feedback, setFeedback] = useState('Tap the matching shape as quickly as you can.');
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -86,7 +87,7 @@ export default function ShapeMatcherGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss();
@@ -101,11 +102,11 @@ export default function ShapeMatcherGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (score >= goal) {
+    if (hasStarted && score >= goal) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [goal, score]);
+  }, [goal, score, hasStarted]);
 
   const advanceRound = () => {
     const next = buildRound();
@@ -115,7 +116,7 @@ export default function ShapeMatcherGame() {
   };
 
   const handleChoice = (shape) => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
 
     setPressedShape(shape.id);
     window.setTimeout(() => setPressedShape(null), 140);
@@ -133,6 +134,7 @@ export default function ShapeMatcherGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     const next = buildRound();
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
@@ -173,6 +175,10 @@ export default function ShapeMatcherGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -228,9 +234,15 @@ export default function ShapeMatcherGame() {
             Shape Matcher
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Match the target shape before time runs out.
+            {hasStarted ? 'Match the target shape before time runs out.' : 'Press Start when you are ready to match shapes.'}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card>
@@ -283,7 +295,7 @@ export default function ShapeMatcherGame() {
               key={shape.id}
               type="button"
               onClick={() => handleChoice(shape)}
-              disabled={busy || showWin || showLose}
+              disabled={!hasStarted || busy || showWin || showLose}
               className="rounded-3xl px-4 py-6 font-extrabold transition-transform"
               style={{
                 background: `linear-gradient(160deg, ${shape.color} 0%, rgba(17,24,39,0.9) 190%)`,
@@ -367,7 +379,9 @@ export default function ShapeMatcherGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

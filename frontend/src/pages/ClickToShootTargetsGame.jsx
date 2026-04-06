@@ -60,6 +60,7 @@ export default function ClickToShootTargetsGame() {
   );
   const [hits, setHits] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -72,7 +73,7 @@ export default function ClickToShootTargetsGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss();
@@ -87,24 +88,24 @@ export default function ClickToShootTargetsGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (hits >= goal) {
+    if (hasStarted && hits >= goal) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [goal, hits]);
+  }, [goal, hits, hasStarted]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return undefined;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return undefined;
 
     const mover = setInterval(() => {
       setTarget(getRandomTarget());
     }, 900);
 
     return () => clearInterval(mover);
-  }, [showBackConfirm, showLose, showWin]);
+  }, [showBackConfirm, showLose, showWin, hasStarted]);
 
   const handleTargetHit = () => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
 
     const burst = {
       key: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
@@ -123,7 +124,7 @@ export default function ClickToShootTargetsGame() {
   };
 
   const handleArenaMiss = (event) => {
-    if (event.target !== event.currentTarget || busy || showWin || showLose) return;
+    if (event.target !== event.currentTarget || !hasStarted || busy || showWin || showLose) return;
 
     setFlash('miss');
     window.setTimeout(() => setFlash(null), 180);
@@ -131,6 +132,7 @@ export default function ClickToShootTargetsGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setTimeLeft(getReplayGameTime(timeLimit));
     setHits(0);
     setBusy(false);
@@ -168,6 +170,10 @@ export default function ClickToShootTargetsGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -250,9 +256,15 @@ export default function ClickToShootTargetsGame() {
             Click-to-Shoot Targets
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Tap the moving target before the timer runs out.
+            {hasStarted ? 'Tap the moving target before the timer runs out.' : 'Press Start when you are ready to shoot targets.'}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Card>
@@ -277,10 +289,10 @@ export default function ClickToShootTargetsGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            Sharpshooter mode
+            {hasStarted ? 'Sharpshooter mode' : 'Ready to start'}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Goal: land {goal} clean hits. The target relocates every moment, so keep tracking it.
+            {hasStarted ? `Goal: land ${goal} clean hits. The target relocates every moment, so keep tracking it.` : `Press Start when you're ready to land ${goal} clean hits.`}
           </p>
         </Card>
 
@@ -345,7 +357,7 @@ export default function ClickToShootTargetsGame() {
               event.stopPropagation();
               handleTargetHit();
             }}
-            disabled={busy || showWin || showLose}
+            disabled={!hasStarted || busy || showWin || showLose}
             className="absolute rounded-full transition-[left,top,transform] duration-300 ease-out"
             style={{
               width: target.size,
@@ -420,7 +432,9 @@ export default function ClickToShootTargetsGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>

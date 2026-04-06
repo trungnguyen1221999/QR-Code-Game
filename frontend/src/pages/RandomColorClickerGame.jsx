@@ -73,6 +73,7 @@ export default function RandomColorClickerGame() {
   const [prompt, setPrompt] = useState(() => pickPrompt());
   const [feedback, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -83,7 +84,7 @@ export default function RandomColorClickerGame() {
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleLoss();
@@ -98,11 +99,11 @@ export default function RandomColorClickerGame() {
   }, [showBackConfirm, showLose, showWin, timeLeft]);
 
   useEffect(() => {
-    if (score >= goal) {
+    if (hasStarted && score >= goal) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [goal, score]);
+  }, [goal, score, hasStarted]);
 
   const instructionText = useMemo(
     () => `Tap the button matching the text color, not the word.`,
@@ -110,7 +111,7 @@ export default function RandomColorClickerGame() {
   );
 
   const handleChoice = (colorId) => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
 
     setPressedColor(colorId);
     setTimeout(() => setPressedColor(null), 140);
@@ -130,6 +131,7 @@ export default function RandomColorClickerGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
     setRound(1);
@@ -168,6 +170,10 @@ export default function RandomColorClickerGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -223,9 +229,15 @@ export default function RandomColorClickerGame() {
             Random Color Clicker
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {instructionText}
+            {hasStarted ? instructionText : 'Press Start when you are ready for the color challenge.'}
           </p>
         </div>
+
+        {!hasStarted && (
+          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+            Start
+          </Button>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card>
@@ -278,7 +290,7 @@ export default function RandomColorClickerGame() {
               key={color.id}
               type="button"
               onClick={() => handleChoice(color.id)}
-              disabled={busy || showWin || showLose}
+              disabled={!hasStarted || busy || showWin || showLose}
               className="rounded-3xl px-4 py-5 text-white font-extrabold text-lg transition-transform"
               style={{
                 background: `linear-gradient(160deg, ${color.value} 0%, rgba(17,24,39,0.88) 180%)`,
@@ -360,7 +372,9 @@ export default function RandomColorClickerGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>
