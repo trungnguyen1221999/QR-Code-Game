@@ -7,21 +7,36 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { playerAPI } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 const DEFAULT_AVATAR = '/avatar/avatar1.png';
 
 export default function JoinGame({ onJoin }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
+
   const existingPlayer = JSON.parse(localStorage.getItem('player') || 'null');
-  const [form, setForm] = useState({ username: existingPlayer?.username || '', gameCode: '' });
+  const [form, setForm] = useState({
+    username: existingPlayer?.username || '',
+    gameCode: '',
+  });
   const [loading, setLoading] = useState(false);
   const avatar = existingPlayer?.avatar || location.state?.avatar || DEFAULT_AVATAR;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username.trim()) { toast.error('Please enter your name'); return; }
-    if (!form.gameCode.trim()) { toast.error('Please enter the game code'); return; }
+
+    if (!form.username.trim()) {
+      toast.error(t.pleaseEnterYourName);
+      return;
+    }
+
+    if (!form.gameCode.trim()) {
+      toast.error(t.pleaseEnterGameCode);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -30,11 +45,13 @@ export default function JoinGame({ onJoin }) {
         code: form.gameCode.trim(),
         avatar,
       });
+
       localStorage.setItem('player', JSON.stringify(data.user));
       localStorage.setItem('playerSession', JSON.stringify(data.playerSession));
       localStorage.setItem('session', JSON.stringify(data.session));
       localStorage.removeItem('playerGameProgress');
       localStorage.removeItem('playerGamePowerups');
+
       onJoin?.(data.user);
       navigate(`/${data.redirect || 'waiting-room'}`);
     } catch (err) {
@@ -49,13 +66,11 @@ export default function JoinGame({ onJoin }) {
       <div className="pt-4 pb-8">
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            
             {existingPlayer ? (
               <p className="font-bold text-base" style={{ color: 'var(--color-primary)' }}>
-                👋 Hello, {existingPlayer.username}!
+                {translate(t.helloUser, { name: existingPlayer.username })}
               </p>
             ) : (
-              /* Guest — pick avatar + enter name */
               <>
                 <div className="flex flex-col items-center gap-2">
                   <button
@@ -65,64 +80,76 @@ export default function JoinGame({ onJoin }) {
                   >
                     <img
                       src={avatar}
-                      alt="Your avatar"
+                      alt={t.yourAvatarAlt}
                       className="rounded-full object-cover"
                       style={{ width: 80, height: 80, border: '3px solid var(--color-primary)' }}
                     />
                   </button>
+
                   <button
                     type="button"
                     onClick={() => navigate('/select-avatar', { state: { current: avatar } })}
                     className="text-xs font-semibold px-3 py-1 rounded-full"
                     style={{ backgroundColor: 'var(--color-info-bg)', color: 'var(--color-primary)' }}
                   >
-                    Change avatar
+                    {t.changeAvatar}
                   </button>
                 </div>
+
                 <Input
-                  label="Your name"
+                  label={t.yourName}
                   icon={<User size={14} />}
-                  placeholder="Enter your name"
+                  placeholder={t.enterYourName}
                   value={form.username}
-                  onChange={e => setForm({ ...form, username: e.target.value })}
+                  onChange={(e) => setForm({ ...form, username: e.target.value })}
                 />
               </>
             )}
 
             <div>
-              <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Join game</h2>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
+                {t.joinGameTitle}
+              </h2>
               <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-                Enter the game code provided by the host
+                {t.enterGameCodeProvidedByHost}
               </p>
             </div>
 
             <Input
-              label="Game code"
+              label={t.gameCode}
               icon={<Hash size={14} />}
-              placeholder="Enter 6-digit code"
+              placeholder={t.enterSixDigitCode}
               maxLength={6}
               value={form.gameCode}
-              onChange={e => setForm({ ...form, gameCode: e.target.value.toUpperCase() })}
+              onChange={(e) => setForm({ ...form, gameCode: e.target.value.toUpperCase() })}
             />
 
-            {/* What to Expect */}
             <div className="rounded-xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-              <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>What to Expect:</p>
-              <ul className="text-xs space-y-1 list-disc list-inside" style={{ color: 'var(--color-subtext)' }}>
-                <li>Wait in the lobby until the host starts</li>
-                <li>Complete 6 checkpoints of exciting challenges</li>
-                <li>Compete against other players</li>
-                <li>Earn coins and buy power-ups</li>
-                <li>Aim for the top of the leaderboard!</li>
+              <p className="font-bold text-sm mb-2" style={{ color: 'var(--color-text)' }}>
+                {t.whatToExpect}
+              </p>
+              <ul
+                className="text-xs space-y-1 list-disc list-inside"
+                style={{ color: 'var(--color-subtext)' }}
+              >
+                <li>{t.waitInLobbyUntilHostStarts}</li>
+                <li>{t.completeSixCheckpoints}</li>
+                <li>{t.competeAgainstOtherPlayers}</li>
+                <li>{t.earnCoinsAndBuyPowerUps}</li>
+                <li>{t.aimForTopOfLeaderboard}</li>
               </ul>
             </div>
 
             <Button type="submit" variant="green" disabled={loading}>
-              {loading ? 'Joining...' : 'Join'}
+              {loading ? t.joining : t.join}
             </Button>
-                {/* Signup GIF */}
+
             <div className="flex justify-center">
-              <img src="/join.gif" alt="Sign Up" style={{ height: '180px', objectFit: 'contain' }} />
+              <img
+                src="/join.gif"
+                alt={t.signUpAlt}
+                style={{ height: '180px', objectFit: 'contain' }}
+              />
             </div>
           </form>
         </Card>

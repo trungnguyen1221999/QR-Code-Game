@@ -1,22 +1,13 @@
 import { useEffect, useState } from 'react';
 import BackgroundMusic from './BackgroundMusic';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function FloatingMenu() {
   const [open, setOpen] = useState(false);
-  const [language, setLanguage] = useState(
-    () => localStorage.getItem('language') || 'EN'
-  );
+  const { language, setLanguage } = useLanguage();
 
   const handleLanguageChange = (lang) => {
     setLanguage(lang);
-    localStorage.setItem('language', lang);
-
-    window.dispatchEvent(
-      new CustomEvent('languageChanged', {
-        detail: { language: lang },
-      })
-    );
-
     setOpen(false);
   };
 

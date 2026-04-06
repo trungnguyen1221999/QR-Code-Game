@@ -245,3 +245,10 @@ export const translations = {
     tapGamesAboveToSelect: 'Valitse pelit napauttamalla yllä',
   },
 };
+
+export function translate(template, vars = {}) {
+  return Object.entries(vars).reduce(
+    (text, [key, value]) => text.replaceAll(`{${key}}`, String(value)),
+    template
+  );
+}

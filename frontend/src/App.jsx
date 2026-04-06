@@ -40,6 +40,8 @@ import FinalWinPage from './pages/FinalWinPage';
 import FinalIntroPage from './pages/FinalIntroPage';
 import BackgroundMusic from './components/BackgroundMusic';
 import FloatingMenu from './components/FloatingMenu';
+import { LanguageProvider } from './context/LanguageContext';
+
 
 function App() {
   const [player, setPlayer] = useState(null);
@@ -49,6 +51,7 @@ function App() {
   const handleLogout = () => { localStorage.removeItem('host'); localStorage.removeItem('session'); setIsLoggedIn(false); };
 
   return (
+     <LanguageProvider>
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage onLogout={handleLogout} />} />
@@ -92,6 +95,7 @@ function App() {
       <FloatingMenu />
       <Toaster position="top-center" />
     </Router>
+    </LanguageProvider>
   );
 }
 
