@@ -344,14 +344,16 @@ export default function ShapeMatcherDropGame() {
           style={{
             minHeight: 500,
             borderColor: hitFlash === 'bad' ? '#FCA5A5' : '#BFDBFE',
-            background: hitFlash === 'bad'
-              ? 'linear-gradient(180deg, rgba(254,226,226,0.92) 0%, rgba(219,234,254,0.88) 100%)'
-              : hitFlash === 'good'
-                ? 'linear-gradient(180deg, rgba(220,252,231,0.9) 0%, rgba(219,234,254,0.86) 100%)'
-                : 'linear-gradient(180deg, rgba(239,246,255,0.82) 0%, rgba(219,234,254,0.82) 100%)',
-            backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(15,23,42,0.04) 100%), url('/forest2.png')`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundImage: `${
+              hitFlash === 'bad'
+                ? 'linear-gradient(180deg, rgba(254,226,226,0.78) 0%, rgba(219,234,254,0.62) 100%)'
+                : hitFlash === 'good'
+                  ? 'linear-gradient(180deg, rgba(220,252,231,0.74) 0%, rgba(219,234,254,0.6) 100%)'
+                  : 'linear-gradient(180deg, rgba(239,246,255,0.56) 0%, rgba(219,234,254,0.5) 100%)'
+            }, linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(15,23,42,0.04) 100%), url('/forest2.png')`,
+            backgroundSize: 'cover, cover, cover',
+            backgroundPosition: 'center, center, center',
+            backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
             boxShadow: '0 18px 30px rgba(37,99,235,0.14)',
           }}
         >
