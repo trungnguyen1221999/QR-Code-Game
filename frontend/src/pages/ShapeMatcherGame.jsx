@@ -74,7 +74,7 @@ export default function ShapeMatcherGame() {
   const [round, setRound] = useState(1);
   const [target, setTarget] = useState(initialRound.target);
   const [options, setOptions] = useState(initialRound.options);
-  const [feedback, setFeedback] = useState('Tap the matching shape as quickly as you can.');
+  const [feedback, setFeedback] = useState('Press Start when you are ready to match shapes.');
   const [busy, setBusy] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
@@ -141,7 +141,7 @@ export default function ShapeMatcherGame() {
     setRound(1);
     setTarget(next.target);
     setOptions(next.options);
-    setFeedback('Tap the matching shape as quickly as you can.');
+    setFeedback('Press Start when you are ready to match shapes.');
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -274,12 +274,15 @@ export default function ShapeMatcherGame() {
           </p>
           <p
             className="mt-3 text-6xl font-black"
-            style={{ color: target.color, textShadow: '0 10px 24px rgba(0,0,0,0.12)' }}
+            style={{
+              color: hasStarted ? target.color : '#94A3B8',
+              textShadow: '0 10px 24px rgba(0,0,0,0.12)',
+            }}
           >
-            {target.glyph}
+            {hasStarted ? target.glyph : '?'}
           </p>
           <p className="text-sm mt-2 font-bold" style={{ color: 'var(--color-text)' }}>
-            {target.label}
+            {hasStarted ? target.label : 'Hidden until Start'}
           </p>
         </Card>
 
@@ -292,16 +295,21 @@ export default function ShapeMatcherGame() {
               disabled={!hasStarted || busy || showWin || showLose}
               className="rounded-3xl px-4 py-6 font-extrabold transition-transform"
               style={{
-                background: `linear-gradient(160deg, ${shape.color} 0%, rgba(17,24,39,0.9) 190%)`,
+                background: hasStarted
+                  ? `linear-gradient(160deg, ${shape.color} 0%, rgba(17,24,39,0.9) 190%)`
+                  : 'linear-gradient(160deg, #CBD5E1 0%, #94A3B8 190%)',
                 boxShadow: pressedShape === shape.id
                   ? 'inset 0 8px 18px rgba(0,0,0,0.22)'
                   : '0 14px 24px rgba(15,23,42,0.18)',
                 transform: pressedShape === shape.id ? 'scale(0.97)' : 'scale(1)',
                 color: 'white',
+                opacity: hasStarted ? 1 : 0.6,
               }}
             >
-              <span className="block text-5xl leading-none">{shape.glyph}</span>
-              <span className="block mt-2 text-sm uppercase tracking-[0.14em]">{shape.label}</span>
+              <span className="block text-5xl leading-none">{hasStarted ? shape.glyph : '?'}</span>
+              <span className="block mt-2 text-sm uppercase tracking-[0.14em]">
+                {hasStarted ? shape.label : 'Locked'}
+              </span>
             </button>
           ))}
         </div>
@@ -324,6 +332,7 @@ export default function ShapeMatcherGame() {
             <div />
           )}
         </div>
+
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
