@@ -79,14 +79,14 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   function getSnakeStyles(overrides = {}) {
     return {
-      "background-color": "#16a34a",
+      "background-color": "#1e3a8a",
       ...overrides
     };
   }
 
   function getFoodStyles(overrides = {}) {
     return {
-      "background-color": "#dc2626",
+      "background-color": "#7f1d1d",
       "border-radius": "50%",
       ...overrides
     };
@@ -186,7 +186,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
     // Ignore the last part (the snake just moved out from it)
     for (const i of snakePositions.slice(1)) {
       const snakePart = tiles[i];
-      snakePart.style.backgroundColor = "#16a34a";
+      snakePart.style.backgroundColor = "#1e3a8a";
 
       // Set up transition directions for head and tail
       if (i == snakePositions[snakePositions.length - 1])
