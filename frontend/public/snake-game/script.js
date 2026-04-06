@@ -48,6 +48,8 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   const speed = 280; // Milliseconds it takes for the snake to take a step in the grid
   const color = "black"; // Primary color
+  const snakeSprite = "/croc.png";
+  const foodSprite = "/images/animals/candy.png";
 
   // Setup: Build up the grid
   // The grid consists of (width x height) tiles
@@ -76,6 +78,28 @@ window.addEventListener("DOMContentLoaded", function (event) {
   const scoreElement = document.querySelector(".score");
   const controlButtons = document.querySelectorAll("[data-direction]");
   const startTargets = [containerElement, grid, document.body];
+
+  function getSnakeStyles(overrides = {}) {
+    return {
+      "background-color": "transparent",
+      "background-image": `url("${snakeSprite}")`,
+      "background-size": "cover",
+      "background-position": "center",
+      "background-repeat": "no-repeat",
+      ...overrides
+    };
+  }
+
+  function getFoodStyles(overrides = {}) {
+    return {
+      "background-color": "transparent",
+      "background-image": `url("${foodSprite}")`,
+      "background-size": "contain",
+      "background-position": "center",
+      "background-repeat": "no-repeat",
+      ...overrides
+    };
+  }
 
   // Initialize layout
   resetGame();
@@ -165,16 +189,17 @@ window.addEventListener("DOMContentLoaded", function (event) {
     for (const tile of tiles) setTile(tile);
 
     // Render apple
-    setTile(tiles[applePosition], {
-      "background-color": color,
-      "border-radius": "50%"
-    });
+    setTile(tiles[applePosition], getFoodStyles());
 
     // Render snake
     // Ignore the last part (the snake just moved out from it)
     for (const i of snakePositions.slice(1)) {
       const snakePart = tiles[i];
-      snakePart.style.backgroundColor = color;
+      snakePart.style.backgroundColor = "transparent";
+      snakePart.style.backgroundImage = `url("${snakeSprite}")`;
+      snakePart.style.backgroundSize = "cover";
+      snakePart.style.backgroundPosition = "center";
+      snakePart.style.backgroundRepeat = "no-repeat";
 
       // Set up transition directions for head and tail
       if (i == snakePositions[snakePositions.length - 1])
@@ -367,37 +392,33 @@ window.addEventListener("DOMContentLoaded", function (event) {
       const tailValue = `${100 - percentageOfStep * 100}%`;
 
       if (tailDi == "right")
-        setTile(tail, {
+        setTile(tail, getSnakeStyles({
           left: 0,
-          width: tailValue,
-          "background-color": color
-        });
+          width: tailValue
+        }));
 
       if (tailDi == "left")
-        setTile(tail, {
+        setTile(tail, getSnakeStyles({
           right: 0,
-          width: tailValue,
-          "background-color": color
-        });
+          width: tailValue
+        }));
 
       if (tailDi == "down")
-        setTile(tail, {
+        setTile(tail, getSnakeStyles({
           top: 0,
-          height: tailValue,
-          "background-color": color
-        });
+          height: tailValue
+        }));
 
       if (tailDi == "up")
-        setTile(tail, {
+        setTile(tail, getSnakeStyles({
           bottom: 0,
-          height: tailValue,
-          "background-color": color
-        });
+          height: tailValue
+        }));
     }
 
     // Set previous head to full size
     const previousHead = tiles[snakePositions[snakePositions.length - 2]];
-    setTile(previousHead, { "background-color": color });
+    setTile(previousHead, getSnakeStyles());
 
     // Set up and start transitioning for new head
     // Make sure it heads to the right direction and set initial size
@@ -406,36 +427,32 @@ window.addEventListener("DOMContentLoaded", function (event) {
     const headValue = `${percentageOfStep * 100}%`;
 
     if (headDi == "right")
-      setTile(head, {
+      setTile(head, getSnakeStyles({
         left: 0, // Slide in from left
         width: headValue,
-        "background-color": color,
         "border-radius": 0
-      });
+      }));
 
     if (headDi == "left")
-      setTile(head, {
+      setTile(head, getSnakeStyles({
         right: 0, // Slide in from right
         width: headValue,
-        "background-color": color,
         "border-radius": 0
-      });
+      }));
 
     if (headDi == "down")
-      setTile(head, {
+      setTile(head, getSnakeStyles({
         top: 0, // Slide in from top
         height: headValue,
-        "background-color": color,
         "border-radius": 0
-      });
+      }));
 
     if (headDi == "up")
-      setTile(head, {
+      setTile(head, getSnakeStyles({
         bottom: 0, // Slide in from bottom
         height: headValue,
-        "background-color": color,
         "border-radius": 0
-      });
+      }));
   }
 
   // Transition head and tail between two steps
@@ -530,10 +547,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
     } while (snakePositions.includes(newPosition));
 
     // Set new apple
-    setTile(tiles[newPosition], {
-      "background-color": color,
-      "border-radius": "50%"
-    });
+    setTile(tiles[newPosition], getFoodStyles());
 
     // Note that the apple is here
     applePosition = newPosition;
@@ -548,7 +562,12 @@ window.addEventListener("DOMContentLoaded", function (event) {
       right: "auto",
       bottom: "auto",
       left: "auto",
-      "background-color": "transparent"
+      "background-color": "transparent",
+      "background-image": "none",
+      "background-size": "auto",
+      "background-position": "center",
+      "background-repeat": "no-repeat",
+      "border-radius": 0
     };
     const cssProperties = { ...defaults, ...overrides };
     element.style.cssText = Object.entries(cssProperties)
