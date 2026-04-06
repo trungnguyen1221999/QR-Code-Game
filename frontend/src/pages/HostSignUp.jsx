@@ -7,16 +7,18 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import { hostAPI } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext.jsx';
 
 export default function HostSignUp({ onLogin }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [form, setForm] = useState({ username: '', name: '', password: '' });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.username.trim() || !form.name.trim() || !form.password.trim()) {
-      toast.error('Please fill in all fields');
+      toast.error(t.pleaseFillAllFields);
       return;
     }
     setLoading(true);
@@ -28,7 +30,7 @@ export default function HostSignUp({ onLogin }) {
       });
       localStorage.setItem('host', JSON.stringify(data.host));
       onLogin?.();
-      toast.success('Account created!');
+      toast.success(t.accountCreated);
       navigate('/host-setup');
     } catch (err) {
       toast.error(err.message);
@@ -45,39 +47,41 @@ export default function HostSignUp({ onLogin }) {
 
             {/* Signup GIF */}
             <div className="flex justify-center">
-              <img src="/sign.gif" alt="Sign Up" style={{ height: '180px', objectFit: 'contain' }} />
+              <img src="/sign.gif" alt={t.signUpAlt} style={{ height: '180px', objectFit: 'contain' }} />
             </div>
 
             <div className="flex items-center gap-2">
               <User size={20} style={{ color: 'var(--color-primary)' }} />
-              <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Sign Up</h2>
+              <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{t.signUpTitle}</h2>
             </div>
 
             <Input
-              placeholder="Enter username"
+              placeholder={t.enterUsername}
               value={form.username}
               onChange={e => setForm({ ...form, username: e.target.value })}
             />
 
             <Input
-              placeholder="Enter your name"
+              placeholder={t.enterYourName}
               value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
             />
 
             <Input
               type="password"
-              placeholder="Enter your password"
+              placeholder={t.enterYourPassword}
               value={form.password}
               onChange={e => setForm({ ...form, password: e.target.value })}
             />
 
-            <Button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Sign Up'}</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? t.creatingAccount : t.signUp}
+            </Button>
 
             <p className="text-center text-xs" style={{ color: 'var(--color-subtext)' }}>
-              Already have an account?{' '}
+              {t.alreadyHaveAccount}{' '}
               <Link to="/host-login" className="font-semibold" style={{ color: 'var(--color-blue)' }}>
-                Login
+                {t.login}
               </Link>
             </p>
 

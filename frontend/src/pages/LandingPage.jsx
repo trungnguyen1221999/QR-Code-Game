@@ -6,7 +6,8 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import { sessionAPI, userAPI } from '../utils/api';
 import Card from '../components/ui/Card';
-
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 const PODIUM = {
   1: { h: 68, size: 60, badge: '🥇', color: '#F59E0B', ring: '#FCD34D' },
@@ -16,6 +17,7 @@ const PODIUM = {
 
 export default function LandingPage({ onLogout }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const host = JSON.parse(localStorage.getItem('host') || 'null');
   const [playerSession] = useState(() => JSON.parse(localStorage.getItem('playerSession') || 'null'));
   const [player] = useState(() => JSON.parse(localStorage.getItem('player') || 'null'));
@@ -60,7 +62,7 @@ export default function LandingPage({ onLogout }) {
 
   const handleLogout = () => {
     onLogout?.();
-    toast.success('Logged out');
+    toast.success(t.loggedOut);
   };
 
   const handleExitGame = () => {
@@ -75,9 +77,9 @@ export default function LandingPage({ onLogout }) {
       {host && (
         <div className="flex items-center justify-between pt-4 pb-1">
           <div>
-            <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Logged in as Host</p>
+            <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.loggedInAsHost}</p>
             <p className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
-              👋 Hello, {host.name || host.username}!
+              {translate(t.helloUser, { name: host.name || host.username || '' })}
             </p>
           </div>
           <button
@@ -86,16 +88,16 @@ export default function LandingPage({ onLogout }) {
             style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
           >
             <LogOut size={13} />
-            Logout
+            {t.logout}
           </button>
         </div>
       )}
 
       {/* Mascot + Title */}
       <div className="flex flex-col items-center gap-2 pt-2 pb-6">
-        <img src="/brown-bear.gif" alt="Brown bear mascot" style={{ height: '150px', objectFit: 'contain' }} />
-        <h1 className="text-4xl font-bold text-center" style={{ color: 'var(--color-primary)' }}>The prophecy of Mystery X</h1>
-        <p className="text-sm" >Find QR codes. Play games. Win!</p>
+        <img src="/brown-bear.gif" alt={t.landingMascotAlt} style={{ height: '150px', objectFit: 'contain' }} />
+        <h1 className="text-4xl font-bold text-center" style={{ color: 'var(--color-primary)' }}>{t.landingTitle}</h1>
+        <p className="text-sm">{t.landingSubtitle}</p>
       </div>
 
       <div className="flex flex-col gap-5">
@@ -113,9 +115,9 @@ export default function LandingPage({ onLogout }) {
               />
               <div>
                 <p className="font-bold text-sm" style={{ color: '#15803D' }}>
-                  👋 Welcome back, {player.username}!
+                  {translate(t.welcomeBackUser, { name: player.username || '' })}
                 </p>
-                <p className="text-xs" style={{ color: '#16A34A' }}>You have an ongoing game.</p>
+                <p className="text-xs" style={{ color: '#16A34A' }}>{t.ongoingGame}</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -124,14 +126,14 @@ export default function LandingPage({ onLogout }) {
                 className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-bold text-white"
                 style={{ backgroundColor: 'var(--color-green)' }}
               >
-                <RotateCcw size={14} /> Continue game
+                <RotateCcw size={14} /> {t.continueGame}
               </button>
               <button
                 onClick={handleExitGame}
                 className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold"
                 style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
               >
-                <X size={14} /> Exit
+                <X size={14} /> {t.exit}
               </button>
             </div>
           </div>
@@ -141,27 +143,25 @@ export default function LandingPage({ onLogout }) {
         <Card>
           <div className="flex items-center gap-3 mb-3">
             <User size={22} style={{ color: 'var(--color-primary)' }} />
-            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>Host game</h2>
+            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>{t.hostGame}</h2>
           </div>
           <p className="text-sm mb-5" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Create a new game and invite players to join.
+            {t.hostGameDesc}
           </p>
-          <Button onClick={() => navigate(host ? '/host-setup' : '/host-login')}>Create game</Button>
+          <Button onClick={() => navigate(host ? '/host-setup' : '/host-login')}>{t.createGame}</Button>
         </Card>
 
         {/* Join game */}
         <Card>
           <div className="flex items-center gap-3 mb-3">
             <Gamepad2 size={22} style={{ color: 'var(--color-primary)' }} />
-            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>Join game</h2>
+            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>{t.joinGame}</h2>
           </div>
           <p className="text-sm mb-5" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Enter a game code and join your friends.
+            {t.joinGameDesc}
           </p>
-          <Button onClick={() => navigate('/join')}>Join game</Button>
+          <Button onClick={() => navigate('/join')}>{t.joinGame}</Button>
         </Card>
-
-       
 
         {/* How to play */}
         <Card>
@@ -171,7 +171,7 @@ export default function LandingPage({ onLogout }) {
           >
             <div className="flex items-center gap-3">
               <LayoutGrid size={22} style={{ color: 'var(--color-primary)' }} />
-              <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>How to play?</h2>
+              <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>{t.howToPlay}</h2>
             </div>
             <ChevronDown size={18} style={{
               color: 'var(--color-subtext)',
@@ -187,10 +187,10 @@ export default function LandingPage({ onLogout }) {
           }}>
             <div className="flex flex-col gap-5 mt-5">
               {[
-                { num: 1, color: 'var(--color-orange)', title: 'Scan QR Checkpoints',  desc: 'Find and scan QR codes hidden at different locations.' },
-                { num: 2, color: 'var(--color-green)',  title: 'Complete Mini Games',   desc: 'Play mini games at each checkpoint and earn coins.' },
-                { num: 3, color: 'var(--color-blue)',   title: 'Shop for Power-ups',    desc: 'Use your coins to buy time boosts, extra lives, and more.' },
-                { num: 4, color: '#8B5CF6',             title: 'Final Challenge',        desc: 'Complete all checkpoints to unlock the epic final challenge!' },
+                { num: 1, color: 'var(--color-orange)', title: t.scanQrCheckpoints, desc: t.scanQrCheckpointsDesc },
+                { num: 2, color: 'var(--color-green)', title: t.completeMiniGames, desc: t.completeMiniGamesDesc },
+                { num: 3, color: 'var(--color-blue)', title: t.shopForPowerUps, desc: t.shopForPowerUpsDesc },
+                { num: 4, color: '#8B5CF6', title: t.finalChallenge, desc: t.finalChallengeDesc },
               ].map(({ num, color, title, desc }) => (
                 <div key={num} className="flex items-start gap-4">
                   <span className="shrink-0 h-8 w-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
@@ -206,12 +206,13 @@ export default function LandingPage({ onLogout }) {
             </div>
           </div>
         </Card>
- {/* All Time Ranking */}
+
+        {/* All Time Ranking */}
         <Card>
           {/* Header */}
           <div className="flex items-center gap-3 mb-4">
             <Trophy size={22} style={{ color: 'var(--color-primary)' }} />
-            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>All Time Ranking</h2>
+            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>{t.allTimeRanking}</h2>
           </div>
 
           {/* Podium top 3 */}
@@ -247,8 +248,8 @@ export default function LandingPage({ onLogout }) {
           {/* Expand button */}
           <button onClick={() => setLbOpen(v => !v)}
             className="w-full flex items-center justify-center gap-1 mt-3 font-semibold text-xs text-primary"
-    >
-            {lbOpen ? 'Show less' : 'Show all'}
+          >
+            {lbOpen ? t.showLess : t.showAll}
             <ChevronDown size={14} style={{
               transform: lbOpen ? 'rotate(180deg)' : 'rotate(0deg)',
               transition: 'transform 0.2s ease',

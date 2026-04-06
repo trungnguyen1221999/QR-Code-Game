@@ -202,6 +202,59 @@ endGame: 'End game',
 timesUp: "Time's up!",
 redirectingToLeaderboardIn: 'Redirecting to leaderboard in',
 
+// ───────── LANDING PAGE ─────────
+landingMascotAlt: 'Brown bear mascot',
+landingTitle: 'The prophecy of Mystery X',
+landingSubtitle: 'Find QR codes. Play games. Win!',
+
+welcomeBackUser: '👋 Welcome back, {name}!',
+ongoingGame: 'You have an ongoing game.',
+
+hostGameDesc: 'Create a new game and invite players to join.',
+joinGameDesc: 'Enter a game code and join your friends.',
+
+joinGame: 'Join game',
+createGame: 'Create game',
+
+howToPlay: 'How to play?',
+
+scanQrCheckpoints: 'Scan QR Checkpoints',
+scanQrCheckpointsDesc: 'Find and scan QR codes hidden at different locations.',
+
+completeMiniGames: 'Complete Mini Games',
+completeMiniGamesDesc: 'Play mini games at each checkpoint and earn coins.',
+
+shopForPowerUps: 'Shop for Power-ups',
+shopForPowerUpsDesc: 'Use your coins to buy time boosts, extra lives, and more.',
+
+finalChallenge: 'Final Challenge',
+finalChallengeDesc: 'Complete all checkpoints to unlock the epic final challenge!',
+
+allTimeRanking: 'All Time Ranking',
+
+rank: 'Rank',
+name: 'Name',
+score: 'Score',
+
+
+// ───────── LEADERBOARD PAGE ─────────
+leaderboardLoading: 'Loading...',
+
+
+// ───────── LIVE LEADERBOARD ─────────
+gameCompleted: 'Game completed',
+youFinishedInPlace: 'You finished in #{rank} place',
+
+congratulations: '🎉 Congratulations',
+champion: 'Champion! 🎉',
+
+yourRank: 'Your rank',
+totalPlayers: 'Total players',
+yourScore: 'Your score',
+
+finalLeaderboardLower: 'Final leaderboard',
+liveLeaderboardTitle: 'Leaderboard',
+
   },
 
   FI: {
@@ -406,6 +459,60 @@ noPlayersYet: 'Ei vielä pelaajia.',
 endGame: 'Päätä peli',
 timesUp: 'Aika loppui!',
 redirectingToLeaderboardIn: 'Siirrytään tulostaulukkoon',
+
+// ───────── LANDING PAGE ─────────
+landingMascotAlt: 'Ruskea karhu -maskotti',
+landingTitle: 'Mystery X:n ennustus',
+landingSubtitle: 'Löydä QR-koodit. Pelaa pelejä. Voita!',
+
+welcomeBackUser: '👋 Tervetuloa takaisin, {name}!',
+ongoingGame: 'Sinulla on peli kesken.',
+
+hostGameDesc: 'Luo uusi peli ja kutsu pelaajat mukaan.',
+joinGameDesc: 'Anna pelikoodi ja liity ystäviesi peliin.',
+
+// FI
+joinGame: 'Liity peliin',
+createGame: 'Luo peli',
+
+howToPlay: 'Kuinka pelata?',
+
+scanQrCheckpoints: 'Skannaa QR-tarkistuspisteet',
+scanQrCheckpointsDesc: 'Etsi ja skannaa eri paikkoihin piilotetut QR-koodit.',
+
+completeMiniGames: 'Suorita minipelit',
+completeMiniGamesDesc: 'Pelaa minipelejä jokaisella tarkistuspisteellä ja ansaitse kolikoita.',
+
+shopForPowerUps: 'Osta tehosteita',
+shopForPowerUpsDesc: 'Käytä kolikoitasi ostaaksesi lisäaikaa, lisäelämiä ja muuta.',
+
+finalChallenge: 'Viimeinen haaste',
+finalChallengeDesc: 'Suorita kaikki tarkistuspisteet avataksesi eeppisen viimeisen haasteen!',
+
+allTimeRanking: 'Kaikkien aikojen ranking',
+
+rank: 'Sija',
+name: 'Nimi',
+score: 'Pisteet',
+
+
+// ───────── LEADERBOARD PAGE ─────────
+leaderboardLoading: 'Ladataan...',
+
+
+// ───────── LIVE LEADERBOARD ─────────
+gameCompleted: 'Peli suoritettu',
+youFinishedInPlace: 'Sijoituit sijalle #{rank}',
+
+congratulations: '🎉 Onneksi olkoon',
+champion: 'Mestari! 🎉',
+
+yourRank: 'Sijoituksesi',
+totalPlayers: 'Pelaajia yhteensä',
+yourScore: 'Pisteesi',
+
+finalLeaderboardLower: 'Lopullinen tulostaulukko',
+liveLeaderboardTitle: 'Tulostaulukko',
   },
 };
 

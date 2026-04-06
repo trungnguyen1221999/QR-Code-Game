@@ -6,8 +6,12 @@ import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
+
 export default function HostSetup({ onLogout }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const host = JSON.parse(localStorage.getItem('host'));
   const [gameName, setGameName] = useState('');
   const [time, setTime] = useState(30);
@@ -16,18 +20,18 @@ export default function HostSetup({ onLogout }) {
 
   const handleLogout = () => {
     onLogout?.();
-    toast.success('Logged out');
+    toast.success(t.loggedOut);
     navigate('/host-login');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!gameName.trim()) {
-      toast.error('Please enter a game name');
+      toast.error(t.pleaseEnterGameName);
       return;
     }
     if (!host) {
-      toast.error('Not logged in');
+      toast.error(t.notLoggedIn);
       navigate('/host-login');
       return;
     }
@@ -45,9 +49,9 @@ export default function HostSetup({ onLogout }) {
             {/* Host greeting + logout */}
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Logged in as Host</p>
+                <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.loggedInAsHost}</p>
                 <p className="font-bold text-base" style={{ color: 'var(--color-primary)' }}>
-                  👋 Hello, {host?.name || host?.username}!
+                  {translate(t.helloUser, { name: host?.name || host?.username || '' })}
                 </p>
               </div>
               <button
@@ -57,23 +61,23 @@ export default function HostSetup({ onLogout }) {
                 style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
               >
                 <LogOut size={13} />
-                Logout
+                {t.logout}
               </button>
             </div>
 
             {/* Title */}
             <div>
-              <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>Host game setup</h2>
+              <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>{t.hostGameSetup}</h2>
               <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-                Configure your game settings and get ready to start.
+                {t.configureGameSettings}
               </p>
             </div>
 
             {/* Game name */}
             <Input
-              label="Game name"
+              label={t.gameName}
               icon={<Gamepad2 size={14} />}
-              placeholder="Enter game name"
+              placeholder={t.enterGameName}
               value={gameName}
               onChange={e => setGameName(e.target.value)}
             />
@@ -82,7 +86,7 @@ export default function HostSetup({ onLogout }) {
             <div className="flex flex-col gap-2">
               <label className="flex items-center gap-1 text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
                 <Clock size={14} style={{ color: 'var(--color-primary)' }} />
-                Total game time : <span className="font-bold ml-1">{time} minutes</span>
+                {t.totalGameTime} <span className="font-bold ml-1">{translate(t.minutesCount, { count: time })}</span>
               </label>
               <input
                 type="range"
@@ -94,19 +98,19 @@ export default function HostSetup({ onLogout }) {
                 className="w-full accent-orange-600"
               />
               <div className="flex justify-between text-xs" style={{ color: 'var(--color-subtext)' }}>
-                <span>15 mins</span>
-                <span>120 mins</span>
+                <span>{translate(t.minutesShortCount, { count: 15 })}</span>
+                <span>{translate(t.minutesShortCount, { count: 120 })}</span>
               </div>
             </div>
 
             {/* Game structure info */}
             <div className="rounded-xl p-4 flex flex-col gap-1" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-              <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-text)' }}>Game Structure:</p>
+              <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-text)' }}>{t.gameStructure}</p>
               {[
-                '6 QR Checkpoints to discover',
-                '3 Mini games',
-                '3 Quiz',
-                '1 Final game',
+                t.gameStructureQrCheckpoints,
+                t.gameStructureMiniGames,
+                t.gameStructureQuiz,
+                t.gameStructureFinalGame,
               ].map(item => (
                 <p key={item} className="text-sm" style={{ color: 'var(--color-subtext)' }}>• {item}</p>
               ))}
@@ -115,19 +119,19 @@ export default function HostSetup({ onLogout }) {
             {/* Game Mode */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                🗺️ Game Mode
+                {t.gameMode}
               </label>
               {[
                 {
                   value: 'ordered',
-                  label: 'Ordered Mode',
-                  desc: 'Players must complete games sequentially (1→2→3→...)',
+                  label: t.orderedMode,
+                  desc: t.orderedModeDesc,
                   emoji: '🔢',
                 },
                 {
                   value: 'random',
-                  label: 'Random Mode',
-                  desc: 'Players can complete games in any order',
+                  label: t.randomMode,
+                  desc: t.randomModeDesc,
                   emoji: '🔀',
                 },
               ].map(opt => (
@@ -156,12 +160,12 @@ export default function HostSetup({ onLogout }) {
             {/* Game Level */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-                🎯 Game Level
+                {t.gameLevel}
               </label>
               {[
-                { value: 'easy',   label: 'Easy',   desc: 'Unlimited lives 🌈 — players never lose progress. Perfect for a fun, stress-free adventure!', emoji: '🧸' },
-                { value: 'normal', label: 'Normal', desc: 'Start with 5 lives 💛 — if all lives are lost, restart from checkpoint 1. Mini-games have lower goals and more forgiving time limits.', emoji: '🐼' },
-                { value: 'hard',   label: 'Hard',   desc: 'Start with 3 lives 🔥 — if all lives are lost, restart from checkpoint 1. Mini-games are stricter and time moves faster. For the bravest capybaras only!', emoji: '🐻' },
+                { value: 'easy', label: t.easy, desc: t.easyDesc, emoji: '🧸' },
+                { value: 'normal', label: t.normal, desc: t.normalDesc, emoji: '🐼' },
+                { value: 'hard', label: t.hard, desc: t.hardDesc, emoji: '🐻' },
               ].map(opt => (
                 <button
                   key={opt.value}
@@ -185,7 +189,7 @@ export default function HostSetup({ onLogout }) {
               ))}
             </div>
 
-            <Button type="submit">Next: Select Games</Button>
+            <Button type="submit">{t.nextSelectGames}</Button>
 
           </form>
         </Card>
