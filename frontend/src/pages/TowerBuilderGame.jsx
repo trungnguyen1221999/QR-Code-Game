@@ -131,7 +131,7 @@ export default function TowerBuilderGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     const shouldPause = showWin || showLose || showBackConfirm;

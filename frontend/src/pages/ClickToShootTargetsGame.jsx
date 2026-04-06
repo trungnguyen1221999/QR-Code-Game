@@ -85,7 +85,7 @@ export default function ClickToShootTargetsGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     if (hasStarted && hits >= goal) {

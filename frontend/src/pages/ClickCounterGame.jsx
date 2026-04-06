@@ -71,7 +71,7 @@ export default function ClickCounterGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     if (hasStarted && clicks >= TARGET_CLICKS) {
@@ -219,12 +219,6 @@ export default function ClickCounterGame() {
           </p>
         </Card>
 
-        {!hasStarted && (
-          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            Start
-          </Button>
-        )}
-
         <button
           type="button"
           onClick={handleTap}
@@ -250,9 +244,18 @@ export default function ClickCounterGame() {
           </p>
         </Card>
 
-        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-          Back
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
+            Back
+          </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          ) : (
+            <div />
+          )}
+        </div>
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>

@@ -96,7 +96,7 @@ export default function RandomColorClickerGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     if (hasStarted && score >= goal) {

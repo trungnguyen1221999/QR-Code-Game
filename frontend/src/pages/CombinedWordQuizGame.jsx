@@ -147,7 +147,7 @@ export default function CombinedWordQuizGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     if (!hasStarted || showWin || showLose) return;

@@ -133,7 +133,7 @@ export default function PuzzlePlacementGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showWin, showLose, timeLeft]);
+  }, [showBackConfirm, showWin, showLose, timeLeft, hasStarted]);
 
   useEffect(() => {
     const isComplete = placedPieces.every(
@@ -370,12 +370,6 @@ export default function PuzzlePlacementGame() {
           </p>
         </div>
 
-        {!hasStarted && (
-          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            Start
-          </Button>
-        )}
-
         <div className="grid grid-cols-2 gap-2">
           <Card>
             <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
@@ -486,7 +480,7 @@ export default function PuzzlePlacementGame() {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Button
             variant="red"
             onClick={() => setShowBackConfirm(true)}
@@ -494,6 +488,13 @@ export default function PuzzlePlacementGame() {
           >
             Back
           </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          ) : (
+            <div />
+          )}
         </div>
       </div>
 

@@ -75,7 +75,7 @@ export default function MemoryCardGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     if (flippedIds.length !== 2 || resolvingRef.current) return;
@@ -228,12 +228,6 @@ export default function MemoryCardGame() {
           </p>
         </div>
 
-          {!hasStarted && (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              Start
-            </Button>
-          )}
-
           <Card>
            <div className='flex justify-between items-center' > 
               <p className="text font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
@@ -289,6 +283,13 @@ export default function MemoryCardGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             Back
           </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          ) : (
+            <div />
+          )}
         </div>
       </div>
 

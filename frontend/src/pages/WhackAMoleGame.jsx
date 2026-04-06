@@ -147,7 +147,7 @@ export default function WhackAMoleGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
     if (!hasStarted || showWin || showLose || showBackConfirm) return;
@@ -170,7 +170,7 @@ export default function WhackAMoleGame() {
     spawnRound();
     const interval = setInterval(spawnRound, ANIMAL_SPAWN_INTERVAL);
     return () => clearInterval(interval);
-  }, [holes, showBackConfirm, showLose, showWin, targetAnimalKey]);
+  }, [holes, showBackConfirm, showLose, showWin, targetAnimalKey, hasStarted]);
 
   useEffect(() => {
     if (!hasStarted || hasEndedRef.current || score < WINNING_SCORE) return;
@@ -403,12 +403,6 @@ export default function WhackAMoleGame() {
           </p>
         </div>
 
-        {!hasStarted && (
-          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            Start
-          </Button>
-        )}
-
         <div className="grid grid-cols-2 gap-3">
           <Card>
             
@@ -608,9 +602,18 @@ export default function WhackAMoleGame() {
           </p>
         </div>
 
-        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-          Back
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
+            Back
+          </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          ) : (
+            <div />
+          )}
+        </div>
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
