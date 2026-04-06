@@ -48,8 +48,6 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   const speed = 280; // Milliseconds it takes for the snake to take a step in the grid
   const color = "black"; // Primary color
-  const snakeSprite = "/croc.png";
-  const foodSprite = "/images/animals/candy.png";
 
   // Setup: Build up the grid
   // The grid consists of (width x height) tiles
@@ -81,22 +79,15 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   function getSnakeStyles(overrides = {}) {
     return {
-      "background-color": "transparent",
-      "background-image": `url("${snakeSprite}")`,
-      "background-size": "cover",
-      "background-position": "center",
-      "background-repeat": "no-repeat",
+      "background-color": "#16a34a",
       ...overrides
     };
   }
 
   function getFoodStyles(overrides = {}) {
     return {
-      "background-color": "transparent",
-      "background-image": `url("${foodSprite}")`,
-      "background-size": "contain",
-      "background-position": "center",
-      "background-repeat": "no-repeat",
+      "background-color": "#dc2626",
+      "border-radius": "50%",
       ...overrides
     };
   }
@@ -195,11 +186,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
     // Ignore the last part (the snake just moved out from it)
     for (const i of snakePositions.slice(1)) {
       const snakePart = tiles[i];
-      snakePart.style.backgroundColor = "transparent";
-      snakePart.style.backgroundImage = `url("${snakeSprite}")`;
-      snakePart.style.backgroundSize = "cover";
-      snakePart.style.backgroundPosition = "center";
-      snakePart.style.backgroundRepeat = "no-repeat";
+      snakePart.style.backgroundColor = "#16a34a";
 
       // Set up transition directions for head and tail
       if (i == snakePositions[snakePositions.length - 1])
