@@ -48,11 +48,7 @@ export default function HostLogin({ onLogin }) {
 
             {/* Login GIF */}
             <div className="flex justify-center">
-              <img
-                src="/hi.gif.gif"
-                alt={t.loginAlt}
-                style={{ height: '180px', objectFit: 'contain' }}
-              />
+              <img src="/hi.gif.gif" alt={t.loginAlt} style={{ height: '180px', objectFit: 'contain' }} />
             </div>
 
             <div className="flex items-center gap-2">
