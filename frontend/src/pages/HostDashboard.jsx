@@ -8,9 +8,12 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import { sessionAPI } from '../utils/api';
 import GameSettingsCard from '../components/ui/GameSettingsCard';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 export default function HostDashboard({ onLogout }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const host = JSON.parse(localStorage.getItem('host') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
 
@@ -22,7 +25,6 @@ export default function HostDashboard({ onLogout }) {
 
   const sessionId = session?.id || session?._id;
 
-  // Poll players every 2s
   useEffect(() => {
     if (!sessionId) return;
 
@@ -42,7 +44,7 @@ export default function HostDashboard({ onLogout }) {
 
   const handleLogout = () => {
     onLogout?.();
-    toast.success('Logged out');
+    toast.success(t.loggedOut);
     navigate('/host-login');
   };
 
@@ -77,18 +79,20 @@ export default function HostDashboard({ onLogout }) {
   return (
     <PageLayout>
       <div className="pt-6 flex flex-col gap-4">
-
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Logged in as Host</p>
+            <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>
+              {t.loggedInAsHost}
+            </p>
             <p className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
-              👋 Hello, {host?.name || host?.username}!
+              {translate(t.helloUser, { name: host?.name || host?.username || '' })}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-              style={{ backgroundColor: '#FEF3E2' }}>
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ backgroundColor: '#FEF3E2' }}
+            >
               <Users size={16} style={{ color: 'var(--color-primary)' }} />
               <span className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
                 {players.length}
@@ -98,7 +102,7 @@ export default function HostDashboard({ onLogout }) {
               onClick={handleLogout}
               className="p-2 rounded-full"
               style={{ backgroundColor: '#FEE2E2' }}
-              title="Logout"
+              title={t.logout}
             >
               <LogOut size={16} style={{ color: 'var(--color-red)' }} />
             </button>
@@ -108,30 +112,35 @@ export default function HostDashboard({ onLogout }) {
         {/* Waiting room title */}
         <div>
           <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>
-            {session?.name || 'Waiting Room'}
+            {session?.name || t.waitingRoomTitle}
           </h2>
           <p className="text-sm mt-0.5" style={{ color: 'var(--color-subtext)' }}>
-            Waiting for players to join...
+            {t.waitingForPlayersToJoin}
           </p>
         </div>
 
         {/* Game code */}
-        <div className="rounded-2xl p-5 flex flex-col items-center gap-2"
-          style={{ backgroundColor: '#FEF3E2' }}>
-          <p className="text-sm" style={{ color: 'var(--color-primary)' }}>Game code</p>
+        <div
+          className="rounded-2xl p-5 flex flex-col items-center gap-2"
+          style={{ backgroundColor: '#FEF3E2' }}
+        >
+          <p className="text-sm" style={{ color: 'var(--color-primary)' }}>
+            {t.gameCode}
+          </p>
           <button
             onClick={handleCopy}
             className="flex items-center gap-2 text-3xl font-bold"
             style={{ color: 'var(--color-primary)' }}
           >
             {session?.code || '------'}
-            {copied
-              ? <Check size={20} style={{ color: 'var(--color-green)' }} />
-              : <Copy size={20} style={{ color: 'var(--color-primary)' }} />
-            }
+            {copied ? (
+              <Check size={20} style={{ color: 'var(--color-green)' }} />
+            ) : (
+              <Copy size={20} style={{ color: 'var(--color-primary)' }} />
+            )}
           </button>
           <p className="text-xs" style={{ color: 'var(--color-primary)' }}>
-            Share this code with other players.
+            {t.shareCodeWithPlayers}
           </p>
         </div>
 
@@ -141,11 +150,12 @@ export default function HostDashboard({ onLogout }) {
             <div className="flex items-center gap-2">
               <Users size={16} style={{ color: 'var(--color-primary)' }} />
               <span className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
-                Players ({players.length})
+                {translate(t.playersCount, { count: players.length })}
               </span>
             </div>
             <span className="text-sm" style={{ color: 'var(--color-subtext)' }}>
-              Host : <span className="font-semibold" style={{ color: 'var(--color-text)' }}>
+              {t.hostLabel}{' '}
+              <span className="font-semibold" style={{ color: 'var(--color-text)' }}>
                 {host?.name || host?.username}
               </span>
             </span>
@@ -153,13 +163,16 @@ export default function HostDashboard({ onLogout }) {
 
           {players.length === 0 ? (
             <p className="text-sm text-center py-4" style={{ color: 'var(--color-subtext)' }}>
-              No players yet. Share the code!
+              {t.noPlayersYetShareCode}
             </p>
           ) : (
             <div className="flex flex-col divide-y divide-gray-100 rounded-xl overflow-hidden border border-gray-100">
-              {players.map(p => (
-                <div key={p._id} className="flex items-center gap-3 px-3 py-2.5"
-                  style={{ backgroundColor: '#FEF9F5' }}>
+              {players.map((p) => (
+                <div
+                  key={p._id}
+                  className="flex items-center gap-3 px-3 py-2.5"
+                  style={{ backgroundColor: '#FEF9F5' }}
+                >
                   <img
                     src={p.userId?.avatar || '/avatar/avatar1.png'}
                     alt={p.userId?.username}
@@ -178,39 +191,49 @@ export default function HostDashboard({ onLogout }) {
 
         {/* Actions */}
         <Button variant="green" onClick={() => setShowStartPopup(true)}>
-          <Play size={16} /> Start game
+          <Play size={16} /> {t.startGame}
         </Button>
         <Button variant="red" onClick={() => setShowExitPopup(true)}>
-          <X size={16} /> Exit game
+          <X size={16} /> {t.exitGame}
         </Button>
-
       </div>
 
       {/* Start game confirmation popup */}
       <Popup open={showStartPopup} onClose={() => setShowStartPopup(false)} showClose={false}>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#DCFCE7' }}>
+          <div
+            className="h-14 w-14 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#DCFCE7' }}
+          >
             <Play size={28} style={{ color: 'var(--color-green)' }} />
           </div>
           <h3 className="text-lg font-bold text-center" style={{ color: 'var(--color-text)' }}>
-            Start game now?
+            {t.startGameNow}
           </h3>
-          <div className="w-full rounded-xl p-3 flex flex-col gap-1" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+          <div
+            className="w-full rounded-xl p-3 flex flex-col gap-1"
+            style={{ backgroundColor: 'var(--color-info-bg)' }}
+          >
             <div className="flex justify-between text-sm">
-              <span style={{ color: 'var(--color-subtext)' }}>Players joined</span>
-              <span className="font-bold" style={{ color: 'var(--color-text)' }}>{players.length}</span>
+              <span style={{ color: 'var(--color-subtext)' }}>{t.playersJoined}</span>
+              <span className="font-bold" style={{ color: 'var(--color-text)' }}>
+                {players.length}
+              </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span style={{ color: 'var(--color-subtext)' }}>Game time</span>
-              <span className="font-bold" style={{ color: 'var(--color-text)' }}>{session?.totalTime || 30} minutes</span>
+              <span style={{ color: 'var(--color-subtext)' }}>{t.gameTime}</span>
+              <span className="font-bold" style={{ color: 'var(--color-text)' }}>
+                {translate(t.minutesCount, { count: session?.totalTime || 30 })}
+              </span>
             </div>
           </div>
           <div className="flex flex-col gap-2 w-full">
             <Button variant="green" disabled={starting} onClick={handleStart}>
-              {starting ? 'Starting...' : 'Confirm'}
+              {starting ? t.starting : t.confirm}
             </Button>
-            <Button variant="red" onClick={() => setShowStartPopup(false)}>Cancel</Button>
+            <Button variant="red" onClick={() => setShowStartPopup(false)}>
+              {t.cancel}
+            </Button>
           </div>
         </div>
       </Popup>
@@ -218,20 +241,25 @@ export default function HostDashboard({ onLogout }) {
       {/* Exit confirmation popup */}
       <Popup open={showExitPopup} onClose={() => setShowExitPopup(false)} showClose={false}>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#FEE2E2' }}>
+          <div
+            className="h-14 w-14 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#FEE2E2' }}
+          >
             <X size={28} style={{ color: 'var(--color-red)' }} />
           </div>
           <h3 className="text-lg font-bold text-center" style={{ color: 'var(--color-text)' }}>
-            Are you sure to end game?
+            {t.areYouSureEndGame}
           </h3>
           <div className="flex flex-col gap-2 w-full">
-            <Button variant="green" onClick={handleExit}>Confirm</Button>
-            <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
+            <Button variant="green" onClick={handleExit}>
+              {t.confirm}
+            </Button>
+            <Button variant="red" onClick={() => setShowExitPopup(false)}>
+              {t.cancel}
+            </Button>
           </div>
         </div>
       </Popup>
-
     </PageLayout>
   );
 }
