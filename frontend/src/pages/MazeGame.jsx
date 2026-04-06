@@ -176,6 +176,7 @@ export default function MazeGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const playerSessionId = playerSession?._id || playerSession?.id;
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const hitReasonRef = useRef('Time is up');
 
   const buildState = () => {
@@ -290,8 +291,9 @@ export default function MazeGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
     setStatusText(hitReasonRef.current);
 
@@ -311,6 +313,7 @@ export default function MazeGame() {
 
     if (sameCell(nextPlayer, exit)) {
       setStatusText('Exit reached!');
+      outcomeLockedRef.current = true;
       setShowWin(true);
       return;
     }
@@ -325,6 +328,7 @@ export default function MazeGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     const nextState = buildState();
     setTimeLeft(getReplayGameTime(timeLimit));
     setMaze(nextState.maze);

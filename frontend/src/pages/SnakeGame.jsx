@@ -43,6 +43,7 @@ export default function SnakeGame() {
   const playerSessionId = playerSession?._id || playerSession?.id;
   const iframeRef = useRef(null);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
 
   const [timeLeft, setTimeLeft] = useState(() =>
     getInitialGameTime(timeLimit, 'snake', location.key)
@@ -74,9 +75,17 @@ export default function SnakeGame() {
 
   useEffect(() => {
     if (score >= goal) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
     }
   }, [goal, score]);
+
+  useEffect(() => {
+    if (showWin || showLose || showBackConfirm) {
+      outcomeLockedRef.current = true;
+      iframeRef.current?.contentWindow?.postMessage({ type: 'snake-control', action: 'freeze' }, '*');
+    }
+  }, [showBackConfirm, showLose, showWin]);
 
   useEffect(() => {
     const onMessage = (event) => {
@@ -102,6 +111,7 @@ export default function SnakeGame() {
       }
 
       if (data.event === 'gameover') {
+        if (outcomeLockedRef.current) return;
         setStatusText(data.message || 'Game over');
         void handleLoss(data.message || 'Game over');
       }
@@ -129,8 +139,9 @@ export default function SnakeGame() {
   };
 
   const handleLoss = async (message) => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
     if (message) setStatusText(message);
 
@@ -141,6 +152,7 @@ export default function SnakeGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
     setStatusText('Tap the game area and use arrow keys to control the snake.');

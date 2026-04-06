@@ -119,6 +119,7 @@ export default function CrossRoadGame() {
   const [flash, setFlash] = useState(null);
   const playerRef = useRef(initialPlayer);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
@@ -173,8 +174,9 @@ export default function CrossRoadGame() {
   };
 
   const handleLoss = async (message) => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
     setStatusText(message);
     setFlash('bad');
@@ -204,6 +206,7 @@ export default function CrossRoadGame() {
       setStatusText('You reached the top goal row!');
       setFlash('good');
       window.setTimeout(() => setFlash(null), 240);
+      outcomeLockedRef.current = true;
       setShowWin(true);
       return;
     }
@@ -222,6 +225,7 @@ export default function CrossRoadGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     const resetPlayer = getInitialPlayer(rows, cols);
     setTimeLeft(getReplayGameTime(timeLimit));
     setPlayer(resetPlayer);

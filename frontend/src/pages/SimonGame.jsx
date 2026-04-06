@@ -106,6 +106,7 @@ export default function SimonGame() {
   const audioContextRef = useRef(null);
   const mountedRef = useRef(true);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const soundsRef = useRef({
     green: typeof Audio !== 'undefined' ? new Audio('/sounds/owl.mp3') : null,
     red: typeof Audio !== 'undefined' ? new Audio('/sounds/fox.mp3') : null,
@@ -243,6 +244,7 @@ export default function SimonGame() {
   };
 
   const startGame = async () => {
+    outcomeLockedRef.current = false;
     const firstSequence = buildNextSequence([]);
     setSequence(firstSequence);
     setPlayerSequence([]);
@@ -260,6 +262,7 @@ export default function SimonGame() {
   };
 
   const handleReset = () => {
+    outcomeLockedRef.current = false;
     setSequence([]);
     setPlayerSequence([]);
     setActiveButton(null);
@@ -287,8 +290,9 @@ export default function SimonGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
     setGameStarted(false);
 
@@ -358,6 +362,7 @@ export default function SimonGame() {
     if (nextPlayerSequence.length === sequence.length) {
       if (round >= targetRound) {
         setGameStarted(false);
+        outcomeLockedRef.current = true;
         addCoinsToProgress(Math.max(0, timeLeft * COINS_PER_SECOND));
         setShowWin(true);
         setStatus('Great job! You completed the Simon game.');

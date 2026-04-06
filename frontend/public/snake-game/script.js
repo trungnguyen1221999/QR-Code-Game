@@ -39,6 +39,8 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   let gameStarted = false;
   let hardMode = false;
+  let gameFrozen = false;
+  let animationFrameId = null;
 
   // Configuration
   const width = 15; // Grid width
@@ -88,12 +90,14 @@ window.addEventListener("DOMContentLoaded", function (event) {
   controlButtons.forEach((button) => {
     button.addEventListener("pointerdown", function (event) {
       event.preventDefault();
+      if (gameFrozen) return;
       const direction = event.currentTarget.getAttribute("data-direction");
       handleDirection(direction);
     });
   });
 
   function handleDirection(direction) {
+    if (gameFrozen) return;
     if (!["left", "up", "right", "down"].includes(direction)) return;
 
     if (
@@ -135,6 +139,11 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   // Resets game variables and layouts but does not start the game (game starts on keypress)
   function resetGame() {
+    gameFrozen = false;
+    if (animationFrameId !== null) {
+      window.cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
+    }
     // Reset positions
     snakePositions = [168, 169, 170, 171];
     applePosition = 100; // Initially the apple is always at the same position to make sure it's reachable
@@ -176,6 +185,9 @@ window.addEventListener("DOMContentLoaded", function (event) {
 
   // Handle user inputs (e.g. start the game)
   window.addEventListener("keydown", function (event) {
+    if (gameFrozen && event.key !== " " && event.key !== "H" && event.key !== "h" && event.key !== "E" && event.key !== "e") {
+      return;
+    }
     // If not an arrow key or space or H was pressed then return
     if (
       ![
@@ -242,12 +254,27 @@ window.addEventListener("DOMContentLoaded", function (event) {
     }
   });
 
+  window.addEventListener("message", function (event) {
+    const data = event.data;
+    if (!data || data.type !== "snake-control") return;
+
+    if (data.action === "freeze") {
+      gameFrozen = true;
+      gameStarted = false;
+      if (animationFrameId !== null) {
+        window.cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    }
+  });
+
   // Start the game
   function startGame() {
+    if (gameFrozen) return;
     gameStarted = true;
     noteElement.style.opacity = 0;
     publish("start", { score, hardMode });
-    window.requestAnimationFrame(main);
+    animationFrameId = window.requestAnimationFrame(main);
   }
 
   // The main game loop
@@ -255,6 +282,10 @@ window.addEventListener("DOMContentLoaded", function (event) {
   // It keeps track of the total elapsed time and time elapsed since last call
   // Based on that animates the snake either by transitioning it in between tiles or stepping it to the next tile
   function main(timestamp) {
+    if (gameFrozen) {
+      animationFrameId = null;
+      return;
+    }
     try {
       if (startTimestamp === undefined) startTimestamp = timestamp;
       const totalElapsedTime = timestamp - startTimestamp;
@@ -287,7 +318,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
       contrastElement.innerText = "100%";
       containerElement.style.opacity = 1;
 
-      window.requestAnimationFrame(main);
+      animationFrameId = window.requestAnimationFrame(main);
     } catch (error) {
       // Write a note about restarting game and setting difficulty
       const pressSpaceToStart = "Press space to reset the game.";
@@ -298,6 +329,7 @@ window.addEventListener("DOMContentLoaded", function (event) {
       noteElement.style.opacity = 1;
       containerElement.style.opacity = 1;
       gameStarted = false;
+      animationFrameId = null;
       publish("gameover", { score, hardMode, message: error.message });
     }
 

@@ -92,6 +92,7 @@ export default function PuzzlePlacementGame() {
 
   const slotRefs = useRef([]);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
 
   const [selectedImage, setSelectedImage] = useState(() => pickRandomImage());
   const [placedPieces, setPlacedPieces] = useState(Array(TOTAL_PIECES).fill(null));
@@ -139,6 +140,7 @@ export default function PuzzlePlacementGame() {
     );
 
     if (isComplete) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
     }
   }, [placedPieces]);
@@ -245,6 +247,7 @@ export default function PuzzlePlacementGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     setSelectedImage(pickRandomImage());
     setPlacedPieces(Array(TOTAL_PIECES).fill(null));
     setTrayPieces(shuffleArray(createPieces()));
@@ -270,8 +273,9 @@ export default function PuzzlePlacementGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
 
     const summary = await registerLifeLoss();

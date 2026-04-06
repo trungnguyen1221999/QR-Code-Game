@@ -113,6 +113,7 @@ export default function ShapeMatcherDropGame() {
   const [fallProgress, setFallProgress] = useState(0);
   const [hitFlash, setHitFlash] = useState(null);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const resolvingRef = useRef(false);
   const dragStartRef = useRef(null);
   const fallingShapeRef = useRef(fallingShape);
@@ -146,6 +147,7 @@ export default function ShapeMatcherDropGame() {
 
   useEffect(() => {
     if (score >= goal) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
     }
   }, [goal, score]);
@@ -191,8 +193,9 @@ export default function ShapeMatcherDropGame() {
   };
 
   const handleTimeoutLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
     setFeedback('Time is up.');
 
@@ -242,6 +245,7 @@ export default function ShapeMatcherDropGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
     setLives(getPlayerProgress().life ?? 0);

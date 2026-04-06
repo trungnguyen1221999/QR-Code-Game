@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useBlockBack from '../hooks/useBlockBack';
 import toast from 'react-hot-toast';
@@ -127,6 +127,7 @@ export default function CombinedWordQuizGame() {
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
+  const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   const currentQuestion = questions[currentIndex];
@@ -150,6 +151,7 @@ export default function CombinedWordQuizGame() {
   useEffect(() => {
     if (showWin || showLose) return;
     if (score >= PASS_SCORE) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
       return;
     }
@@ -173,6 +175,7 @@ export default function CombinedWordQuizGame() {
   };
 
   const resetGame = () => {
+    outcomeLockedRef.current = false;
     setQuestions(shuffle(QUESTION_BANK).slice(0, TOTAL_QUESTIONS));
     setTimeLeft(getReplayGameTime(QUIZ_TIME_LIMIT));
     setCurrentIndex(0);
@@ -208,7 +211,8 @@ export default function CombinedWordQuizGame() {
   };
 
   const handleLoss = async () => {
-    if (busy || showLose) return;
+    if (busy || showLose || outcomeLockedRef.current) return;
+    outcomeLockedRef.current = true;
     setBusy(true);
     const summary = await registerLifeLoss();
     setLoseState(summary);

@@ -68,6 +68,7 @@ export default function ClickToShootTargetsGame() {
   const [flash, setFlash] = useState(null);
   const [hitBurst, setHitBurst] = useState(null);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export default function ClickToShootTargetsGame() {
 
   useEffect(() => {
     if (hits >= goal) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
     }
   }, [goal, hits]);
@@ -128,6 +130,7 @@ export default function ClickToShootTargetsGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     setTimeLeft(getReplayGameTime(timeLimit));
     setHits(0);
     setBusy(false);
@@ -153,8 +156,9 @@ export default function ClickToShootTargetsGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
 
     const summary = await registerLifeLoss();

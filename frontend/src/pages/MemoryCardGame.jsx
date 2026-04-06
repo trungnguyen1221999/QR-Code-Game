@@ -59,6 +59,7 @@ export default function MemoryCardGame() {
   const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const resolvingRef = useRef(false);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
@@ -110,6 +111,7 @@ export default function MemoryCardGame() {
 
   useEffect(() => {
     if (cards.length > 0 && cards.every((card) => card.matched)) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
     }
   }, [cards]);
@@ -124,6 +126,7 @@ export default function MemoryCardGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     setCards(shuffleCards());
     setFlippedIds([]);
     setTimeLeft(getReplayGameTime(MEMORY_TIME_LIMIT));
@@ -154,8 +157,9 @@ export default function MemoryCardGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
 
     const summary = await registerLifeLoss();

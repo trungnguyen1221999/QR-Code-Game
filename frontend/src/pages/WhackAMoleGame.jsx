@@ -117,6 +117,7 @@ export default function WhackAMoleGame() {
   });
   const hasEndedRef = useRef(false);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   const clearVisualTimeouts = () => {
@@ -173,6 +174,7 @@ export default function WhackAMoleGame() {
   useEffect(() => {
     if (hasEndedRef.current || score < WINNING_SCORE) return;
     hasEndedRef.current = true;
+    outcomeLockedRef.current = true;
     setShowWin(true);
     setActiveAnimals({});
   }, [score]);
@@ -261,6 +263,7 @@ export default function WhackAMoleGame() {
   };
 
   const resetGame = () => {
+    outcomeLockedRef.current = false;
     clearVisualTimeouts();
     setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
     setScore(0);
@@ -302,8 +305,9 @@ export default function WhackAMoleGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
 
     const summary = await registerLifeLoss();

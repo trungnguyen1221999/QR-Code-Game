@@ -54,6 +54,7 @@ export default function ClickCounterGame() {
   const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const [pressed, setPressed] = useState(false);
   const lossHandledRef = useRef(false);
+  const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function ClickCounterGame() {
 
   useEffect(() => {
     if (clicks >= TARGET_CLICKS) {
+      outcomeLockedRef.current = true;
       setShowWin(true);
     }
   }, [clicks, TARGET_CLICKS]);
@@ -86,6 +88,7 @@ export default function ClickCounterGame() {
   };
 
   const handleRetry = () => {
+    outcomeLockedRef.current = false;
     setTimeLeft(getReplayGameTime(CLICK_TIME_LIMIT));
     setClicks(0);
     setBusy(false);
@@ -109,8 +112,9 @@ export default function ClickCounterGame() {
   };
 
   const handleLoss = async () => {
-    if (lossHandledRef.current) return;
+    if (lossHandledRef.current || outcomeLockedRef.current) return;
     lossHandledRef.current = true;
+    outcomeLockedRef.current = true;
     setBusy(true);
 
     const summary = await registerLifeLoss();
