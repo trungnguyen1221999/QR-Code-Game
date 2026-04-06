@@ -262,13 +262,23 @@ export default function TowerBuilderGame() {
 
   const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
+  const handleRetry = () => {
+    stopGame();
+    endedRef.current = false;
+    pausedByOverlayRef.current = false;
+    setHasStarted(false);
+    setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
+    setFloors(0);
+    setBusy(false);
+    setShowWin(false);
+    setShowLose(false);
+    setShowBackConfirm(false);
+    setLoseState(INITIAL_LOSE_STATE);
+    setCanvasVersion((v) => v + 1);
+  };
+
   const handleLosePrimaryAction = () =>
-    handleCheckpointLosePrimaryAction(loseState, navigate, () => {
-      stopGame();
-      setHasStarted(false);
-      setCanvasVersion((v) => v + 1);
-      setTimeLeft(getReplayGameTime(GAME_TIME_LIMIT));
-    }, playerSessionId);
+    handleCheckpointLosePrimaryAction(loseState, navigate, handleRetry, playerSessionId);
 
   const handleBackExit = () => {
     if (!hasStarted) {

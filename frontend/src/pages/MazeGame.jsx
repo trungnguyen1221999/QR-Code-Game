@@ -414,12 +414,6 @@ export default function MazeGame() {
           </p>
         </div>
 
-        {!hasStarted && (
-          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            Start
-          </Button>
-        )}
-
         <div className="grid grid-cols-3 gap-3">
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
@@ -557,9 +551,18 @@ export default function MazeGame() {
           </div>
         </Card>
 
-        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-          Back
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
+            Back
+          </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          ) : (
+            <div />
+          )}
+        </div>
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
