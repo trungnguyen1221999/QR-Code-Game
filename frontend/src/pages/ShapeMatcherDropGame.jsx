@@ -101,8 +101,9 @@ export default function ShapeMatcherDropGame() {
   );
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(progress.life ?? 0);
-  const [feedback, setFeedback] = useState('Falling shapes are coming. Tap the catcher to rotate it.');
+  const [feedback, setFeedback] = useState('Press Start when you are ready to catch matching shapes.');
   const [busy, setBusy] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
   const [showLose, setShowLose] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -131,7 +132,7 @@ export default function ShapeMatcherDropGame() {
   }, [containerShape]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm) return;
+    if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
       void handleTimeoutLoss();
@@ -143,17 +144,17 @@ export default function ShapeMatcherDropGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
 
   useEffect(() => {
-    if (score >= goal) {
+    if (hasStarted && score >= goal) {
       outcomeLockedRef.current = true;
       setShowWin(true);
     }
-  }, [goal, score]);
+  }, [goal, score, hasStarted]);
 
   useEffect(() => {
-    if (showWin || showLose || showBackConfirm || busy) return undefined;
+    if (!hasStarted || showWin || showLose || showBackConfirm || busy) return undefined;
 
     const step = 100 / ((fallDuration * 1000) / 60);
     const interval = setInterval(() => {
@@ -169,10 +170,10 @@ export default function ShapeMatcherDropGame() {
     }, 60);
 
     return () => clearInterval(interval);
-  }, [busy, fallDuration, fallingShapeSpawn, showBackConfirm, showLose, showWin]);
+  }, [busy, fallDuration, fallingShapeSpawn, showBackConfirm, showLose, showWin, hasStarted]);
 
   const rotateContainer = (direction = 1) => {
-    if (busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose) return;
     setContainerIndex((value) => (value + direction + SHAPES.length) % SHAPES.length);
   };
 
@@ -246,10 +247,11 @@ export default function ShapeMatcherDropGame() {
 
   const handleRetry = () => {
     outcomeLockedRef.current = false;
+    setHasStarted(false);
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
     setLives(getPlayerProgress().life ?? 0);
-    setFeedback('Falling shapes are coming. Tap the catcher to rotate it.');
+    setFeedback('Press Start when you are ready to catch matching shapes.');
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -272,6 +274,10 @@ export default function ShapeMatcherDropGame() {
   };
 
   const handleBackExit = async () => {
+    if (!hasStarted) {
+      navigate('/game');
+      return;
+    }
     setBusy(true);
     const summary = await registerLifeLoss();
 
@@ -327,7 +333,9 @@ export default function ShapeMatcherDropGame() {
             Shape Matcher
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Rotate the catcher so the falling shape lands in the matching container.
+            {hasStarted
+              ? 'Rotate the catcher so the falling shape lands in the matching container.'
+              : 'Press Start when you are ready to catch matching shapes.'}
           </p>
         </div>
 
@@ -383,9 +391,10 @@ export default function ShapeMatcherDropGame() {
             className="absolute left-1/2 -translate-x-1/2 transition-[top] duration-75 linear z-10"
             style={{
               top: `calc(${Math.min(fallProgress, 82)}% - 30px)`,
+              opacity: hasStarted ? 1 : 0.45,
             }}
           >
-            {renderShape(fallingShape)}
+            {renderShape(hasStarted ? fallingShape : { ...fallingShape, color: '#94A3B8' })}
           </div>
 
           <div className="absolute left-4 right-4 bottom-28 z-20">
@@ -420,9 +429,11 @@ export default function ShapeMatcherDropGame() {
             <button
               type="button"
               onPointerDown={(event) => {
+                if (!hasStarted || busy || showWin || showLose) return;
                 dragStartRef.current = event.clientX;
               }}
               onPointerUp={(event) => {
+                if (!hasStarted || busy || showWin || showLose) return;
                 const start = dragStartRef.current;
                 if (start == null) {
                   rotateContainer(1);
@@ -439,24 +450,36 @@ export default function ShapeMatcherDropGame() {
 
                 rotateContainer(delta > 0 ? 1 : -1);
               }}
-              disabled={busy || showWin || showLose}
+              disabled={!hasStarted || busy || showWin || showLose}
               className="mx-auto flex min-h-[74px] w-full max-w-[260px] items-center justify-center gap-3 rounded-[28px] px-5 py-4 text-white"
               style={{
-                background: `linear-gradient(160deg, ${containerShape.color} 0%, rgba(15,23,42,0.9) 180%)`,
+                background: hasStarted
+                  ? `linear-gradient(160deg, ${containerShape.color} 0%, rgba(15,23,42,0.9) 180%)`
+                  : 'linear-gradient(160deg, #94A3B8 0%, rgba(15,23,42,0.9) 180%)',
                 boxShadow: '0 18px 30px rgba(15,23,42,0.18)',
+                opacity: hasStarted ? 1 : 0.7,
               }}
             >
               <RotateCw size={20} />
               <span className="text-sm font-bold uppercase tracking-[0.16em]">
-                Tap / Drag to Rotate
+                {hasStarted ? 'Tap / Drag to Rotate' : 'Locked Until Start'}
               </span>
             </button>
           </div>
         </div>
 
-        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-          Back
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
+            Back
+          </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              Start
+            </Button>
+          ) : (
+            <div />
+          )}
+        </div>
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
@@ -515,7 +538,9 @@ export default function ShapeMatcherDropGame() {
               Leave this game?
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
-              {backWillResetToStart
+              {!hasStarted
+                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                : backWillResetToStart
                 ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
                 : 'If you go back now, one life will be lost.'}
             </p>
