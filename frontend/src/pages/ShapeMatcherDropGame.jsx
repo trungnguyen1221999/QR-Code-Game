@@ -26,10 +26,10 @@ import {
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
 
 const SHAPES = [
-  { id: 'circle', label: 'Circle', color: '#EF4444' },
-  { id: 'square', label: 'Square', color: '#3B82F6' },
-  { id: 'triangle', label: 'Triangle', color: '#22C55E' },
-  { id: 'diamond', label: 'Diamond', color: '#F59E0B' },
+  { id: 'circle', label: 'Bird', color: '#EF4444', image: '/images/animals/bird.png' },
+  { id: 'square', label: 'Deer', color: '#3B82F6', image: '/images/animals/deer.png' },
+  { id: 'triangle', label: 'Fox', color: '#22C55E', image: '/images/animals/fox.png' },
+  { id: 'diamond', label: 'Owl', color: '#F59E0B', image: '/images/animals/owl.png' },
 ];
 
 function formatTime(seconds) {
@@ -43,42 +43,15 @@ function getRandomShape() {
 }
 
 function renderShape(shape, size = 68) {
-  const common = {
-    width: size,
-    height: size,
-    backgroundColor: shape.color,
-    boxShadow: '0 16px 26px rgba(15,23,42,0.18)',
-  };
-
-  if (shape.id === 'circle') {
-    return <div style={{ ...common, borderRadius: '999px' }} />;
-  }
-
-  if (shape.id === 'square') {
-    return <div style={{ ...common, borderRadius: 18 }} />;
-  }
-
-  if (shape.id === 'triangle') {
-    return (
-      <div
-        style={{
-          width: 0,
-          height: 0,
-          borderLeft: `${size / 2}px solid transparent`,
-          borderRight: `${size / 2}px solid transparent`,
-          borderBottom: `${size}px solid ${shape.color}`,
-          filter: 'drop-shadow(0 16px 18px rgba(15,23,42,0.18))',
-        }}
-      />
-    );
-  }
-
   return (
-    <div
+    <img
+      src={shape.image}
+      alt={shape.label}
       style={{
-        ...common,
-        borderRadius: 18,
-        transform: 'rotate(45deg)',
+        width: size,
+        height: size,
+        objectFit: 'contain',
+        filter: 'drop-shadow(0 16px 20px rgba(15,23,42,0.18))',
       }}
     />
   );
@@ -372,10 +345,13 @@ export default function ShapeMatcherDropGame() {
             minHeight: 500,
             borderColor: hitFlash === 'bad' ? '#FCA5A5' : '#BFDBFE',
             background: hitFlash === 'bad'
-              ? 'linear-gradient(180deg, #FEE2E2 0%, #DBEAFE 100%)'
+              ? 'linear-gradient(180deg, rgba(254,226,226,0.92) 0%, rgba(219,234,254,0.88) 100%)'
               : hitFlash === 'good'
-                ? 'linear-gradient(180deg, #DCFCE7 0%, #DBEAFE 100%)'
-                : 'linear-gradient(180deg, #EFF6FF 0%, #DBEAFE 100%)',
+                ? 'linear-gradient(180deg, rgba(220,252,231,0.9) 0%, rgba(219,234,254,0.86) 100%)'
+                : 'linear-gradient(180deg, rgba(239,246,255,0.82) 0%, rgba(219,234,254,0.82) 100%)',
+            backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(15,23,42,0.04) 100%), url('/forest2.png')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             boxShadow: '0 18px 30px rgba(37,99,235,0.14)',
           }}
         >
@@ -394,7 +370,9 @@ export default function ShapeMatcherDropGame() {
               opacity: hasStarted ? 1 : 0.45,
             }}
           >
-            {renderShape(hasStarted ? fallingShape : { ...fallingShape, color: '#94A3B8' })}
+            <div style={{ opacity: hasStarted ? 1 : 0.45 }}>
+              {renderShape(fallingShape)}
+            </div>
           </div>
 
           <div className="absolute left-4 right-4 bottom-28 z-20">
@@ -415,7 +393,14 @@ export default function ShapeMatcherDropGame() {
                       transform: isActive ? 'translateY(-4px)' : 'translateY(0)',
                     }}
                   >
-                    {renderShape(shape, 34)}
+                    <div
+                      style={{
+                        opacity: hasStarted ? 0.85 : 0.5,
+                        filter: 'grayscale(1)',
+                      }}
+                    >
+                      {renderShape(shape, 42)}
+                    </div>
                     <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.12em]" style={{ color: '#334155' }}>
                       {shape.label}
                     </p>
