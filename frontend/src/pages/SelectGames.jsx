@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, Download, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Download, ChevronUp, ChevronDown } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -22,109 +22,111 @@ import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import { sessionAPI } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 export const AVAILABLE_GAMES = [
   {
     id: 'memory',
     route: '/memory-game',
-    label: 'Memory card game',
-    desc: 'Match pairs of cards by remembering their position',
+    labelKey: 'memoryCardGame',
+    descKey: 'memoryCardGameDesc',
     emoji: '🃏',
     bg: '#FEF3C7',
   },
   {
     id: 'simon',
     route: '/simon-game',
-    label: 'Simon game',
-    desc: 'Remember and repeat the pattern as long as possible.',
+    labelKey: 'simonGame',
+    descKey: 'simonGameDesc',
     emoji: '🎯',
     bg: '#DBEAFE',
   },
   {
     id: 'puzzle',
     route: '/puzzle-game',
-    label: 'Puzzle game',
-    desc: 'Arrange the puzzle pieces to form a meaningful picture',
+    labelKey: 'puzzleGame',
+    descKey: 'puzzleGameDesc',
     emoji: '🧩',
     bg: '#FCE7F3',
   },
   {
     id: 'whack',
     route: '/whack-a-mole',
-    label: 'Whack-a-Mole',
-    desc: 'Hit as many moles as possible in a limited time',
+    labelKey: 'whackAMole',
+    descKey: 'whackAMoleDesc',
     emoji: '🔨',
     bg: '#D1FAE5',
   },
   {
     id: 'tower',
     route: '/tower-builder',
-    label: 'Tower builder',
-    desc: 'Build as high as possible without the tower falling',
+    labelKey: 'towerBuilder',
+    descKey: 'towerBuilderDesc',
     emoji: '🏗️',
     bg: '#FEE2E2',
   },
   {
     id: 'quiz',
     route: '/combined-word-quiz',
-    label: 'Quiz game',
-    desc: 'Guess the correct word or phrase they represent',
+    labelKey: 'quizGame',
+    descKey: 'quizGameDesc',
     emoji: '📝',
     bg: '#EDE9FE',
   },
   {
     id: 'click-counter',
     route: '/click-counter-game',
-    label: 'Click Counter Game',
-    desc: 'Tap as fast as you can and reach the target count before time runs out',
+    labelKey: 'clickCounterGame',
+    descKey: 'clickCounterGameDesc',
     emoji: '👆',
     bg: '#FEF3C7',
   },
   {
     id: 'random-color-clicker',
     route: '/random-color-clicker',
-    label: 'Random Color Clicker',
-    desc: 'Tap the button that matches the text color, not the written word',
+    labelKey: 'randomColorClicker',
+    descKey: 'randomColorClickerDesc',
     emoji: '🎨',
     bg: '#FDE68A',
   },
   {
     id: 'snake',
     route: '/snake-game',
-    label: 'Snake game',
-    desc: 'Collect apples, avoid walls, and survive the fading snake challenge',
+    labelKey: 'snakeGame',
+    descKey: 'snakeGameDesc',
     emoji: '🐍',
     bg: '#BBF7D0',
   },
   {
     id: 'click-to-shoot-targets',
     route: '/click-to-shoot-targets',
-    label: 'Click-to-Shoot Targets',
-    desc: 'Tap the moving target quickly and clear the hit goal before time runs out',
+    labelKey: 'clickToShootTargets',
+    descKey: 'clickToShootTargetsDesc',
     emoji: '🎯',
     bg: '#DBEAFE',
   },
   {
     id: 'maze',
     route: '/maze-game',
-    label: 'Maze game',
-    desc: 'Navigate a random maze, avoid roaming enemies on higher difficulties, and find the exit',
+    labelKey: 'mazeGame',
+    descKey: 'mazeGameDesc',
     emoji: '🧭',
     bg: '#E9D5FF',
   },
   {
     id: 'shape-matcher',
     route: '/shape-matcher',
-    label: 'Shape Matcher',
-    desc: 'Spot the target shape and tap the matching option before time runs out',
+    labelKey: 'shapeMatcher',
+    descKey: 'shapeMatcherDesc',
     emoji: '⏺️',
     bg: '#FBCFE8',
   },
   {
     id: 'cross-road',
     route: '/cross-road-game',
-    label: 'Cross Road',
-    desc: 'Cross busy traffic lanes on mobile controls and reach the goal at the top',
+    labelKey: 'crossRoad',
+    descKey: 'crossRoadDesc',
     emoji: '🚗',
     bg: '#BBF7D0',
   },
@@ -132,8 +134,7 @@ export const AVAILABLE_GAMES = [
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
 
-// ── Sortable chip inside the bottom panel ─────────────────────
-function SortableChip({ id, idx, onRemove }) {
+function SortableChip({ id, idx, onRemove, t }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
 
@@ -155,10 +156,13 @@ function SortableChip({ id, idx, onRemove }) {
       {...attributes}
       {...listeners}
     >
-      {idx + 1}. {game?.emoji} {game?.label}
+      {idx + 1}. {game?.emoji} {t[game?.labelKey] ?? game?.labelKey}
       <button
         onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => { e.stopPropagation(); onRemove(id); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove(id);
+        }}
         className="ml-0.5 opacity-60"
       >
         <X size={11} />
@@ -167,21 +171,22 @@ function SortableChip({ id, idx, onRemove }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────
 export default function SelectGames() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
+
   const { name, time, difficulty, gameMode } = location.state ?? {};
   const host = JSON.parse(localStorage.getItem('host') || 'null');
 
-  const [selected, setSelected] = useState([]); // ordered array of game ids
+  const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [showChips, setShowChips] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
   );
 
   const toggle = (id) => {
@@ -211,12 +216,16 @@ export default function SelectGames() {
     const game = AVAILABLE_GAMES.find((g) => g.id === gameId);
     const QR_SIZE = 300;
     const PADDING = 20;
-    const qrDataUrl = await QRCode.toDataURL(
-      `CHECKPOINT:${checkpoint}`,
-      { width: QR_SIZE, margin: 1 },
-    );
+    const qrDataUrl = await QRCode.toDataURL(`CHECKPOINT:${checkpoint}`, {
+      width: QR_SIZE,
+      margin: 1,
+    });
     const img = new Image();
-    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = qrDataUrl; });
+    await new Promise((res, rej) => {
+      img.onload = res;
+      img.onerror = rej;
+      img.src = qrDataUrl;
+    });
     const canvas = document.createElement('canvas');
     canvas.width = QR_SIZE + PADDING * 2;
     canvas.height = QR_SIZE + PADDING * 2 + 52;
@@ -227,10 +236,14 @@ export default function SelectGames() {
     ctx.fillStyle = '#1a1a1a';
     ctx.font = 'bold 22px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(`Checkpoint ${checkpoint}`, canvas.width / 2, QR_SIZE + PADDING + 30);
+    ctx.fillText(
+      translate(t.checkpointLabel, { checkpoint }),
+      canvas.width / 2,
+      QR_SIZE + PADDING + 30
+    );
     ctx.fillStyle = '#555555';
     ctx.font = '16px sans-serif';
-    ctx.fillText(game?.label ?? '', canvas.width / 2, QR_SIZE + PADDING + 54);
+    ctx.fillText(t[game?.labelKey] ?? '', canvas.width / 2, QR_SIZE + PADDING + 54);
     return { canvas, game, checkpoint };
   };
 
@@ -247,7 +260,7 @@ export default function SelectGames() {
         if (i < selected.length - 1) await new Promise((r) => setTimeout(r, 400));
       }
     } catch {
-      toast.error('Failed to generate QR codes');
+      toast.error(t.failedToGenerateQrCodes);
     } finally {
       setDownloading(false);
     }
@@ -255,11 +268,11 @@ export default function SelectGames() {
 
   const handleCreate = async () => {
     if (selected.length < 1) {
-      toast.error('Please select at least 1 game');
+      toast.error(t.pleaseSelectAtLeastOneGame);
       return;
     }
     if (!host) {
-      toast.error('Not logged in');
+      toast.error(t.notLoggedIn);
       navigate('/host-login');
       return;
     }
@@ -288,15 +301,13 @@ export default function SelectGames() {
   return (
     <PageLayout back="/host-setup">
       <div className="pt-4 pb-36 flex flex-col gap-4">
-
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-              Select Games
+              {t.selectGames}
             </h2>
             <p className="text-xs mt-0.5" style={{ color: 'var(--color-primary)' }}>
-              Choose games and set order
+              {t.chooseGamesAndSetOrder}
             </p>
           </div>
           <div
@@ -310,23 +321,21 @@ export default function SelectGames() {
           </div>
         </div>
 
-        {/* Instructions */}
         <Card className="rounded-2xl p-3">
           <p className="text-xs font-bold mb-1" style={{ color: 'var(--color-text)' }}>
-            ℹ️ Instructions
+            {t.instructions}
           </p>
           <ul className="text-xs flex flex-col gap-0.5" style={{ color: 'var(--color-subtext)' }}>
-            <li>• Tap games below to select (max {MAX_GAMES})</li>
-            <li>• Drag ≡ in the selected list to reorder checkpoints</li>
-            <li>• Number of checkpoints = number of games selected</li>
-            <li>• Download QR codes for each checkpoint</li>
+            <li>{translate(t.tapGamesBelowToSelect, { max: MAX_GAMES })}</li>
+            <li>{t.dragSelectedListToReorder}</li>
+            <li>{t.numberOfCheckpointsEqualsGames}</li>
+            <li>{t.downloadQrCodesForEachCheckpoint}</li>
           </ul>
         </Card>
 
-        {/* Game list */}
         <div>
           <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-            Available Games ({AVAILABLE_GAMES.length})
+            {translate(t.availableGamesCount, { count: AVAILABLE_GAMES.length })}
           </p>
           <div className="flex flex-col gap-2">
             {AVAILABLE_GAMES.map((game) => {
@@ -352,13 +361,13 @@ export default function SelectGames() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-                      {game.label}
+                      {t[game.labelKey]}
                     </p>
                     <p
                       className="text-xs mt-0.5"
                       style={{ color: 'var(--color-subtext)', lineHeight: '1.4' }}
                     >
-                      {game.desc}
+                      {t[game.descKey]}
                     </p>
                   </div>
                   <div
@@ -378,7 +387,6 @@ export default function SelectGames() {
         </div>
       </div>
 
-      {/* Sticky bottom panel */}
       <div
         className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4 pt-3"
         style={{
@@ -390,36 +398,47 @@ export default function SelectGames() {
       >
         {selected.length > 0 ? (
           <>
-            {/* Title row — tap to expand/collapse chips */}
             <button
               className="flex items-center justify-between w-full mb-2"
               onClick={() => setShowChips((v) => !v)}
             >
               <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-                ✅ Selected ({selected.length} checkpoint{selected.length > 1 ? 's' : ''})
+                {translate(t.selectedCheckpoints, {
+                  count: selected.length,
+                  suffix: selected.length > 1 ? t.checkpointPluralSuffix : '',
+                })}
                 {!showChips && (
-                  <span className="ml-2 text-xs font-normal" style={{ color: 'var(--color-subtext)' }}>
-                    — tap to view & reorder
+                  <span
+                    className="ml-2 text-xs font-normal"
+                    style={{ color: 'var(--color-subtext)' }}
+                  >
+                    {t.tapToViewAndReorder}
                   </span>
                 )}
               </p>
-              {showChips ? <ChevronDown size={16} style={{ color: 'var(--color-subtext)' }} /> : <ChevronUp size={16} style={{ color: 'var(--color-subtext)' }} />}
+              {showChips ? (
+                <ChevronDown size={16} style={{ color: 'var(--color-subtext)' }} />
+              ) : (
+                <ChevronUp size={16} style={{ color: 'var(--color-subtext)' }} />
+              )}
             </button>
 
-            {/* Sortable chips — collapsible */}
             {showChips && (
-              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
                 <SortableContext items={selected} strategy={rectSortingStrategy}>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {selected.map((id, idx) => (
-                      <SortableChip key={id} id={id} idx={idx} onRemove={remove} />
+                      <SortableChip key={id} id={id} idx={idx} onRemove={remove} t={t} />
                     ))}
                   </div>
                 </SortableContext>
               </DndContext>
             )}
 
-            {/* Download QR + Create */}
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleDownloadAllQR}
@@ -428,16 +447,18 @@ export default function SelectGames() {
                 style={{ backgroundColor: '#1D4ED8', color: 'white' }}
               >
                 <Download size={14} />
-                {downloading ? 'Downloading...' : 'Download QR codes'}
+                {downloading ? t.downloading : t.downloadQrCodes}
               </button>
               <Button variant="green" onClick={handleCreate} disabled={!canCreate || loading}>
-                {loading ? 'Creating...' : `Create Game (${selected.length} checkpoints) ▶`}
+                {loading
+                  ? t.creating
+                  : translate(t.createGameWithCheckpoints, { count: selected.length })}
               </Button>
             </div>
           </>
         ) : (
           <p className="text-sm text-center py-1" style={{ color: 'var(--color-subtext)' }}>
-            Tap games above to select them
+            {t.tapGamesAboveToSelect}
           </p>
         )}
       </div>

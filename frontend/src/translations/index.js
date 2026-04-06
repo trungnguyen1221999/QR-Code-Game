@@ -99,6 +99,9 @@ export const translations = {
     shapeMatcher: 'Shape Matcher',
     shapeMatcherDesc:
       'Spot the target shape and tap the matching option before time runs out',
+    crossRoad: 'Cross-road',
+    crossRoadDesc:
+      'Cross busy traffic lanes on mobile controls and reach the goal at the top',
 
     failedToGenerateQrCodes: 'Failed to generate QR codes',
     pleaseSelectAtLeastOneGame: 'Please select at least 1 game',
@@ -222,6 +225,9 @@ export const translations = {
     shapeMatcher: 'Muotojen yhdistäjä',
     shapeMatcherDesc:
       'Etsi kohdemuoto ja napauta vastaavaa vaihtoehtoa ennen ajan loppumista',
+    crossRoad: 'Risteys',
+    crossRoadDesc:
+      'Ylitä vilkkaat liikennekaistat mobiilikontrolleilla ja saavuta tavoite ylhäällä',
 
     failedToGenerateQrCodes: 'QR-koodien luonti epäonnistui',
     pleaseSelectAtLeastOneGame: 'Valitse vähintään 1 peli',

@@ -8,6 +8,8 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import { playerAPI, sessionAPI } from '../utils/api';
 import Card from '../components/ui/Card';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 const TOTAL_SECONDS = 30 * 60;
 
@@ -23,7 +25,7 @@ function getTotalCheckpoints() {
 const DEFAULT_COINS = 0;
 
 function getLivesForDifficulty(difficulty) {
-  if (difficulty === 'easy')   return Infinity;
+  if (difficulty === 'easy') return Infinity;
   if (difficulty === 'normal') return 5;
   return 3; // hard
 }
@@ -118,10 +120,12 @@ function clearProgress() {
   localStorage.removeItem(PLAYER_PROGRESS_KEY);
 }
 
-function ScanningOverlay({ videoRef, onCancel }) {
+function ScanningOverlay({ videoRef, onCancel, t }) {
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5"
-      style={{ backgroundColor: 'rgba(0,0,0,0.92)' }}>
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5"
+      style={{ backgroundColor: 'rgba(0,0,0,0.92)' }}
+    >
       <style>{`
         @keyframes scan-line { 0%{top:5%} 50%{top:90%} 100%{top:5%} }
         .scan-line-full { position:absolute; left:0; right:0; height:3px; background:#22C55E; animation: scan-line 1.8s linear infinite; box-shadow: 0 0 12px #22C55E, 0 0 24px #22C55E; }
@@ -129,11 +133,18 @@ function ScanningOverlay({ videoRef, onCancel }) {
         .corner-pulse { animation: pulse-corner 1.2s ease-in-out infinite; }
       `}</style>
 
-      <p className="text-white text-lg font-bold tracking-wide">Point at QR code</p>
+      <p className="text-white text-lg font-bold tracking-wide">{t.pointAtQrCode}</p>
 
-      {/* Viewfinder with live camera */}
-      <div className="relative rounded-2xl overflow-hidden"
-        style={{ width: '84vw', maxWidth: 340, height: '84vw', maxHeight: 340, border: '2px solid rgba(255,255,255,0.3)' }}>
+      <div
+        className="relative rounded-2xl overflow-hidden"
+        style={{
+          width: '84vw',
+          maxWidth: 340,
+          height: '84vw',
+          maxHeight: 340,
+          border: '2px solid rgba(255,255,255,0.3)',
+        }}
+      >
         <video
           ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
@@ -141,20 +152,34 @@ function ScanningOverlay({ videoRef, onCancel }) {
           muted
         />
         <div className="scan-line-full" />
-        <div className="corner-pulse absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg" style={{ borderColor: '#22C55E' }} />
-        <div className="corner-pulse absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg" style={{ borderColor: '#22C55E' }} />
-        <div className="corner-pulse absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg" style={{ borderColor: '#22C55E' }} />
-        <div className="corner-pulse absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-lg" style={{ borderColor: '#22C55E' }} />
+        <div
+          className="corner-pulse absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg"
+          style={{ borderColor: '#22C55E' }}
+        />
+        <div
+          className="corner-pulse absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg"
+          style={{ borderColor: '#22C55E' }}
+        />
+        <div
+          className="corner-pulse absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg"
+          style={{ borderColor: '#22C55E' }}
+        />
+        <div
+          className="corner-pulse absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-lg"
+          style={{ borderColor: '#22C55E' }}
+        />
       </div>
 
-      <p className="text-sm font-semibold" style={{ color: '#22C55E' }}>Scanning... please wait</p>
+      <p className="text-sm font-semibold" style={{ color: '#22C55E' }}>
+        {t.scanningPleaseWait}
+      </p>
 
       <button
         onClick={onCancel}
         className="flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold"
         style={{ backgroundColor: 'rgba(255,255,255,0.15)', color: 'white' }}
       >
-        <X size={14} /> Cancel
+        <X size={14} /> {t.cancel}
       </button>
     </div>
   );
@@ -164,6 +189,8 @@ export default function PlayerGame() {
   const TOTAL_CHECKPOINTS = getTotalCheckpoints();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
+
   const player = JSON.parse(localStorage.getItem('player') || 'null');
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const session = JSON.parse(localStorage.getItem('session') || 'null');
@@ -172,25 +199,25 @@ export default function PlayerGame() {
   const initialProgress = readSavedProgress(DEFAULT_LIFE);
   const shouldSkipProgressRefresh = !!(location.state?.justCompleted || location.state?.wrongAnswer);
 
-  const [timeLeft, setTimeLeft] = useState(() => getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS));
+  const [timeLeft, setTimeLeft] = useState(() =>
+    getRemainingSessionSeconds(session?.expiresAt, TOTAL_SECONDS)
+  );
   const [showExitPopup, setShowExitPopup] = useState(false);
-const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
+  const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
   const [hostEndedCountdown, setHostEndedCountdown] = useState(5);
   const [scanning, setScanning] = useState(false);
   const videoRef = useRef(null);
   const qrScannerRef = useRef(null);
-  const lastQrDataRef = useRef(null); // debounce repeated QR detections
-  const lastScanTimeRef = useRef(0);  // 1s any-scan cooldown
+  const lastQrDataRef = useRef(null);
+  const lastScanTimeRef = useRef(0);
   const introKey = `introPlayed_${session?.id || session?._id}`;
 
-  // Redirect to intro page if not yet played
   useEffect(() => {
     if (!sessionStorage.getItem(introKey)) {
       navigate('/intro', { replace: true });
     }
   }, []);
 
-  // Track completed checkpoints; accept update from challenge page
   const [completed, setCompleted] = useState(initialProgress.completed);
   const [current, setCurrent] = useState(initialProgress.current);
   const [life, setLife] = useState(initialProgress.life);
@@ -241,7 +268,6 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
     shouldSkipProgressRefresh,
   ]);
 
-  // Apply result coming back from challenge page
   useEffect(() => {
     const state = location.state;
     if (!state) return;
@@ -255,19 +281,19 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
         const pending = parseInt(sessionStorage.getItem('pendingCheckpoint') || '0', 10) || undefined;
         const cp = state.completedCheckpoint ?? pending;
         sessionStorage.removeItem('pendingCheckpoint');
-        if (cp) setCompletedList(prev => prev.includes(cp) ? prev : [...prev, cp]);
-        setCompleted(prev => Math.min(prev + 1, TOTAL_CHECKPOINTS));
+        if (cp) setCompletedList((prev) => (prev.includes(cp) ? prev : [...prev, cp]));
+        setCompleted((prev) => Math.min(prev + 1, TOTAL_CHECKPOINTS));
       } else {
         setCompleted((value) => {
-          const nextCompleted = state.completedCheckpoint ?? (value + 1);
+          const nextCompleted = state.completedCheckpoint ?? value + 1;
           return Math.min(Math.max(value, nextCompleted), TOTAL_CHECKPOINTS);
         });
         setCurrent((value) => {
-          const nextCurrent = state.nextCheckpoint ?? (value + 1);
+          const nextCurrent = state.nextCheckpoint ?? value + 1;
           return Math.min(Math.max(value, nextCurrent), TOTAL_CHECKPOINTS + 1);
         });
       }
-      setCoins(v => v + (state.rewardCoins ?? 50));
+      setCoins((v) => v + (state.rewardCoins ?? 50));
     }
     if (state.wrongAnswer && DEFAULT_LIFE !== Infinity) {
       const nextLife = life - 1;
@@ -283,7 +309,6 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
     }
   }, [life]);
 
-  // Poll session status — detect if host ended the game early
   useEffect(() => {
     const sessionId = session?.id || session?._id;
     if (!sessionId || showHostEndedPopup) return;
@@ -291,19 +316,18 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
       try {
         const data = await sessionAPI.getById(sessionId);
         if (data.status === 'finished') setShowHostEndedPopup(true);
-      } catch { /* ignore */ }
+      } catch {}
     }, 1000);
     return () => clearInterval(interval);
   }, [session?.id, session?._id, showHostEndedPopup]);
 
-  // 5s countdown after host-ended popup
   useEffect(() => {
     if (!showHostEndedPopup) return;
     setHostEndedCountdown(5);
-    const t = setInterval(() => {
-      setHostEndedCountdown(v => {
+    const timer = setInterval(() => {
+      setHostEndedCountdown((v) => {
         if (v <= 1) {
-          clearInterval(t);
+          clearInterval(timer);
           clearProgress();
           localStorage.removeItem('playerSession');
           localStorage.removeItem('session');
@@ -313,13 +337,16 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
         return v - 1;
       });
     }, 1000);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, [showHostEndedPopup]);
 
   useEffect(() => {
-    if (timeLeft <= 0) { navigate('/game-over'); return; }
-    const t = setInterval(() => setTimeLeft(v => v - 1), 1000);
-    return () => clearInterval(t);
+    if (timeLeft <= 0) {
+      navigate('/game-over');
+      return;
+    }
+    const timer = setInterval(() => setTimeLeft((v) => v - 1), 1000);
+    return () => clearInterval(timer);
   }, [timeLeft]);
 
   const progress = completed / TOTAL_CHECKPOINTS;
@@ -332,14 +359,12 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
     }
   };
 
-  // Start/stop real QR scanner when scanning state changes
   useEffect(() => {
     if (!scanning) return;
 
     let cancelled = false;
 
     const start = async () => {
-      // Wait one tick for the video element to mount
       await new Promise((r) => setTimeout(r, 50));
       if (cancelled || !videoRef.current) return;
 
@@ -349,21 +374,20 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
           (result) => {
             if (cancelled) return;
             const data = result?.data ?? '';
-
-            // 1s cooldown after any scan attempt
             const now = Date.now();
             if (now - lastScanTimeRef.current < 1000) return;
             lastScanTimeRef.current = now;
 
-            // 5s debounce for same QR code
             if (data === lastQrDataRef.current) return;
             lastQrDataRef.current = data;
-            setTimeout(() => { lastQrDataRef.current = null; }, 5000);
+            setTimeout(() => {
+              lastQrDataRef.current = null;
+            }, 5000);
 
             const match = data.match(/\/checkpoint\/(\d+)/) || data.match(/^CHECKPOINT:(\d+)$/);
 
             if (!match) {
-              toast.error('Invalid QR code. Please scan the correct checkpoint QR.');
+              toast.error(t.invalidQrCode);
               return;
             }
 
@@ -371,13 +395,14 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
 
             if (GAME_MODE === 'random') {
               if (completedList.includes(scannedNum)) {
-                toast.error(`Checkpoint ${scannedNum} already completed! Try another one.`);
+                toast.error(
+                  translate(t.checkpointAlreadyCompletedTryAnother, { checkpoint: scannedNum })
+                );
                 return;
               }
               if (scannedNum < 1 || scannedNum > TOTAL_CHECKPOINTS) {
-                return; // silently ignore out-of-range
+                return;
               }
-              // Valid — store checkpoint so completedList can be updated on return
               sessionStorage.setItem('pendingCheckpoint', String(scannedNum));
               stopScanner();
               cancelled = true;
@@ -386,24 +411,27 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
               return;
             }
 
-            // Ordered mode
             if (scannedNum < current) {
-              toast.error(`Checkpoint ${scannedNum} already completed! Move to checkpoint ${current}.`);
+              toast.error(
+                translate(t.checkpointAlreadyCompletedMoveTo, {
+                  checkpoint: scannedNum,
+                  current,
+                })
+              );
               return;
             }
 
             if (scannedNum !== current) {
-              toast.error(`Wrong checkpoint! You need checkpoint ${current}.`);
+              toast.error(translate(t.wrongCheckpointNeed, { current }));
               return;
             }
 
-            // Correct checkpoint — stop scanner and navigate
             stopScanner();
             cancelled = true;
             setScanning(false);
             navigate(getCheckpointRoute(current), { state: { checkpoint: current } });
           },
-          { returnDetailedScanResult: true },
+          { returnDetailedScanResult: true }
         );
 
         qrScannerRef.current = scanner;
@@ -411,7 +439,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
       } catch {
         if (!cancelled) {
           setScanning(false);
-          toast.error('Could not access camera. Please allow camera permission.');
+          toast.error(t.couldNotAccessCamera);
         }
       }
     };
@@ -424,17 +452,17 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
     };
   }, [scanning]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Clean up scanner on unmount
   useEffect(() => () => stopScanner(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleScan = () => setScanning(true);
-  const handleCancelScan = () => { stopScanner(); setScanning(false); };
+  const handleCancelScan = () => {
+    stopScanner();
+    setScanning(false);
+  };
 
   return (
     <PageLayout>
       <div className="pt-6 flex flex-col gap-4 pb-4">
-
-        {/* Player greeting */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <img
@@ -444,7 +472,7 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
               style={{ width: 52, height: 52, border: '2px solid var(--color-primary)' }}
             />
             <p className="font-bold text-sm" style={{ color: 'var(--color-primary)' }}>
-              👋 Hello, {player?.username}!
+              {translate(t.helloUser, { name: player?.username || '' })}
             </p>
           </div>
           <button
@@ -453,27 +481,29 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
             style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
           >
             <LogOut size={13} />
-            Sign out
+            {t.signOut}
           </button>
         </div>
 
-        {/* Header */}
         <div>
           <div className="flex items-center gap-2 mb-1">
             <QrCode size={22} style={{ color: 'var(--color-primary)' }} />
-            <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>QR checkpoint</h2>
+            <h2 className="text-xl" style={{ color: 'var(--color-text)' }}>
+              {t.qrCheckpoint}
+            </h2>
           </div>
           <p className="text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Scan QR code to unlock the next challenge
+            {t.scanQrToUnlockNextChallenge}
           </p>
         </div>
 
-        {/* Progress */}
         <Card>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Your progress</span>
+            <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
+              {t.yourProgress}
+            </span>
             <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
-              {completed}/{TOTAL_CHECKPOINTS} completed
+              {translate(t.completedProgress, { completed, total: TOTAL_CHECKPOINTS })}
             </span>
           </div>
           <div className="w-full rounded-full h-3" style={{ backgroundColor: '#E5E7EB' }}>
@@ -484,115 +514,132 @@ const [showHostEndedPopup, setShowHostEndedPopup] = useState(false);
           </div>
           {completed < TOTAL_CHECKPOINTS && GAME_MODE === 'ordered' && (
             <p className="text-xs mt-2" style={{ color: 'var(--color-subtext)' }}>
-              Current checkpoint: <span className="font-bold" style={{ color: 'var(--color-text)' }}>{current}</span>
+              {t.currentCheckpoint}{' '}
+              <span className="font-bold" style={{ color: 'var(--color-text)' }}>
+                {current}
+              </span>
             </p>
           )}
           {completed < TOTAL_CHECKPOINTS && GAME_MODE === 'random' && (
             <p className="text-xs mt-2" style={{ color: 'var(--color-subtext)' }}>
-              Scan any remaining checkpoint QR code
+              {t.scanAnyRemainingCheckpointQr}
             </p>
           )}
         </Card>
 
         {completed >= TOTAL_CHECKPOINTS ? (
           <>
-            {/* Final game banner */}
             <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-              You have completed {TOTAL_CHECKPOINTS} checkpoints. Ready to make the final challenge.
+              {translate(t.readyForFinalChallenge, { total: TOTAL_CHECKPOINTS })}
             </p>
             <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-end h-100">
-              <img src="/games/finalGame/finalgamecapybara.png" alt="Final game" className="h-60 object-cover" />
-              <Button className='mt-10' style={{ backgroundColor: 'var(--color-green)' }}
+              <img
+                src="/games/finalGame/finalgamecapybara.png"
+                alt={t.finalGameAlt}
+                className="h-60 object-cover"
+              />
+              <Button
+                className="mt-10"
+                style={{ backgroundColor: 'var(--color-green)' }}
                 onClick={() => navigate('/final-shop', { state: { coins } })}
               >
-                ▶ Play final game
+                {t.playFinalGame}
               </Button>
             </div>
           </>
         ) : (
           <>
-            {/* QR Scanner area */}
-            <Card className="relative rounded-2xl flex flex-col items-center justify-center gap-3"
-              style={{ minHeight: 260 }}>
+            <Card
+              className="relative rounded-2xl flex flex-col items-center justify-center gap-3"
+              style={{ minHeight: 260 }}
+            >
               <Camera size={64} style={{ color: '#9CA3AF' }} />
-              <p className="text-base font-semibold" style={{ color: '#6B7280' }}>Camera / QR scanner</p>
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>Tap "Scan QR" to start</p>
-              {scanning && <ScanningOverlay videoRef={videoRef} onCancel={handleCancelScan} />}
+              <p className="text-base font-semibold" style={{ color: '#6B7280' }}>
+                {t.cameraQrScanner}
+              </p>
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>
+                {t.tapScanQrToStart}
+              </p>
+              {scanning && <ScanningOverlay videoRef={videoRef} onCancel={handleCancelScan} t={t} />}
             </Card>
 
-            {/* Scan button */}
             <Button variant="green" onClick={handleScan} disabled={scanning}>
-              <ScanLine size={16} /> {scanning ? 'Scanning...' : 'Scan QR'}
+              <ScanLine size={16} /> {scanning ? t.scanning : t.scanQr}
             </Button>
           </>
         )}
 
-        {/* Stats row */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: 'Time left', value: formatTime(timeLeft), color: '#3B82F6', icon: <Clock size={14} /> },
-            { label: 'Life',      value: DEFAULT_LIFE === Infinity ? '❤️ ∞' : `❤️ ${life}`, color: '#DC2626', icon: null },
-            { label: 'Coins',     value: `🪙 ${coins}`,        color: '#CA8A04', icon: null },
+            { label: t.timeLeft, value: formatTime(timeLeft), color: '#3B82F6', icon: <Clock size={14} /> },
+            { label: t.life, value: DEFAULT_LIFE === Infinity ? '❤️ ∞' : `❤️ ${life}`, color: '#DC2626', icon: null },
+            { label: t.coins, value: `🪙 ${coins}`, color: '#CA8A04', icon: null },
           ].map(({ label, value, color, icon }) => (
             <Card key={label} className="rounded-xl py-4 px-2 flex flex-col items-center gap-1.5">
-              <span className="text-sm font-semibold" style={{ color }}>{label}</span>
+              <span className="text-sm font-semibold" style={{ color }}>
+                {label}
+              </span>
               <div className="flex items-center gap-1">
                 {icon && <span style={{ color }}>{icon}</span>}
-                <span className="text-base font-bold" style={{ color }}>{value}</span>
+                <span className="text-base font-bold" style={{ color }}>
+                  {value}
+                </span>
               </div>
             </Card>
           ))}
         </div>
 
-        {/* Trophy shortcut */}
-        <Button
-          onClick={() => navigate('/leaderboard')}
-          >
-          <Trophy size={25}  />
+        <Button onClick={() => navigate('/leaderboard')}>
+          <Trophy size={25} />
         </Button>
-
-
-
       </div>
 
-      {/* Sign out confirmation popup */}
       <Popup open={showExitPopup} onClose={() => setShowExitPopup(false)} showClose={false}>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-14 w-14 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: '#FEE2E2' }}>
+          <div
+            className="h-14 w-14 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: '#FEE2E2' }}
+          >
             <LogOut size={28} style={{ color: 'var(--color-red)' }} />
           </div>
           <h3 className="text-lg font-bold text-center" style={{ color: 'var(--color-text)' }}>
-            Are you sure you want to sign out?
+            {t.areYouSureSignOut}
           </h3>
           <div className="flex flex-col gap-2 w-full">
-            <Button variant="green" onClick={() => {
-              clearProgress();
-              localStorage.clear();
-              navigate('/');
-            }}>Confirm</Button>
-            <Button variant="red" onClick={() => setShowExitPopup(false)}>Cancel</Button>
+            <Button
+              variant="green"
+              onClick={() => {
+                clearProgress();
+                localStorage.clear();
+                navigate('/');
+              }}
+            >
+              {t.confirm}
+            </Button>
+            <Button variant="red" onClick={() => setShowExitPopup(false)}>
+              {t.cancel}
+            </Button>
           </div>
         </div>
       </Popup>
 
-      {/* Host ended game popup */}
       <Popup open={showHostEndedPopup} onClose={() => {}} showClose={false}>
         <div className="flex flex-col items-center gap-4 py-2">
           <span className="text-5xl">🏁</span>
           <h3 className="text-xl font-bold text-center" style={{ color: 'var(--color-text)' }}>
-            Host has ended the game
+            {t.hostEndedGame}
           </h3>
           <p className="text-sm text-center" style={{ color: 'var(--color-subtext)' }}>
-            Returning to home in
+            {t.returningHomeIn}
           </p>
-          <div className="h-14 w-14 rounded-full flex items-center justify-center text-2xl font-black"
-            style={{ backgroundColor: '#FEF3E2', color: 'var(--color-primary)' }}>
+          <div
+            className="h-14 w-14 rounded-full flex items-center justify-center text-2xl font-black"
+            style={{ backgroundColor: '#FEF3E2', color: 'var(--color-primary)' }}
+          >
             {hostEndedCountdown}
           </div>
         </div>
       </Popup>
-
     </PageLayout>
   );
 }
