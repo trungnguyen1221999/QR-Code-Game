@@ -1,40 +1,43 @@
 import { useState, useEffect } from 'react';
 import Button from './Button';
-
-const SCENES = [
-  {
-    img: '/scene1.png',
-    title: 'Scene 1',
-    text: 'In a vast and peaceful land of forests, rivers, and wildlife, all animals once lived in perfect balance. At the heart of this world stood a great natural kingdom, where harmony was maintained through unity and trust.',
-  },
-  {
-    img: '/scene2.png',
-    title: 'Scene 2',
-    text: 'But everything changed when a mysterious force known only as "X" took control of the land. The rivers began to dry... The forests grew silent... And the animals turned against each other.',
-  },
-  {
-    img: '/scene3.png',
-    title: 'Scene 3',
-    text: 'The ancestors of the forest knew that these days would come. They passed down the prophecy from generation to generation about a young capybara gifted by the Finnish forest god Tapio who will save this forest from that tragedy.',
-  },
-  {
-    img: '/scene4.png',
-    title: 'Scene 4',
-    text: 'The rightful guardian of balance — a young capybara — was born and forced into hiding after the fall of the kingdom.',
-  },
-  {
-    img: '/scene5.png',
-    title: 'Scene 5',
-    text: 'When the capybara grew up, the guardian animals around him passed down a time-travel magical wand which can open a time portal gifted by the Tapio god to the ancestors — in order to go back to the past and collect powerful items in the forest. Only the worthy heir can awaken the power trapped inside the wand.',
-  },
-  {
-    img: '/scene6.png',
-    title: 'Scene 6',
-    text: 'The capybara opens the time travel portal with the wand, seeing the past peaceful and beautiful forest. With a backpack on his back, he is ready for the adventure to find the items from the past.',
-  },
-];
+import { useLanguage } from '../../context/LanguageContext.jsx';
 
 export default function IntroVideoModal({ open, onSkip }) {
+  const { t } = useLanguage();
+
+  const SCENES = [
+    {
+      img: '/OScene1.png',
+      title: t.introScene1Title,
+      text: t.introScene1Text,
+    },
+    {
+      img: '/OScene2.png',
+      title: t.introScene2Title,
+      text: t.introScene2Text,
+    },
+    {
+      img: '/OScene3.png',
+      title: t.introScene3Title,
+      text: t.introScene3Text,
+    },
+    {
+      img: '/OScene4.png',
+      title: t.introScene4Title,
+      text: t.introScene4Text,
+    },
+    {
+      img: '/OScene5.png',
+      title: t.introScene5Title,
+      text: t.introScene5Text,
+    },
+    {
+      img: '/OScene6.png',
+      title: t.introScene6Title,
+      text: t.introScene6Text,
+    },
+  ];
+
   const [current, setCurrent] = useState(0);
   const [leaving, setLeaving] = useState(null);
   const [fading, setFading] = useState(false);
@@ -54,14 +57,13 @@ export default function IntroVideoModal({ open, onSkip }) {
       if (i >= scene.text.length) clearInterval(interval);
     }, 10);
     return () => clearInterval(interval);
-  }, [current, open]);
+  }, [current, open, scene.text]);
 
   // Preload all scene images
   useEffect(() => {
     if (!open) return;
     SCENES.forEach(s => { new Image().src = s.img; });
-  }, [open]);
-
+  }, [open, SCENES]);
 
   if (!open) return null;
 
@@ -74,7 +76,7 @@ export default function IntroVideoModal({ open, onSkip }) {
       setLeaving(null);
       setFading(false);
       setTextVisible(true);
-    }, 700)
+    }, 700);
   };
 
   const handleNext = () => {
@@ -136,7 +138,7 @@ export default function IntroVideoModal({ open, onSkip }) {
             cursor: 'pointer',
           }}
         >
-          Skip
+          {t.skip}
         </button>
 
         {/* Scene indicator dots */}
@@ -197,11 +199,11 @@ export default function IntroVideoModal({ open, onSkip }) {
         }}>
           {current > 0 && (
             <Button variant="ghost" onClick={handlePrev}>
-              ← Back
+              {t.back}
             </Button>
           )}
           <Button variant={isLast ? 'green' : 'primary'} onClick={handleNext}>
-            {isLast ? 'Start Adventure →' : 'Next →'}
+            {isLast ? t.startAdventure : t.next}
           </Button>
         </div>
       </div>
