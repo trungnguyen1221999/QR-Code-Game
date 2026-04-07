@@ -24,6 +24,9 @@ export default function FloatingMenu() {
 
   return (
     <>
+      {/* Keep music component mounted all the time */}
+      <BackgroundMusic visible={open} />
+
       {open && (
         <div
           onClick={() => setOpen(false)}
@@ -76,10 +79,6 @@ export default function FloatingMenu() {
             >
               EN
             </button>
-
-            <div>
-              <BackgroundMusic />
-            </div>
           </div>
         )}
 
