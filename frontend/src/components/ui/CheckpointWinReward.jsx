@@ -1,7 +1,10 @@
 import { getCheckpointSecretReward } from '../../utils/checkpointRewards';
 import { isFinalCheckpointClear } from '../../utils/finalCheckpointFlow';
+import { useLanguage } from '../../context/LanguageContext.jsx';
+import { translate } from '../../translations/index';
 
 export default function CheckpointWinReward({ checkpoint, title, message }) {
+  const { t } = useLanguage();
   const reward = getCheckpointSecretReward(checkpoint);
   const finalCheckpointCleared = isFinalCheckpointClear(checkpoint);
 
@@ -10,11 +13,11 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
       <div className="flex flex-col items-center gap-4 py-2 text-center">
         <img
           src="/beforeFinalGame.png"
-          alt="All checkpoints cleared"
+          alt={t.allCheckpointsCleared}
           className="w-36 h-36 object-contain"
         />
         <p className="text-base font-bold" style={{ color: 'var(--color-text)', lineHeight: '1.6' }}>
-          All checkpoints cleared! Get ready for the final challenge.
+          {t.allCheckpointsCleared}
         </p>
       </div>
     );
@@ -85,7 +88,7 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
             animation: 'checkpoint-reward-text-glow 2.2s ease-in-out infinite',
           }}
         >
-          You got secrete {reward.name} item.
+          {translate(t.secretItemReward, { item: reward.name })}
         </p>
       </div>
     </>

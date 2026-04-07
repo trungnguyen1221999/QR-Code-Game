@@ -299,6 +299,88 @@ bridgeBuddy: 'Bridge Buddy',
 bridgeBuddyDesc: 'Close misses are forgiven — each use saves 1 fall.',
 usesProgress: 'Uses: {current} / {max}',
 
+// ───────── CHECKPOINT / FINAL FLOW ─────────
+allCheckpointsCleared: 'All checkpoints cleared! Get ready for the final challenge.',
+continue: 'Continue',
+secretItemReward: 'You got secret {item} item.',
+
+
+// ───────── CHECKPOINT SHOP ─────────
+yourCoinsLabel: 'Your coins',
+coinsLabel: 'Coins',
+shopPowerUpsUpcoming: 'Use your coins to buy power-ups for upcoming rounds',
+purchased: 'Purchased',
+purchasedAutoApply: 'Purchased. It will apply automatically on your next game.',
+
+
+// ───────── GAME SETTINGS / QR ─────────
+gameSettings: 'Game Settings',
+difficulty: 'Difficulty',
+mode: 'Mode',
+checkpoints: 'Checkpoints',
+qrCodesCount: '{count} QR codes',
+totalTime: 'Total time',
+minutesShort: '{count} mins',
+
+
+// ───────── DIFFICULTY / MODE LABELS ─────────
+difficultyEasyLabel: '🌈 Easy',
+difficultyNormalLabel: '🐼 Normal',
+difficultyHardLabel: '🔥 Hard',
+
+modeOrderedLabel: '🔢 Ordered',
+modeRandomLabel: '🔀 Random',
+
+// ───────── INTRO VIDEO MODAL ─────────
+introScene1Title: 'Scene 1',
+introScene1Text: 'In a vast and peaceful land of forests, rivers, and wildlife, all animals once lived in perfect balance. At the heart of this world stood a great natural kingdom, where harmony was maintained through unity and trust.',
+
+introScene2Title: 'Scene 2',
+introScene2Text: 'But everything changed when a mysterious force known only as "X" took control of the land. The rivers began to dry... The forests grew silent... And the animals turned against each other.',
+
+introScene3Title: 'Scene 3',
+introScene3Text: 'The ancestors of the forest knew that these days would come. They passed down the prophecy from generation to generation about a young capybara gifted by the Finnish forest god Tapio who will save this forest from that tragedy.',
+
+introScene4Title: 'Scene 4',
+introScene4Text: 'The rightful guardian of balance — a young capybara — was born and forced into hiding after the fall of the kingdom.',
+
+introScene5Title: 'Scene 5',
+introScene5Text: 'When the capybara grew up, the guardian animals around him passed down a time-travel magical wand which can open a time portal gifted by the Tapio god to the ancestors — in order to go back to the past and collect powerful items in the forest. Only the worthy heir can awaken the power trapped inside the wand.',
+
+introScene6Title: 'Scene 6',
+introScene6Text: 'The capybara opens the time travel portal with the wand, seeing the past peaceful and beautiful forest. With a backpack on his back, he is ready for the adventure to find the items from the past.',
+
+skip: 'Skip',
+back: '← Back',
+next: 'Next →',
+startAdventure: 'Start Adventure →',
+
+
+// ───────── FINAL INTRO PAGE ─────────
+finalIntroText: 'The grown-up capybara heir, returning from past to the current world to reclaim his place, restore balance, and destroy mystery “X” force with the items he got along the time travel journey to overcome the final test. Here comes the river of the judgement.',
+
+
+// ───────── FINAL WIN PAGE ─────────
+finalWinScene1Text: 'At the end of a long and unforgiving journey… when hope itself seemed fragile — the capybara heir stands at last before the heart of all corruption. The force that consumed the forest. The force whispered in fear as "X."',
+
+finalWinScene2Text: 'With relics forged by time… and wisdom carried across generations — the heir calls upon every power earned through struggle and sacrifice. Light surges against darkness — as the fate of the forest hangs in a single moment.',
+
+finalWinScene3Text: 'The darkness trembles… cracks… and begins to fall apart. But within the ruins of destruction — a hidden truth awakens.',
+
+finalWinScene4Text: 'From the dying storm of shadow… a divine presence emerges. Ancient. Calm. Unshaken. The force called "X"… was never meant to destroy.',
+
+finalWinScene5Text: 'It was a trial. Forged by Tapio — guardian of the forest. To test the spirit of all life. To challenge their will to endure… their instinct to survive… their strength to rise again. And to seek the one worthy of guiding the forest forward.',
+
+finalWinScene6Text: 'Through suffering… through chaos… through the breaking of balance — the forest has spoken. Not through words — but through those who stood when all else fell. All the surviving souls gather to cheer the great success of their new king.',
+
+finalWinScene7Text: 'And now… the child once hidden in shadows… stands as the answer to the forest\'s call. Not defined by power alone — but by courage in darkness… wisdom through time… and unity with all life. The heir has become worthy.',
+
+finalWinScene8Text: 'The trial ends. The corruption fades like a forgotten nightmare. Roots breathe again. Rivers sing once more. Life returns to the forest. Balance… is reborn.',
+
+finalWinScene9Text: 'The heir has returned… not to claim a throne — but to become something greater. A protector. A guide. A guardian of all that lives in this forest. And as long as the forest stands… so too will its true king.',
+
+seeLeaderboard: 'See Leaderboard →',
+
   },
 
   FI: {
@@ -604,6 +686,88 @@ buy: 'Osta',
 bridgeBuddy: 'Siltakaveri',
 bridgeBuddyDesc: 'Läheltä piti -tilanteet annetaan anteeksi — jokainen käyttö pelastaa yhdeltä putoamiselta.',
 usesProgress: 'Käyttökerrat: {current} / {max}',
+
+// ───────── CHECKPOINT / FINAL FLOW ─────────
+allCheckpointsCleared: 'Kaikki tarkistuspisteet suoritettu! Valmistaudu viimeiseen haasteeseen.',
+continue: 'Jatka',
+secretItemReward: 'Sait salaisen {item} esineen.',
+
+
+// ───────── CHECKPOINT SHOP ─────────
+yourCoinsLabel: 'Kolikkosi',
+coinsLabel: 'Kolikot',
+shopPowerUpsUpcoming: 'Käytä kolikoitasi ostaaksesi tehosteita tuleville kierroksille',
+purchased: 'Ostettu',
+purchasedAutoApply: 'Ostettu. Se otetaan automaattisesti käyttöön seuraavassa pelissäsi.',
+
+
+// ───────── GAME SETTINGS / QR ─────────
+gameSettings: 'Pelin asetukset',
+difficulty: 'Vaikeustaso',
+mode: 'Tila',
+checkpoints: 'Tarkistuspisteet',
+qrCodesCount: '{count} QR-koodia',
+totalTime: 'Kokonaisaika',
+minutesShort: '{count} min',
+
+
+// ───────── DIFFICULTY / MODE LABELS ─────────
+difficultyEasyLabel: '🌈 Helppo',
+difficultyNormalLabel: '🐼 Normaali',
+difficultyHardLabel: '🔥 Vaikea',
+
+modeOrderedLabel: '🔢 Järjestetty',
+modeRandomLabel: '🔀 Satunnainen',
+
+// ───────── INTRO VIDEO MODAL ─────────
+introScene1Title: 'Kohtaus 1',
+introScene1Text: 'Laajassa ja rauhallisessa metsien, jokien ja villieläinten maassa kaikki eläimet elivät kerran täydellisessä tasapainossa. Tämän maailman sydämessä seisoi suuri luonnon valtakunta, jossa harmonia säilyi yhtenäisyyden ja luottamuksen kautta.',
+
+introScene2Title: 'Kohtaus 2',
+introScene2Text: 'Mutta kaikki muuttui, kun salaperäinen voima, joka tunnettiin vain nimellä "X", otti maan hallintaansa. Joet alkoivat kuivua... Metsät hiljenivät... Ja eläimet kääntyivät toisiaan vastaan.',
+
+introScene3Title: 'Kohtaus 3',
+introScene3Text: 'Metsän esi-isät tiesivät, että nämä päivät tulisivat. Sukupolvelta toiselle he välittivät ennustuksen nuoresta kapybarasta, jonka Suomen metsänjumala Tapio oli lahjoittanut pelastamaan tämän metsän tuolta tragedialta.',
+
+introScene4Title: 'Kohtaus 4',
+introScene4Text: 'Tasapainon oikeutettu suojelija — nuori kapybara — syntyi ja joutui piiloutumaan valtakunnan kukistumisen jälkeen.',
+
+introScene5Title: 'Kohtaus 5',
+introScene5Text: 'Kun kapybara kasvoi aikuiseksi, häntä ympäröivät suojelijaeläimet antoivat hänelle aikamatkustukseen kykenevän taikasauvan, joka voi avata aikaportaalin. Tapio-jumala oli lahjoittanut sen esi-isille, jotta he voisivat palata menneisyyteen ja kerätä voimakkaita esineitä metsästä. Vain arvollinen perillinen voi herättää sauvassa piilevän voiman.',
+
+introScene6Title: 'Kohtaus 6',
+introScene6Text: 'Kapybara avaa sauvalla aikamatkaportaalin ja näkee menneisyyden rauhallisen ja kauniin metsän. Reppu selässään hän on valmis seikkailuun löytääkseen menneisyyden esineet.',
+
+skip: 'Ohita',
+back: '← Takaisin',
+next: 'Seuraava →',
+startAdventure: 'Aloita seikkailu →',
+
+
+// ───────── FINAL INTRO PAGE ─────────
+finalIntroText: 'Aikuiseksi kasvanut kapybaraperillinen palaa menneisyydestä nykyiseen maailmaan ottaakseen paikkansa takaisin, palauttaakseen tasapainon ja tuhotakseen salaperäisen ”X”-voiman niillä esineillä, jotka hän sai aikamatkallaan selvitäkseen viimeisestä koetuksesta. Edessä on tuomion joki.',
+
+
+// ───────── FINAL WIN PAGE ─────────
+finalWinScene1Text: 'Pitkän ja armottoman matkan lopussa… kun itse toivokin tuntui haurastuneen — kapybaraperillinen seisoo viimein kaiken turmeluksen sydämen edessä. Sen voiman edessä, joka nieli metsän. Sen voiman, jota pelolla kuiskittiin nimellä "X".',
+
+finalWinScene2Text: 'Ajan takomina reliikkeinä… ja sukupolvien halki kannettuna viisautena — perillinen kutsuu avukseen jokaisen voiman, jonka hän ansaitsi kamppailun ja uhrauksen kautta. Valo syöksyy pimeyttä vastaan — ja metsän kohtalo riippuu yhdestä ainoasta hetkestä.',
+
+finalWinScene3Text: 'Pimeys vapisee… halkeaa… ja alkaa hajota. Mutta tuhon raunioista — herää kätketty totuus.',
+
+finalWinScene4Text: 'Kuolevan varjomyrskyn keskeltä… ilmestyy jumalallinen läsnäolo. Ikiaikainen. Rauhallinen. Horjumaton. Voimaa, jota kutsuttiin nimellä "X"… ei koskaan ollut tarkoitettu tuhoamaan.',
+
+finalWinScene5Text: 'Se oli koetus. Tapion — metsän suojelijan — luoma. Elämän hengen koettelemiseksi. Haastaakseen niiden tahdon kestää… niiden vaiston selviytyä… niiden voiman nousta uudelleen. Ja etsiäkseen sen, joka on arvollinen johdattamaan metsää eteenpäin.',
+
+finalWinScene6Text: 'Kärsimyksen… kaaoksen… tasapainon murtumisen kautta — metsä on puhunut. Ei sanoilla — vaan niiden kautta, jotka pysyivät pystyssä kaiken muun kaatuessa. Kaikki eloonjääneet sielut kokoontuvat juhlimaan uuden kuninkaansa suurta voittoa.',
+
+finalWinScene7Text: 'Ja nyt… lapsi, joka kerran piilotettiin varjoihin… seisoo vastauksena metsän kutsuun. Häntä ei määritä pelkkä voima — vaan rohkeus pimeydessä… viisaus ajan halki… ja yhteys kaikkeen elävään. Perillisestä on tullut arvollinen.',
+
+finalWinScene8Text: 'Koetus päättyy. Turmelus haihtuu kuin unohdettu painajainen. Juuret hengittävät jälleen. Joet laulavat taas. Elämä palaa metsään. Tasapaino… syntyy uudelleen.',
+
+finalWinScene9Text: 'Perillinen on palannut… ei vaatiakseen valtaistuinta — vaan tullakseen joksikin suuremmaksi. Suojelijaksi. Oppaaksi. Kaiken tässä metsässä elävän vartijaksi. Ja niin kauan kuin metsä seisoo… seisoo myös sen todellinen kuningas.',
+
+seeLeaderboard: 'Katso tulostaulukko →',
   },
 };
 

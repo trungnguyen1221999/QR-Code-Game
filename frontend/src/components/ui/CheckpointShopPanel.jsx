@@ -8,6 +8,7 @@ import {
 } from '../../utils/checkpointShop';
 import { isFinalCheckpointClear } from '../../utils/finalCheckpointFlow';
 import Card from './Card';
+import { useLanguage } from '../../context/LanguageContext.jsx';
 
 export default function CheckpointShopPanel({
   earnedCoins = 0,
@@ -17,6 +18,7 @@ export default function CheckpointShopPanel({
   onPurchase,
   checkpoint = 1,
 }) {
+  const { t } = useLanguage();
   const [coins, setCoins] = useState(() => {
     const baseCoins = getPlayerProgress().coins ?? 0;
     return grantCoins ? baseCoins + earnedCoins : baseCoins;
@@ -62,7 +64,7 @@ export default function CheckpointShopPanel({
       ...current,
       [itemId]: true,
     }));
-    setMessage('Purchased. It will apply automatically on your next game.');
+    setMessage(t.purchasedAutoApply);
     onPurchase?.(result);
   };
 
@@ -78,14 +80,14 @@ export default function CheckpointShopPanel({
         </p>
       )}
       <p className="text-xs sm:text-sm font-bold text-center" style={{ color: 'var(--color-primary)' }}>
-        Your coins
+        {t.yourCoinsLabel}
       </p>
       <p className="text-xl sm:text-2xl font-bold mt-1 text-center" style={{ color: 'var(--color-primary)' }}>
-        Coins {coins}
+        {t.coinsLabel} {coins}
       </p>
 
       <p className="text-xs sm:text-sm mt-2 sm:mt-3" style={{ color: 'var(--color-subtext)', lineHeight: '1.5' }}>
-        Use your coins to buy power-ups for upcoming rounds
+        {t.shopPowerUpsUpcoming}
       </p>
 
       <div className="flex flex-col gap-2 mt-3">
@@ -103,7 +105,9 @@ export default function CheckpointShopPanel({
             <div className="flex-1 min-w-0 text-left">
               <p className="text-xs sm:text-sm font-bold" style={{ color: 'var(--color-text)' }}>{item.label}</p>
               <p className="text-[11px] sm:text-xs" style={{ color: 'var(--color-subtext)', lineHeight: '1.35' }}>{item.desc}</p>
-              <p className="text-xs sm:text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>Coins {getItemPrice(item, checkpoint)}</p>
+              <p className="text-xs sm:text-sm font-bold mt-1" style={{ color: '#CA8A04' }}>
+                {t.coinsLabel} {getItemPrice(item, checkpoint)}
+              </p>
             </div>
             <button
               onClick={() => handleBuy(item.id)}
@@ -114,7 +118,7 @@ export default function CheckpointShopPanel({
                 color: 'white',
               }}
             >
-              {purchasedItems[item.id] ? 'Purchased' : 'Buy'}
+              {purchasedItems[item.id] ? t.purchased : t.buy}
             </button>
           </Card>
         ))}

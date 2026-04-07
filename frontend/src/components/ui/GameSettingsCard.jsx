@@ -4,9 +4,8 @@ import QRCode from 'qrcode';
 import toast from 'react-hot-toast';
 import Card from './Card';
 import { AVAILABLE_GAMES } from '../../pages/SelectGames';
-
-const DIFFICULTY_LABEL = { easy: '🌈 Easy', normal: '🐼 Normal', hard: '🔥 Hard' };
-const MODE_LABEL = { ordered: '🔢 Ordered', random: '🔀 Random' };
+import { useLanguage } from '../../context/LanguageContext.jsx';
+import { translate } from '../../translations/index';
 
 async function buildQRCanvas(route, idx) {
   const checkpoint = idx + 1;
@@ -37,7 +36,19 @@ async function buildQRCanvas(route, idx) {
 }
 
 export default function GameSettingsCard({ session }) {
+  const { t } = useLanguage();
   const [downloading, setDownloading] = useState(false);
+
+  const DIFFICULTY_LABEL = {
+    easy: t.difficultyEasyLabel,
+    normal: t.difficultyNormalLabel,
+    hard: t.difficultyHardLabel,
+  };
+
+  const MODE_LABEL = {
+    ordered: t.modeOrderedLabel,
+    random: t.modeRandomLabel,
+  };
 
   const handleDownloadAllQR = async () => {
     const gameOrder = session?.gameOrder;
@@ -53,7 +64,7 @@ export default function GameSettingsCard({ session }) {
         if (i < gameOrder.length - 1) await new Promise((r) => setTimeout(r, 400));
       }
     } catch {
-      toast.error('Failed to generate QR codes');
+      toast.error(t.failedToGenerateQrCodes);
     } finally {
       setDownloading(false);
     }
@@ -61,31 +72,31 @@ export default function GameSettingsCard({ session }) {
 
   return (
     <Card className="rounded-xl p-4 flex flex-col gap-2">
-      <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-text)' }}>Game Settings</p>
+      <p className="font-bold text-sm mb-1" style={{ color: 'var(--color-text)' }}>{t.gameSettings}</p>
 
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-xl px-3 py-2" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Difficulty</p>
+          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.difficulty}</p>
           <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>
             {DIFFICULTY_LABEL[session?.difficulty] ?? session?.difficulty ?? '—'}
           </p>
         </div>
         <div className="rounded-xl px-3 py-2" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Mode</p>
+          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.mode}</p>
           <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>
             {MODE_LABEL[session?.gameMode] ?? session?.gameMode ?? '—'}
           </p>
         </div>
         <div className="rounded-xl px-3 py-2" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Checkpoints</p>
+          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.checkpoints}</p>
           <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>
-            {session?.gameOrder?.length || AVAILABLE_GAMES.length} QR codes
+            {translate(t.qrCodesCount, { count: session?.gameOrder?.length || AVAILABLE_GAMES.length })}
           </p>
         </div>
         <div className="rounded-xl px-3 py-2" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Total time</p>
+          <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.totalTime}</p>
           <p className="text-sm font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>
-            {session?.totalTime || 30} mins
+            {translate(t.minutesShort, { count: session?.totalTime || 30 })}
           </p>
         </div>
       </div>
@@ -112,7 +123,7 @@ export default function GameSettingsCard({ session }) {
         style={{ backgroundColor: '#1D4ED8', color: 'white' }}
       >
         <Download size={14} />
-        {downloading ? 'Downloading...' : 'Download QR codes'}
+        {downloading ? t.downloading : t.downloadQrCodes}
       </button>
     </Card>
   );
