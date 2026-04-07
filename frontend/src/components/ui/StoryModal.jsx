@@ -16,10 +16,11 @@ export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue ‚Ü
 
   useEffect(() => {
     setDisplayed('');
+    const text = scene.text || '';
     let i = 0;
     const iv = setInterval(() => {
-      i++; setDisplayed(scene.text.slice(0, i));
-      if (i >= scene.text.length) clearInterval(iv);
+      i++; setDisplayed(text.slice(0, i));
+      if (i >= text.length) clearInterval(iv);
     }, 10);
     return () => clearInterval(iv);
   }, [current]);
@@ -48,7 +49,7 @@ export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue ‚Ü
       </div>
       <div style={{ backgroundColor: 'var(--color-bg)', padding: '20px 24px 28px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, opacity: textVisible ? 1 : 0, transition: 'opacity 1s ease' }}>
         <p style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--color-text)', margin: 0 }}>{displayed}</p>
-        <div style={{ display: 'flex', gap: 10, marginTop: 4, opacity: displayed === scene.text ? 1 : 0, transform: displayed === scene.text ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 1s ease, transform 1s ease', pointerEvents: displayed === scene.text ? 'auto' : 'none' }}>
+        <div style={{ display: 'flex', gap: 10, marginTop: 4, opacity: displayed === (scene.text || '') ? 1 : 0, transform: displayed === (scene.text || '') ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 1s ease, transform 1s ease', pointerEvents: displayed === (scene.text || '') ? 'auto' : 'none' }}>
           {current > 0 && (
             <button onClick={() => goTo(current - 1)} style={{ padding: '10px 20px', borderRadius: 12, border: '2px solid #E5E7EB', backgroundColor: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
               ‚Üê Back

@@ -7,15 +7,15 @@ export default function FinalWinPage() {
   const { t } = useLanguage();
 
   const WIN_SCENES = [
-    { img: '/FS1.png', text: t.finalWin1 },
-    { img: '/FS2.png', text: t.finalWin2 },
-    { img: '/FS3.png', text: t.finalWin3 },
-    { img: '/FS4.png', text: t.finalWin4 },
-    { img: '/FS5.png', text: t.finalWin5 },
-    { img: '/FS6.png', text: t.finalWin6 },
-    { img: '/FS7.png', text: t.finalWin7 },
-    { img: '/FS8.png', text: t.finalWin8 },
-    { img: '/FS9.png', text: t.finalWin9 },
+    { img: '/FS1.png', text: t.finalWinScene1Text },
+    { img: '/FS2.png', text: t.finalWinScene2Text },
+    { img: '/FS3.png', text: t.finalWinScene3Text },
+    { img: '/FS4.png', text: t.finalWinScene4Text },
+    { img: '/FS5.png', text: t.finalWinScene5Text },
+    { img: '/FS6.png', text: t.finalWinScene6Text },
+    { img: '/FS7.png', text: t.finalWinScene7Text },
+    { img: '/FS8.png', text: t.finalWinScene8Text },
+    { img: '/FS9.png', text: t.finalWinScene9Text },
   ];
 
   return (
