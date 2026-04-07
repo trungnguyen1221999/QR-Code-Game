@@ -129,11 +129,11 @@ export default function GameSettingsCard({ session }) {
                 <button
                   onClick={() => handleDownloadSingle(route, i)}
                   disabled={downloadingIdx === i}
-                  className="shrink-0 flex items-center justify-center rounded-lg px-2 py-1 disabled:opacity-50"
+                  className="shrink-0 flex items-center justify-center rounded-lg px-2.5 py-1.5 disabled:opacity-50"
                   style={{ backgroundColor: '#EFF6FF', color: '#1D4ED8' }}
                   title={`Download QR #${i + 1}`}
                 >
-                  {downloadingIdx === i ? '…' : <Download size={11} />}
+                  {downloadingIdx === i ? '…' : <Download size={14} />}
                 </button>
               </div>
             );
