@@ -215,6 +215,7 @@ landingSubtitle: 'Find QR codes. Play games. Win!',
 
 welcomeBackUser: '👋 Welcome back, {name}!',
 ongoingGame: 'You have an ongoing game.',
+continueGame: 'Continue game',
 
 hostGameDesc: 'Create a new game and invite players to join.',
 joinGameDesc: 'Enter a game code and join your friends.',
@@ -931,6 +932,7 @@ landingSubtitle: 'Löydä QR-koodit. Pelaa pelejä. Voita!',
 
 welcomeBackUser: '👋 Tervetuloa takaisin, {name}!',
 ongoingGame: 'Sinulla on peli kesken.',
+continueGame: 'Jatka peliä',
 
 hostGameDesc: 'Luo uusi peli ja kutsu pelaajat mukaan.',
 joinGameDesc: 'Anna pelikoodi ja liity ystäviesi peliin.',
