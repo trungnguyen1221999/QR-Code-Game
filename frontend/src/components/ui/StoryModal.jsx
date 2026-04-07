@@ -1,62 +1,118 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue →' }) {
-  const [current, setCurrent]         = useState(0);
-  const [leaving, setLeaving]         = useState(null);
-  const [fading, setFading]           = useState(false);
-  const [displayed, setDisplayed]     = useState('');
+  const [current, setCurrent]     = useState(0);
+  const [leaving, setLeaving]     = useState(null);
+  const [fading, setFading]       = useState(false);
+  const [displayed, setDisplayed] = useState('');
+  const [textDone, setTextDone]   = useState(false);
   const [textVisible, setTextVisible] = useState(true);
 
   const scene  = scenes[current];
   const isLast = current === scenes.length - 1;
+  const fullText = scene?.text || '';
 
+  // Preload images
   useEffect(() => {
     scenes.forEach(s => { new Image().src = s.img; });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Typing effect
   useEffect(() => {
     setDisplayed('');
-    const text = scene.text || '';
+    setTextDone(false);
+    if (!fullText) { setTextDone(true); return; }
     let i = 0;
     const iv = setInterval(() => {
-      i++; setDisplayed(text.slice(0, i));
-      if (i >= text.length) clearInterval(iv);
-    }, 10);
+      i++;
+      setDisplayed(fullText.slice(0, i));
+      if (i >= fullText.length) { clearInterval(iv); setTextDone(true); }
+    }, 18);
     return () => clearInterval(iv);
-  }, [current]);
+  }, [current]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Tap anywhere to skip typing
+  const skipOrNext = useCallback(() => {
+    if (!textDone) {
+      setDisplayed(fullText);
+      setTextDone(true);
+    }
+  }, [textDone, fullText]);
 
   const goTo = (next) => {
     setLeaving(current); setFading(true); setTextVisible(false);
-    setTimeout(() => { setCurrent(next); setLeaving(null); setFading(false); setTextVisible(true); }, 700);
+    setTimeout(() => {
+      setCurrent(next); setLeaving(null); setFading(false); setTextVisible(true);
+    }, 500);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col" style={{ overflowY: 'auto', WebkitOverflowScrolling: 'touch' , backgroundColor: 'var(--color-bg)'}}>
-      <div className="relative" style={{ flexShrink: 0 }}>
+    <div
+      className="fixed inset-0 z-50 flex flex-col"
+      style={{ backgroundColor: 'var(--color-bg)', overflow: 'hidden' }}
+      onClick={skipOrNext}
+    >
+      {/* Image — fixed height */}
+      <div className="relative" style={{ flexShrink: 0, height: '52vh', overflow: 'hidden', backgroundColor: '#000' }}>
         {leaving !== null && (
           <img src={scenes[leaving].img} alt="" style={{
-            position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover',
-            opacity: fading ? 0 : 1, transition: 'opacity 1s ease', zIndex: 1,
+            position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+            opacity: fading ? 0 : 1, transition: 'opacity 0.5s ease', zIndex: 1,
           }} />
         )}
-        <img key={current} src={scene.img} alt="" style={{ width: '100%', height: 'auto', display: 'block', animation: 'imgFadeIn 1s ease forwards' }} />
-        <style>{`@keyframes imgFadeIn { from { opacity:0 } to { opacity:1 } }`}</style>
-        <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6 }}>
+        <img
+          key={current}
+          src={scene.img}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', animation: 'storyImgIn 0.5s ease forwards' }}
+        />
+        <style>{`@keyframes storyImgIn { from { opacity:0 } to { opacity:1 } }`}</style>
+
+        {/* Dot indicators */}
+        <div style={{ position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 5, zIndex: 2 }}>
           {scenes.map((_, i) => (
-            <div key={i} style={{ width: i === current ? 20 : 8, height: 8, borderRadius: 4, backgroundColor: i === current ? 'white' : 'rgba(255,255,255,0.4)', transition: 'width 0.2s' }} />
+            <div key={i} style={{
+              width: i === current ? 18 : 7, height: 7, borderRadius: 4,
+              backgroundColor: i === current ? 'white' : 'rgba(255,255,255,0.45)',
+              transition: 'width 0.2s',
+            }} />
           ))}
         </div>
       </div>
-      <div style={{ backgroundColor: 'var(--color-bg)', padding: '20px 24px 28px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, opacity: textVisible ? 1 : 0, transition: 'opacity 1s ease' }}>
-        <p style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--color-text)', margin: 0 }}>{displayed}</p>
-        <div style={{ display: 'flex', gap: 10, marginTop: 4, opacity: displayed === (scene.text || '') ? 1 : 0, transform: displayed === (scene.text || '') ? 'translateY(0)' : 'translateY(8px)', transition: 'opacity 1s ease, transform 1s ease', pointerEvents: displayed === (scene.text || '') ? 'auto' : 'none' }}>
+
+      {/* Text + buttons — always visible */}
+      <div
+        style={{
+          flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          padding: '16px 20px 24px',
+          opacity: textVisible ? 1 : 0, transition: 'opacity 0.4s ease',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 8 }}>
+          <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--color-text)', margin: 0 }}>
+            {displayed}
+            {!textDone && <span style={{ opacity: 0.5 }}>|</span>}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 10, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
           {current > 0 && (
-            <button onClick={() => goTo(current - 1)} style={{ padding: '10px 20px', borderRadius: 12, border: '2px solid #E5E7EB', backgroundColor: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14 }}>
-              ← Back
+            <button
+              onClick={() => goTo(current - 1)}
+              style={{ padding: '11px 18px', borderRadius: 12, border: '2px solid #E5E7EB', backgroundColor: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 14, flexShrink: 0 }}
+            >
+              ←
             </button>
           )}
-          <button onClick={() => isLast ? onDone() : goTo(current + 1)} style={{ flex: 1, padding: '12px 20px', borderRadius: 12, border: 'none', backgroundColor: isLast ? '#22C55E' : 'var(--color-primary)', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 15 }}>
-            {isLast ? lastBtnLabel : 'Next →'}
+          <button
+            onClick={() => {
+              if (!textDone) { setDisplayed(fullText); setTextDone(true); return; }
+              isLast ? onDone() : goTo(current + 1);
+            }}
+            style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: 'none', backgroundColor: isLast ? '#22C55E' : 'var(--color-primary)', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 15 }}
+          >
+            {!textDone ? 'Skip ⏭' : isLast ? lastBtnLabel : 'Next →'}
           </button>
         </div>
       </div>
