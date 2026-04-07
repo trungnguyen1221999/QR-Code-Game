@@ -313,12 +313,6 @@ export default function CrossRoadGame() {
           </p>
         </div>
 
-        {!hasStarted && (
-          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            {t.start}
-          </Button>
-        )}
-
         <div className="grid grid-cols-3 gap-3">
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
@@ -487,9 +481,18 @@ export default function CrossRoadGame() {
           </div>
         </Card>
 
-        <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-          {t.back}
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
+            {t.back}
+          </Button>
+          {!hasStarted ? (
+            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
+              {t.start}
+            </Button>
+          ) : (
+            <div />
+          )}
+        </div>
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
