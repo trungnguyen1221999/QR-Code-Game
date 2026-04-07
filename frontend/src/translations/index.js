@@ -219,8 +219,12 @@ ongoingGame: 'You have an ongoing game.',
 hostGameDesc: 'Create a new game and invite players to join.',
 joinGameDesc: 'Enter a game code and join your friends.',
 
+forHost: 'For Host',
 joinGame: 'Join game',
 createGame: 'Create game',
+
+musicLabel: 'Music',
+languageLabel: 'Language',
 
 howToPlay: 'How to play?',
 
@@ -931,9 +935,12 @@ ongoingGame: 'Sinulla on peli kesken.',
 hostGameDesc: 'Luo uusi peli ja kutsu pelaajat mukaan.',
 joinGameDesc: 'Anna pelikoodi ja liity ystäviesi peliin.',
 
-// FI
+forHost: 'Hostille',
 joinGame: 'Liity peliin',
 createGame: 'Luo peli',
+
+musicLabel: 'Musiikki',
+languageLabel: 'Kieli',
 
 howToPlay: 'Kuinka pelata?',
 
