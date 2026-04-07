@@ -229,7 +229,18 @@ export default function ClickCounterGame() {
           type="button"
           onClick={handleTap}
           disabled={!hasStarted || busy || showWin || showLose}
-          className="w-full rounded-[32px] py-12 px-6 text-white font-extrabold text-2xl transition-transform"
+          className="w-full rounded-[32px] py-12 px-6 text-white font-extrabold text-2xl transition-transform disabled:cursor-not-allowed"
+          style={{
+            background: pressed
+              ? 'linear-gradient(180deg, #F97316 0%, #EA580C 100%)'
+              : 'linear-gradient(180deg, #FB923C 0%, #F97316 52%, #EA580C 100%)',
+            boxShadow: pressed
+              ? 'inset 0 10px 18px rgba(124,45,18,0.24)'
+              : '0 16px 28px rgba(234,88,12,0.22), inset 0 2px 0 rgba(255,255,255,0.2)',
+            transform: pressed ? 'scale(0.97)' : 'scale(1)',
+            opacity: !hasStarted || busy || showWin || showLose ? 0.65 : 1,
+            border: '1px solid rgba(194, 65, 12, 0.22)',
+          }}
         >
           {t.clickRushTapButton}
         </button>
@@ -256,11 +267,78 @@ export default function ClickCounterGame() {
       </div>
 
       <Popup open={showWin} onClose={() => {}} showClose={false}>
-        <CheckpointWinReward
-          checkpoint={checkpoint}
-          title={t.clickRushWinTitle}
-          message={translate(t.clickRushWinMessage, { clicks, coins: earnedCoins })}
-        />
+        <div className="flex flex-col items-center gap-4 text-center">
+          <CheckpointWinReward
+            checkpoint={checkpoint}
+            title={t.clickRushWinTitle}
+            message={translate(t.clickRushWinMessage, { clicks, coins: earnedCoins })}
+          />
+          <CheckpointShopPanel
+            earnedCoins={earnedCoins}
+            grantCoins={showWin}
+            isOpen={showWin}
+            checkpoint={checkpoint}
+          />
+          <Button variant="green" onClick={handleWinContinue} disabled={busy}>
+            {t.continue}
+          </Button>
+        </div>
+      </Popup>
+
+      <Popup open={showLose} onClose={() => {}} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">⏰</span>
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              {t.whackLoseTitle}
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {loseState.needsLifePurchase
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
+            </p>
+          </div>
+          <CheckpointShopPanel
+            isOpen={showLose}
+            checkpoint={checkpoint}
+            warningMessage={loseState.needsLifePurchase ? t.whackLoseWarning : ''}
+            onPurchase={handleLoseShopPurchase}
+          />
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
+            </Button>
+            <Button variant="green" onClick={handleLoseExit} disabled={busy}>
+              {t.whackExitGame}
+            </Button>
+          </div>
+        </div>
+      </Popup>
+
+      <Popup open={showBackConfirm} onClose={() => setShowBackConfirm(false)} showClose={false}>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <span className="text-5xl">!</span>
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
+              {t.whackLeaveTitle}
+            </h3>
+            <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
+              {!hasStarted
+                ? t.whackLeaveNotStarted
+                : backWillResetToStart
+                  ? t.whackLeaveLastLife
+                  : t.whackLeaveNormal}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 w-full">
+            <Button variant="red" onClick={handleBackExit} disabled={busy}>
+              {t.confirm}
+            </Button>
+            <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
+              {t.cancel}
+            </Button>
+          </div>
+        </div>
       </Popup>
     </PageLayout>
   );
