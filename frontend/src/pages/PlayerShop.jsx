@@ -3,10 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import { SHOP_ITEMS, getItemPrice } from '../utils/checkpointShop';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
 
 const COINS_EARNED = 30;
 
 export default function PlayerShop() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state ?? {};
@@ -34,25 +37,33 @@ export default function PlayerShop() {
         <div className="flex flex-col items-center gap-1 pt-2">
           <span className="text-5xl">🏆</span>
           <div className="flex gap-1 text-2xl">⭐⭐⭐</div>
-          <p className="text-lg font-bold mt-1" style={{ color: 'var(--color-primary)' }}>Victory!</p>
-          <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Checkpoint passed!</p>
-          <p className="text-base font-bold" style={{ color: 'var(--color-primary)' }}>🪙 +{COINS_EARNED} coins</p>
+          <p className="text-lg font-bold mt-1" style={{ color: 'var(--color-primary)' }}>
+            {t.playerShopVictory}
+          </p>
+          <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
+            {t.playerShopCheckpointPassed}
+          </p>
+          <p className="text-base font-bold" style={{ color: 'var(--color-primary)' }}>
+            {translate(t.playerShopCoinsEarned, { coins: COINS_EARNED })}
+          </p>
         </div>
 
          {/* Seller GIF */}
         <div className="flex justify-center">
-          <img src="/shop/seller.gif" alt="Shop seller" style={{ height: '80px', objectFit: 'contain' }} />
+          <img src="/shop/seller.gif" alt={t.shopSellerAlt} style={{ height: '80px', objectFit: 'contain' }} />
         </div>
 
         {/* Divider + desc */}
         <div style={{ borderTop: '1px solid var(--color-border)' }} />
         <p className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-          Use your coins to buy power-ups for upcoming rounds
+          {t.shopPowerUpsUpcoming}
         </p>
 
         {/* Coins balance */}
         <div className="flex items-center justify-between">
-          <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>Your coins</span>
+          <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+            {t.yourCoinsLabel}
+          </span>
           <span className="text-2xl font-bold flex items-center gap-1" style={{ color: 'var(--color-primary)' }}>
             🪙 {coins}
           </span>
@@ -81,14 +92,14 @@ export default function PlayerShop() {
                 className="rounded-xl px-4 py-2 text-sm font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 style={{ backgroundColor: 'var(--color-primary)', color: 'white' }}
               >
-                Buy
+                {t.buy}
               </button>
             </div>
           ))}
 
           {items.length === 0 && (
             <p className="text-center text-sm py-4" style={{ color: 'var(--color-subtext)' }}>
-              All items purchased!
+              {t.playerShopAllItemsPurchased}
             </p>
           )}
         </div>
@@ -98,7 +109,7 @@ export default function PlayerShop() {
           variant="green"
           onClick={() => navigate('/game', { state: { justCompleted: checkpoint, coins } })}
         >
-          Done
+          {t.done}
         </Button>
 
       </div>

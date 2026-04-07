@@ -696,7 +696,20 @@ clickRushWinTitle: 'Target reached!',
 clickRushWinMessage:
   'You hit {clicks} taps and earned {coins} coins from the time left.',
 
+// ───────── PLAYER SHOP ─────────
+playerShopVictory: 'Victory!',
+playerShopCheckpointPassed: 'Checkpoint passed!',
+playerShopCoinsEarned: '🪙 +{coins} coins',
 
+playerShopSellerAlt: 'Shop seller',
+
+playerShopDescription: 'Use your coins to buy power-ups for upcoming rounds',
+playerShopYourCoins: 'Your coins',
+
+playerShopBuy: 'Buy',
+playerShopAllItemsPurchased: 'All items purchased!',
+
+playerShopDone: 'Done',
   },
 
   FI: {
@@ -1394,6 +1407,21 @@ clickRushHowToWinDesc:
 clickRushWinTitle: 'Tavoite saavutettu!',
 clickRushWinMessage:
   'Sait {clicks} napautusta ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+  // ───────── PLAYER SHOP ─────────
+playerShopVictory: 'Voitto!',
+playerShopCheckpointPassed: 'Tarkistuspiste läpäisty!',
+playerShopCoinsEarned: '🪙 +{coins} kolikkoa',
+
+playerShopSellerAlt: 'Kaupan myyjä',
+
+playerShopDescription: 'Käytä kolikoitasi ostaaksesi tehosteita tuleville kierroksille',
+playerShopYourCoins: 'Kolikkosi',
+
+playerShopBuy: 'Osta',
+playerShopAllItemsPurchased: 'Kaikki esineet ostettu!',
+
+playerShopDone: 'Valmis',
   },
 };
 
