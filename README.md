@@ -18,7 +18,7 @@ A real-time multiplayer QR code scavenger hunt game where players race through p
 
 ## Overview
 
-Capybara Quest is a location-based multiplayer game designed for physical events. A host creates a game session and places QR codes at 6 checkpoints around a venue. Players scan each QR code on their phone, complete a mini-game to pass the checkpoint, earn coins to spend at in-game shops, and race to finish all 6 checkpoints before time runs out.
+Capybara Quest is a location-based multiplayer game designed for physical events. A host creates a game session and places QR codes at checkpoints around a venue. Players scan each QR code on their phone, complete a mini-game to pass the checkpoint, earn coins to spend at in-game shops, and race to finish all checkpoints before time runs out.
 
 ---
 
@@ -35,8 +35,10 @@ Capybara Quest is a location-based multiplayer game designed for physical events
 | TanStack React Query | 5.90 | Data fetching & caching |
 | React Hook Form + Zod | latest | Form validation |
 | qr-scanner | 1.4 | QR code scanning via device camera |
+| qrcode | latest | QR code generation |
 | react-hot-toast | 2.6 | Toast notifications |
 | lucide-react | latest | Icons |
+| @dnd-kit | latest | Drag-and-drop game ordering |
 
 ### Backend
 | Technology | Version | Purpose |
@@ -63,53 +65,89 @@ Capybara Quest is a location-based multiplayer game designed for physical events
 - **Join with a code** — Enter a 6-digit game code and a username to join any active session
 - **Custom avatar** — Choose from default avatars or upload a custom photo
 - **QR scanning** — Scan physical QR codes at each checkpoint using your phone camera
-- **6 unique mini-games** — One different game per checkpoint (see below)
-- **Lives system** — Start with 3 lives; losing a mini-game costs one life; 0 lives resets progress to checkpoint 1
+- **13 mini-games** — Host selects which games to include (see full list below)
+- **Lives system** — Losing a mini-game costs one life; 0 lives resets progress to checkpoint 1
+- **Difficulty modes** — Easy (infinite lives), Normal (5 lives), Hard (3 lives)
 - **Coin economy** — Earn coins by completing games, spend them at checkpoint shops
 - **Power-ups** — Buy Time Boost (+10s) or Extra Life at shops between checkpoints
-- **Final challenge** — A special final game unlocked after all 6 checkpoints
+- **Final challenge** — A special final boss game unlocked after all checkpoints are complete
 - **Live leaderboard** — Real-time ranking updated as players progress
+- **Bilingual** — Full Finnish and English support
 
 ### For Hosts
 - **Account system** — Register and log in with username/password
-- **Create sessions** — Generate a unique 6-digit code and set game duration
+- **Create sessions** — Generate a unique 6-digit code, set game duration, difficulty, and scan mode
+- **Choose mini-games** — Select any subset of the 13 available mini-games and drag to reorder
+- **Download QR codes** — Generate and download QR code images per checkpoint, individually or all at once
 - **Live dashboard** — See all players who have joined and monitor game status
 - **Start/end control** — Manually start the game and end it at any time
 - **Live leaderboard view** — Watch player rankings update in real time
 
 ---
 
+## Difficulty Modes
+
+| Mode | Lives | Effect |
+|---|---|---|
+| **Easy** | ∞ Infinite | Players never lose lives — casual, story-focused experience |
+| **Normal** | 5 | Moderate challenge; players can make some mistakes |
+| **Hard** | 3 | Strict mode; one mistake at each checkpoint is costly |
+
+---
+
+## Scan Modes
+
+| Mode | Behaviour |
+|---|---|
+| **Ordered** | Players must scan checkpoints in sequence (1 → 2 → 3 → …) |
+| **Random** | Players can scan checkpoints in any order; all must be completed to unlock the final challenge |
+
+---
+
 ## Mini-Games
 
-| Checkpoint | Game | Description |
+| Game | Emoji | Description |
 |---|---|---|
-| 1 | **Tower Builder** | Stack platforms to build a tower without falling |
-| 2 | **Whack-A-Mole** | Hit animals (cat, bird, frog, rabbit) as they pop up from 9 holes |
-| 3 | **Word Quiz** | Match pictures to Finnish compound words |
-| 4 | **Memory Cards** | Flip and match pairs of emoji cards |
-| 5 | **Puzzle** | Drag and drop pieces to complete a jigsaw |
-| 6 | **Simon Says** | Repeat a growing color sequence |
+| **Memory Cards** | 🃏 | Flip and match pairs of emoji cards |
+| **Simon Says** | 🎯 | Repeat a growing color/sound sequence |
+| **Puzzle** | 🧩 | Drag and drop pieces to complete a jigsaw |
+| **Whack-A-Mole** | 🔨 | Hit animals as they pop up from holes |
+| **Tower Builder** | 🏗️ | Stack platforms to build a tower without falling |
+| **Word Quiz** | 📝 | Match pictures to Finnish compound words |
+| **Click Counter** | 👆 | Click as fast as possible to hit the target count |
+| **Color Clicker** | 🎨 | Click the correct color as it changes randomly |
+| **Snake** | 🐍 | Classic snake — eat food, avoid walls and yourself |
+| **Shoot Targets** | 🎯 | Click on moving targets before they disappear |
+| **Maze** | 🧭 | Navigate through a maze to reach the exit |
+| **Shape Matcher** | ⏺️ | Match shapes by dragging them to the correct slots |
+| **Cross Road** | 🚗 | Cross a busy road without getting hit |
+
+The host chooses any number of these games and can reorder them before the session starts.
 
 ---
 
 ## Game Flow
 
 ```
-Host creates session (6-digit code)
+Host creates session
+  → sets game name, duration, difficulty (Easy/Normal/Hard), scan mode (Ordered/Random)
+  → selects mini-games and drags to reorder
+  → downloads QR codes and places them at physical checkpoints
         ↓
-Players join with code → select avatar → waiting room
+Players join with 6-digit code
+  → pick username & avatar → enter waiting room
         ↓
 Host starts game
         ↓
-Player scans QR at Checkpoint 1
+Players scan QR codes at checkpoints
+  (Ordered: must scan 1 → 2 → 3 in sequence)
+  (Random: scan any unvisited checkpoint in any order)
         ↓
-Play mini-game → Win → Visit shop → buy power-ups
+Complete mini-game → earn coins → visit shop → buy power-ups
         ↓
-Repeat for Checkpoints 2–6
+After all checkpoints: Final Challenge boss game
         ↓
-Final shop → Final challenge
-        ↓
-Champion reveal & podium
+Win story cutscene → Live leaderboard & podium
 ```
 
 **Losing a mini-game** costs 1 life. If all lives are lost, the player resets to checkpoint 1 (or can buy an Extra Life from the shop).
@@ -121,20 +159,23 @@ Champion reveal & podium
 ### GameSession
 - `code` — unique 6-character uppercase code
 - `status` — `waiting` | `in_progress` | `finished`
+- `difficulty` — `easy` | `normal` | `hard`
+- `gameMode` — `ordered` | `random`
+- `gameOrder` — ordered array of mini-game routes selected by the host
 - `totalTime` — session duration (seconds)
 - `startedAt`, `expiresAt` — timestamps
-- `checkpointIds` — array of 6 checkpoint references
 
 ### PlayerSession
 - `money` — coins earned
-- `lives` — remaining lives (default 3)
-- `currentCheckpointIndex` — progress (0–6)
+- `lives` — remaining lives
+- `currentCheckpointIndex` — progress tracker
+- `completedList` — array of completed checkpoint numbers (used in random mode)
 - `purchasedItems` — power-ups bought
 - `score`, `rank` — final results
 - `status` — `waiting` | `active` | `eliminated` | `finished`
 
 ### Checkpoint
-- `level` — 1–6
+- `level` — checkpoint number
 - `qrCode` — unique QR code identifier
 - `miniGameId` — linked mini-game
 
@@ -168,7 +209,7 @@ QR-Code-Game/
 ├── backend/
 │   ├── config/          # Database & Cloudinary config
 │   ├── controllers/     # Route handlers
-│   ├── middleware/      # Express middleware
+│   ├── middleware/       # Express middleware
 │   ├── models/          # Mongoose schemas
 │   ├── routes/          # API routes
 │   ├── utils/           # Helper functions
@@ -177,10 +218,13 @@ QR-Code-Game/
 │   ├── public/          # Static assets, images, audio
 │   └── src/
 │       ├── components/
-│       │   └── ui/      # Reusable UI components
-│       ├── pages/       # All page components
+│       │   └── ui/      # Reusable UI components (Card, GameSettingsCard, StoryModal, …)
+│       ├── context/     # React contexts (Language, etc.)
+│       ├── pages/       # All page components + mini-games
+│       ├── translations/ # EN/FI translation strings
 │       └── utils/
-│           └── api.js   # Axios API client
+│           ├── api.js           # Axios API client
+│           └── checkpointShop.js # Lives, coins, progress helpers
 └── render.yaml          # Render deployment config
 ```
 
