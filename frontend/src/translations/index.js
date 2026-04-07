@@ -1,5 +1,11 @@
 export const translations = {
   EN: {
+
+    //start game
+
+    start: 'Start',
+
+
     // JoinGame
     pleaseEnterYourName: 'Please enter your name',
     pleaseEnterGameCode: 'Please enter the game code',
@@ -381,9 +387,160 @@ finalWinScene9Text: 'The heir has returned… not to claim a throne — but to b
 
 seeLeaderboard: 'See Leaderboard →',
 
+// ───────── WHACK-A-MOLE GAME ─────────
+whackTitle: 'Whack-A-Mole',
+whackTargetInstruction:
+  'Your target animal is random for this game. Hit only that animal to gain points and avoid the wrong one.',
+whackStartInstruction: 'Press Start when you are ready to reach {goal} good hits.',
+
+whackTimeLeft: 'Time left',
+whackScore: 'Score',
+
+whackHitThisAnimal: 'Hit this animal',
+
+whackGreatHit: '+1 Great hit!',
+whackWrongHit: '-1 Wrong animal',
+
+whackHowToWinTitle: 'How to win',
+whackHowToWinDesc:
+  'Watch the target animal card, then tap only that animal. Correct hits give +1, wrong hits give -1.',
+
+whackWinTitle: 'Nice job!',
+whackWinMessage:
+  'You reached the target score and earned {coins} coins.',
+
+whackLoseTitle: 'Time is up',
+whackLoseNoLives:
+  'No lives left. Buy an extra life now to keep your current checkpoint.',
+whackLoseWithLives:
+  'One life was removed. {lives} lives left.',
+
+whackLoseWarning:
+  'If you will not buy life from store now, you need to start again from checkpoint 1.',
+
+whackCheckpointReset: 'Checkpoint 1',
+whackPlayAgain: 'Play again',
+whackExitGame: 'Exit game',
+
+whackLeaveTitle: 'Leave this game?',
+whackLeaveNotStarted:
+  'You have not started this checkpoint yet. Leave without losing a life?',
+whackLeaveLastLife:
+  'If you go back now, one life will be lost and you will need to start again from checkpoint 1.',
+whackLeaveNormal:
+  'If you go back now, one life will be lost.',
+
+  // ───────── TOWER BUILDER GAME ─────────
+towerTitle: 'Tower builder',
+towerStartInstruction: 'Press Start when you are ready to stack {floors} floors.',
+towerTargetInstruction: 'Stack {floors} floors with the original crane-drop tower game before time runs out.',
+
+towerFloors: 'Floors',
+
+towerHowToWinTitle: 'How to win',
+towerHowToWinDesc: 'Tap the game area to release the hanging block. Build {floors} successful floors to clear this checkpoint.',
+
+towerWinTitle: 'Tower completed!',
+towerWinMessage: 'You cleared the tower game!',
+
+towerLoseTitle: 'Tower failed',
+
+// ───────── SNAKE GAME ─────────
+snakeTitle: 'Snake Game',
+
+snakeStartInstruction: 'Press Start when you are ready to reach {goal} apples.',
+snakeTargetInstruction: 'Reach {goal} apples before time runs out. Use arrow keys after tapping the game area.',
+
+snakeScore: 'Score',
+snakeLives: 'Lives',
+
+snakeInitialStatus: 'Tap the game area and use arrow keys to control the snake.',
+snakeResetStatus: 'Press any arrow key inside the snake game to start.',
+snakeStartStatus: 'Collect apples and avoid walls or your own tail.',
+snakeCurrentScoreStatus: 'Great! Current snake score: {score}',
+snakePressStartLoad: 'Press Start to load the snake game.',
+snakeLoadPrompt: 'Press Start to load the checkpoint game.',
+
+snakeWinTitle: 'Snake cleared!',
+snakeWinMessage: 'You collected {score} apples and earned {coins} coins from the time left.',
+
+snakeLoseTitle: 'Snake game over',
+
+// ───────── SIMON MEMORY GAME ─────────
+simonTitle: 'Simon memory game',
+simonSubtitle: 'Watch the pattern, remember it, and repeat it in the exact order.',
+
+simonStartReady: 'Press Start to begin.',
+simonWatchPattern: 'Watch the pattern carefully...',
+simonRepeatPattern: 'Now repeat the pattern in the same order.',
+simonCorrectNextRound: 'Correct! Next round...',
+simonWrongPattern: 'Wrong pattern!',
+simonCompletedStatus: 'Great job! You completed the Simon game.',
+
+simonStartInstruction: 'Press Start when you are ready to reach round {round}.',
+
+simonRound: 'Round',
+simonHowToPlayTitle: 'How to play',
+simonHowToPlayCard: 'Tap to view instructions and game rules.',
+simonHowToPlayPopupTitle: 'How to play',
+
+simonStep1: '1. Press Start.',
+simonStep2: '2. Watch the glowing buttons carefully.',
+simonStep3: '3. Repeat the pattern in the same order.',
+simonStep4: '4. Each round adds one more step.',
+simonStep5: '5. Wrong pattern = lose the game and one life.',
+simonStep6: '6. Reach round {round} to win this checkpoint.',
+
+simonGotIt: 'Got it',
+
+simonWinTitle: 'You win',
+simonWinMessage: 'You completed the Simon game and earned {coins} coins from the time left.',
+
+simonLoseTitle: 'Game over',
+
+// ───────── SHAPE MATCHER GAME ─────────
+shapeMatcherTitle: 'Shape Matcher',
+shapeMatcherReadyInstruction: 'Press Start when you are ready to match shapes.',
+shapeMatcherRunningInstruction: 'Match the target shape before time runs out.',
+
+shapeMatcherScore: 'Score',
+shapeMatcherRound: 'Round',
+shapeMatcherTargetShape: 'Target shape',
+shapeMatcherHiddenUntilStart: 'Hidden until Start',
+shapeMatcherLocked: 'Locked',
+
+shapeMatcherNiceFeedback: 'Nice! You matched the {shape}.',
+shapeMatcherMissFeedback: 'Not quite. You needed {shape}.',
+
+shapeMatcherWinTitle: 'Shape master!',
+shapeMatcherWinMessage: 'You reached {score} points and earned {coins} coins from the time left.',
+
+// ───────── RANDOM COLOR CLICKER GAME ─────────
+randomColorClickerTitle: 'Random Color Clicker',
+randomColorClickerReadyInstruction: 'Press Start when you are ready for the color challenge.',
+randomColorClickerRunningInstruction: 'Tap the button matching the text color, not the word.',
+
+randomColorClickerScore: 'Score',
+randomColorClickerRound: 'Round',
+
+randomColorClickerTrickyMode: 'Tricky mode',
+randomColorClickerIgnoreWord: 'Ignore the word. Tap the matching ink color.',
+
+randomColorClickerCorrect: 'Correct color!',
+randomColorClickerWrong: 'Oops. The correct answer was {color}.',
+randomColorClickerDefaultFeedback: 'Get a point for each correct answer. Wrong answers remove one point.',
+
+randomColorClickerWinTitle: 'Color master!',
+randomColorClickerWinMessage: 'You reached {score} points and earned {coins} coins from the time left.',
+randomColorClickerLoseTitle: 'Game over',
   },
 
   FI: {
+
+    
+    //start game
+
+    start: 'Aloita',
     // JoinGame
     pleaseEnterYourName: 'Anna nimesi',
     pleaseEnterGameCode: 'Anna pelikoodi',
@@ -768,6 +925,151 @@ finalWinScene8Text: 'Koetus päättyy. Turmelus haihtuu kuin unohdettu painajain
 finalWinScene9Text: 'Perillinen on palannut… ei vaatiakseen valtaistuinta — vaan tullakseen joksikin suuremmaksi. Suojelijaksi. Oppaaksi. Kaiken tässä metsässä elävän vartijaksi. Ja niin kauan kuin metsä seisoo… seisoo myös sen todellinen kuningas.',
 
 seeLeaderboard: 'Katso tulostaulukko →',
+
+// ───────── WHACK-A-MOLE GAME ─────────
+whackTitle: 'Mäiski eläimiä',
+whackTargetInstruction:
+  'Kohdeeläin valitaan satunnaisesti. Lyö vain oikeaa eläintä saadaksesi pisteitä ja vältä väärää.',
+whackStartInstruction: 'Paina Aloita, kun olet valmis saavuttamaan {goal} onnistunutta osumaa.',
+
+whackTimeLeft: 'Aikaa jäljellä',
+whackScore: 'Pisteet',
+
+whackHitThisAnimal: 'Lyö tätä eläintä',
+
+whackGreatHit: '+1 Hyvä osuma!',
+whackWrongHit: '-1 Väärä eläin',
+
+whackHowToWinTitle: 'Kuinka voittaa',
+whackHowToWinDesc:
+  'Seuraa kohdeeläintä ja napauta vain sitä. Oikea osuma +1, väärä osuma -1.',
+
+whackWinTitle: 'Hyvin tehty!',
+whackWinMessage:
+  'Saavutit tavoitteen ja ansaitsit {coins} kolikkoa.',
+
+whackLoseTitle: 'Aika loppui',
+whackLoseNoLives:
+  'Ei elämiä jäljellä. Osta lisäelämä säilyttääksesi nykyisen tarkistuspisteen.',
+whackLoseWithLives:
+  'Yksi elämä menetettiin. {lives} elämää jäljellä.',
+
+whackLoseWarning:
+  'Jos et osta elämää nyt, sinun täytyy aloittaa alusta tarkistuspisteestä 1.',
+
+whackCheckpointReset: 'Tarkistuspiste 1',
+whackPlayAgain: 'Pelaa uudelleen',
+whackExitGame: 'Poistu pelistä',
+
+whackLeaveTitle: 'Poistutaanko pelistä?',
+whackLeaveNotStarted:
+  'Et ole vielä aloittanut tätä tarkistuspistettä. Poistutaanko ilman elämän menetystä?',
+whackLeaveLastLife:
+  'Jos palaat nyt, menetät yhden elämän ja joudut aloittamaan alusta tarkistuspisteestä 1.',
+whackLeaveNormal:
+  'Jos palaat nyt, menetät yhden elämän.',
+
+  // ───────── TOWER BUILDER GAME ─────────
+towerTitle: 'Torninrakennus',
+towerStartInstruction: 'Paina Aloita, kun olet valmis pinoamaan {floors} kerrosta.',
+towerTargetInstruction: 'Pinoa {floors} kerrosta alkuperäisessä nosturitornipelissä ennen ajan loppumista.',
+
+towerFloors: 'Kerrokset',
+
+towerHowToWinTitle: 'Kuinka voittaa',
+towerHowToWinDesc: 'Napauta pelialuetta vapauttaaksesi roikkuvan palikan. Rakenna {floors} onnistunutta kerrosta läpäistäksesi  tämän tarkistuspisteen.',
+
+towerWinTitle: 'Torni valmis!',
+towerWinMessage: 'Läpäisit tornipelin!',
+
+// ───────── SNAKE GAME ─────────
+snakeTitle: 'Mato-peli',
+
+snakeStartInstruction: 'Paina Aloita, kun olet valmis keräämään {goal} omenaa.',
+snakeTargetInstruction: 'Kerää {goal} omenaa ennen ajan loppumista. Käytä nuolinäppäimiä napautettuasi pelialuetta.',
+
+snakeScore: 'Pisteet',
+snakeLives: 'Elämät',
+
+snakeInitialStatus: 'Napauta pelialuetta ja ohjaa matoa nuolinäppäimillä.',
+snakeResetStatus: 'Paina mitä tahansa nuolinäppäintä matopelin sisällä aloittaaksesi.',
+snakeStartStatus: 'Kerää omenoita ja vältä seiniä sekä omaa häntääsi.',
+snakeCurrentScoreStatus: 'Hienoa! Nykyinen matopisteesi: {score}',
+snakePressStartLoad: 'Paina Aloita ladataksesi matopelin.',
+snakeLoadPrompt: 'Paina Aloita ladataksesi tarkistuspistepelin.',
+
+snakeWinTitle: 'Mato-peli läpäisty!',
+snakeWinMessage: 'Keräsit {score} omenaa ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+snakeLoseTitle: 'Mato-peli päättyi',
+
+// ───────── SIMON MEMORY GAME ─────────
+simonTitle: 'Simon-muistipeli',
+simonSubtitle: 'Katso kuvio, muista se ja toista se täsmälleen samassa järjestyksessä.',
+
+simonStartReady: 'Paina Aloita aloittaaksesi.',
+simonWatchPattern: 'Katso kuvio tarkasti...',
+simonRepeatPattern: 'Toista nyt kuvio samassa järjestyksessä.',
+simonCorrectNextRound: 'Oikein! Seuraava kierros...',
+simonWrongPattern: 'Väärä kuvio!',
+simonCompletedStatus: 'Hienoa työtä! Suoritit Simon-pelin.',
+
+simonStartInstruction: 'Paina Aloita, kun olet valmis saavuttamaan kierroksen {round}.',
+
+simonRound: 'Kierros',
+simonHowToPlayTitle: 'Kuinka pelata',
+simonHowToPlayCard: 'Napauta nähdäksesi ohjeet ja pelisäännöt.',
+simonHowToPlayPopupTitle: 'Kuinka pelata',
+
+simonStep1: '1. Paina Aloita.',
+simonStep2: '2. Katso hehkuvia painikkeita tarkasti.',
+simonStep3: '3. Toista kuvio samassa järjestyksessä.',
+simonStep4: '4. Jokainen kierros lisää yhden uuden vaiheen.',
+simonStep5: '5. Väärä kuvio = häviät pelin ja menetät yhden elämän.',
+simonStep6: '6. Saavuta kierros {round} voittaaksesi tämän tarkistuspisteen.',
+
+simonGotIt: 'Selvä',
+
+simonWinTitle: 'Voitit',
+simonWinMessage: 'Suoritit Simon-pelin ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+simonLoseTitle: 'Peli päättyi',
+
+// ───────── SHAPE MATCHER GAME ─────────
+shapeMatcherTitle: 'Muotojen yhdistäjä',
+shapeMatcherReadyInstruction: 'Paina Aloita, kun olet valmis yhdistämään muotoja.',
+shapeMatcherRunningInstruction: 'Yhdistä kohdemuoto ennen ajan loppumista.',
+
+shapeMatcherScore: 'Pisteet',
+shapeMatcherRound: 'Kierros',
+shapeMatcherTargetShape: 'Kohdemuoto',
+shapeMatcherHiddenUntilStart: 'Piilotettu aloitukseen asti',
+shapeMatcherLocked: 'Lukittu',
+
+shapeMatcherNiceFeedback: 'Hienoa! Löysit oikean muodon: {shape}.',
+shapeMatcherMissFeedback: 'Ei aivan. Tarvitsit muodon: {shape}.',
+
+shapeMatcherWinTitle: 'Muotomestari!',
+shapeMatcherWinMessage: 'Sait {score} pistettä ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+// ───────── RANDOM COLOR CLICKER GAME ─────────
+randomColorClickerTitle: 'Satunnainen väriklikkaus',
+randomColorClickerReadyInstruction: 'Paina Aloita, kun olet valmis värihaasteeseen.',
+randomColorClickerRunningInstruction: 'Napauta painiketta, joka vastaa tekstin väriä, ei sanaa.',
+
+randomColorClickerScore: 'Pisteet',
+randomColorClickerRound: 'Kierros',
+
+randomColorClickerTrickyMode: 'Hankala tila',
+randomColorClickerIgnoreWord: 'Älä huomioi sanaa. Napauta vastaavaa tekstiväriä.',
+
+randomColorClickerCorrect: 'Oikea väri!',
+randomColorClickerWrong: 'Ups. Oikea vastaus oli {color}.',
+randomColorClickerDefaultFeedback: 'Saat pisteen jokaisesta oikeasta vastauksesta. Väärä vastaus vähentää yhden pisteen.',
+
+randomColorClickerWinTitle: 'Värimestari!',
+randomColorClickerWinMessage: 'Sait {score} pistettä ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
   },
 };
 

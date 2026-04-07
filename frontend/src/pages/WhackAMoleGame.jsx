@@ -24,12 +24,16 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
+
 const HOLE_COUNT = 9;
 const ACTIVE_ANIMAL_COUNT = 3;
 const ANIMAL_SPAWN_INTERVAL = 1300;
-const HIT_EFFECT_DURATION = 200; //550
-const HAMMER_RELEASE_DELAY = 50; //140
+const HIT_EFFECT_DURATION = 200;
+const HAMMER_RELEASE_DELAY = 50;
 const HAMMER_SIZE = 80;
+
 const ANIMALS = [
   {
     key: 'cat',
@@ -86,7 +90,12 @@ function removeKey(source, keyToRemove) {
 }
 
 export default function WhackAMoleGame() {
-  const { timeLimit: GAME_TIME_LIMIT, goal: WINNING_SCORE } = getMiniGameConfig('whackAMole', getSessionDifficulty());
+  const { t } = useLanguage();
+  const { timeLimit: GAME_TIME_LIMIT, goal: WINNING_SCORE } = getMiniGameConfig(
+    'whackAMole',
+    getSessionDifficulty()
+  );
+
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
@@ -98,7 +107,9 @@ export default function WhackAMoleGame() {
   const effectTimeoutsRef = useRef([]);
   const hammerTimeoutRef = useRef(null);
 
-  const [timeLeft, setTimeLeft] = useState(() => getInitialGameTime(GAME_TIME_LIMIT, 'whack-a-mole', location.key));
+  const [timeLeft, setTimeLeft] = useState(() =>
+    getInitialGameTime(GAME_TIME_LIMIT, 'whack-a-mole', location.key)
+  );
   const [score, setScore] = useState(0);
   const [targetAnimalKey, setTargetAnimalKey] = useState(() => pickRandom(ANIMALS).key);
   const [activeAnimals, setActiveAnimals] = useState({});
@@ -116,6 +127,7 @@ export default function WhackAMoleGame() {
     visible: false,
     striking: false,
   });
+
   const hasEndedRef = useRef(false);
   const lossHandledRef = useRef(false);
   const outcomeLockedRef = useRef(false);
@@ -178,7 +190,7 @@ export default function WhackAMoleGame() {
     outcomeLockedRef.current = true;
     setShowWin(true);
     setActiveAnimals({});
-  }, [score]);
+  }, [score, hasStarted, WINNING_SCORE]);
 
   useEffect(() => {
     if (!feedback) return;
@@ -253,10 +265,10 @@ export default function WhackAMoleGame() {
 
     if (isCorrect) {
       setScore((value) => value + 1);
-      setFeedback({ type: 'good', text: '+1 Great hit!' });
+      setFeedback({ type: 'good', text: t.whackGreatHit });
     } else {
       setScore((value) => Math.max(0, value - 1));
-      setFeedback({ type: 'bad', text: '-1 Wrong animal' });
+      setFeedback({ type: 'bad', text: t.whackWrongHit });
     }
 
     registerHitEffect(holeIndex, animalKey, isCorrect);
@@ -334,6 +346,7 @@ export default function WhackAMoleGame() {
 
   const currentLives = getPlayerProgress().life ?? 0;
   const backWillResetToStart = currentLives <= 1;
+  const targetAnimal = ANIMALS.find((animal) => animal.key === targetAnimalKey) ?? ANIMALS[0];
 
   const handleWinContinue = async () => {
     const playerSessionId = playerSession?._id || playerSession?.id;
@@ -343,7 +356,10 @@ export default function WhackAMoleGame() {
 
     try {
       if (playerSessionId) {
-        await playerAPI.checkpoint(playerSessionId, { level: checkpoint, scoreEarned: earnedCoins });
+        await playerAPI.checkpoint(playerSessionId, {
+          level: checkpoint,
+          scoreEarned: earnedCoins,
+        });
       }
     } catch (error) {
       toast.error(error.message);
@@ -360,8 +376,6 @@ export default function WhackAMoleGame() {
       });
     }
   };
-
-  const targetAnimal = ANIMALS.find((animal) => animal.key === targetAnimalKey) ?? ANIMALS[0];
 
   return (
     <PageLayout>
@@ -391,24 +405,23 @@ export default function WhackAMoleGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Whack-A-Mole
+            {t.whackTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
             {hasStarted
-              ? 'Your target animal is random for this game. Hit only that animal to gain points and avoid the wrong one.'
-              : `Press Start when you are ready to reach ${WINNING_SCORE} good hits.`}
+              ? t.whackTargetInstruction
+              : translate(t.whackStartInstruction, { goal: WINNING_SCORE })}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Card>
-            
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
-              <Clock size={14}/>
-              Time left
+              <Clock size={14} />
+              {t.whackTimeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -418,22 +431,24 @@ export default function WhackAMoleGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#C2410C' }}>
               <Target size={14} />
-              Score
+              {t.whackScore}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {score}/{WINNING_SCORE}
             </p>
           </Card>
         </div>
-      <Card style={{ backgroundColor: targetAnimal.shell }}>
-            <p className="font-semibold" style={{ color: targetAnimal.accent }}>
-              Hit this animal 
-            </p>
-            <div className="mt-1 flex items-center justify-center">
-                <img src={targetAnimal.image} alt={targetAnimal.label} className="w-20 object-contain" />
-                <p className='text-primary text-2xl font-bold'>{targetAnimal.label}</p>
-            </div>
-          </Card>
+
+        <Card style={{ backgroundColor: targetAnimal.shell }}>
+          <p className="font-semibold" style={{ color: targetAnimal.accent }}>
+            {t.whackHitThisAnimal}
+          </p>
+          <div className="mt-1 flex items-center justify-center">
+            <img src={targetAnimal.image} alt={targetAnimal.label} className="w-20 object-contain" />
+            <p className="text-primary text-2xl font-bold">{targetAnimal.label}</p>
+          </div>
+        </Card>
+
         <div
           ref={boardRef}
           className="relative select-none"
@@ -474,7 +489,10 @@ export default function WhackAMoleGame() {
           >
             <div
               className="absolute inset-x-4 top-3 h-10 rounded-full opacity-70"
-              style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%)' }}
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%)',
+              }}
             />
 
             <div className="grid grid-cols-3 gap-3 relative z-10">
@@ -496,14 +514,19 @@ export default function WhackAMoleGame() {
                     className="aspect-square rounded-[32px] border-[5px] relative overflow-hidden"
                     style={{
                       borderColor: '#7C3AED',
-                      background: 'radial-gradient(circle at 50% 36%, #7C3AED 0%, #5B21B6 48%, #3B0764 100%)',
-                      boxShadow: 'inset 0 10px 18px rgba(255,255,255,0.18), inset 0 -16px 22px rgba(0,0,0,0.24)',
+                      background:
+                        'radial-gradient(circle at 50% 36%, #7C3AED 0%, #5B21B6 48%, #3B0764 100%)',
+                      boxShadow:
+                        'inset 0 10px 18px rgba(255,255,255,0.18), inset 0 -16px 22px rgba(0,0,0,0.24)',
                       cursor: 'none',
                     }}
                   >
                     <div
                       className="absolute inset-x-4 bottom-4 h-7 rounded-full"
-                      style={{ background: 'radial-gradient(circle at 50% 48%, #2E1065 0%, #1E1B4B 70%, #0F172A 100%)' }}
+                      style={{
+                        background:
+                          'radial-gradient(circle at 50% 48%, #2E1065 0%, #1E1B4B 70%, #0F172A 100%)',
+                      }}
                     />
 
                     <div
@@ -595,16 +618,16 @@ export default function WhackAMoleGame() {
 
         <div className="rounded-2xl p-4" style={{ backgroundColor: 'var(--color-info-bg)' }}>
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            How to win
+            {t.whackHowToWinTitle}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Watch the target animal card, then tap only that animal. Correct hits give +1, wrong hits give -1.
+            {t.whackHowToWinDesc}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            Back
+            {t.back}
           </Button>
           {!hasStarted ? (
             <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
@@ -620,12 +643,17 @@ export default function WhackAMoleGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="Nice job!"
-            message={`You reached the target score and earned ${earnedCoins} coins.`}
+            title={t.whackWinTitle}
+            message={translate(t.whackWinMessage, { coins: earnedCoins })}
           />
-          <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
+          <CheckpointShopPanel
+            earnedCoins={earnedCoins}
+            grantCoins={showWin}
+            isOpen={showWin}
+            checkpoint={checkpoint}
+          />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -635,34 +663,28 @@ export default function WhackAMoleGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Time is up
+              {t.whackLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, {
+                    lives: loseState.remainingLives ?? 0,
+                  })}
             </p>
           </div>
           <CheckpointShopPanel
             isOpen={showLose}
             checkpoint={checkpoint}
-            warningMessage={
-              loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
-                : ''
-            }
+            warningMessage={loseState.needsLifePurchase ? t.whackLoseWarning : ''}
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
-            <Button
-              variant="red"
-              onClick={handleLosePrimaryAction}
-              disabled={busy}
-            >
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+            <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -673,22 +695,22 @@ export default function WhackAMoleGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                  ? t.whackLeaveLastLife
+                  : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>

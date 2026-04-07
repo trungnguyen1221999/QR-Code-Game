@@ -25,6 +25,8 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
 
 const COINS_PER_SECOND = 2;
 
@@ -76,6 +78,7 @@ function formatTime(seconds) {
 }
 
 export default function SimonGame() {
+  const { t } = useLanguage();
   const { timeLimit: SIMON_TIME_LIMIT, goal: SIMON_TARGET_ROUND } = getMiniGameConfig('simon', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
@@ -91,7 +94,7 @@ export default function SimonGame() {
   const [gameStarted, setGameStarted] = useState(false);
   const [backEnabled, setBackEnabled] = useState(false);
   const [round, setRound] = useState(0);
-  const [status, setStatus] = useState('Press Start to begin.');
+  const [status, setStatus] = useState(t.simonStartReady);
   const [timeLeft, setTimeLeft] = useState(() =>
     getInitialGameTime(SIMON_TIME_LIMIT, 'simon', location.key)
   );
@@ -228,7 +231,7 @@ export default function SimonGame() {
 
   const playSequence = async (nextSequence) => {
     setIsPlayingSequence(true);
-    setStatus('Watch the pattern carefully...');
+    setStatus(t.simonWatchPattern);
     await sleep(500);
 
     for (const colorId of nextSequence) {
@@ -240,7 +243,7 @@ export default function SimonGame() {
 
     setPlayerSequence([]);
     setIsPlayingSequence(false);
-    setStatus('Now repeat the pattern in the same order.');
+    setStatus(t.simonRepeatPattern);
   };
 
   const startGame = async () => {
@@ -257,7 +260,7 @@ export default function SimonGame() {
     setLoseState(INITIAL_LOSE_STATE);
     lossHandledRef.current = false;
     setFlashWrong(false);
-    setStatus('Watch the pattern carefully...');
+    setStatus(t.simonWatchPattern);
     await playSequence(firstSequence);
   };
 
@@ -272,7 +275,7 @@ export default function SimonGame() {
     setRound(0);
     setTimeLeft(getReplayGameTime(SIMON_TIME_LIMIT));
     setFlashWrong(false);
-    setStatus('Press Start to begin.');
+    setStatus(t.simonStartReady);
     setShowLose(false);
     setShowWin(false);
     setLoseState(INITIAL_LOSE_STATE);
@@ -331,7 +334,7 @@ export default function SimonGame() {
   const handleLoseExit = () => handleCheckpointLoseExit(loseState, navigate, playerSessionId);
 
   const handleWrongInput = async () => {
-    setStatus('Wrong pattern!');
+    setStatus(t.simonWrongPattern);
     setFlashWrong(true);
     await playWrongSound();
     await sleep(450);
@@ -369,12 +372,12 @@ export default function SimonGame() {
         outcomeLockedRef.current = true;
         addCoinsToProgress(Math.max(0, timeLeft * COINS_PER_SECOND));
         setShowWin(true);
-        setStatus('Great job! You completed the Simon game.');
+        setStatus(t.simonCompletedStatus);
         return;
       }
 
       const nextSequence = buildNextSequence(sequence);
-      setStatus('Correct! Next round...');
+      setStatus(t.simonCorrectNextRound);
       setRound((prev) => prev + 1);
       setSequence(nextSequence);
 
@@ -417,13 +420,13 @@ export default function SimonGame() {
       >
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Simon memory game
+            {t.simonTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Watch the pattern, remember it, and repeat it in the exact order.
+            {t.simonSubtitle}
           </p>
         </div>
 
@@ -431,7 +434,7 @@ export default function SimonGame() {
           <Card >
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
-              Time left
+              {t.timeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -440,7 +443,7 @@ export default function SimonGame() {
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Round
+              {t.simonRound}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {round}/{targetRound}
@@ -523,7 +526,7 @@ export default function SimonGame() {
         <div className="grid grid-cols-2 gap-3">
           <Button onClick={startGame} disabled={gameStarted || isPlayingSequence || busy}>
             <Play size={16} />
-            Start
+            {t.start}
           </Button>
 
           {backEnabled ? (
@@ -533,7 +536,7 @@ export default function SimonGame() {
               onClick={() => setShowBackConfirm(true)}
               disabled={busy || showWin || showLose}
             >
-              Back
+              {t.back}
             </Button>
           ) : (
             <button
@@ -549,7 +552,7 @@ export default function SimonGame() {
                 opacity: 1,
               }}
             >
-              Back
+              {t.back}
             </button>
           )}
         </div>
@@ -559,27 +562,27 @@ export default function SimonGame() {
         >
           <div className="flex items-center gap-2 mb-2">
             <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-              How to play
+              {t.simonHowToPlayTitle}
             </p>
           </div>
           <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>
-            Tap to view instructions and game rules.
+            {t.simonHowToPlayCard}
           </p>
         </Card>
       </div>
 
-      <Popup open={showHowToPlay} onClose={() => setShowHowToPlay(false)} title="How to play">
+      <Popup open={showHowToPlay} onClose={() => setShowHowToPlay(false)} title={t.simonHowToPlayPopupTitle}>
         <div className="flex flex-col gap-3">
           <div className="text-sm" style={{ color: 'var(--color-subtext)', lineHeight: '1.7' }}>
-            <p>1. Press <span className="font-bold" style={{ color: 'var(--color-text)' }}>Start</span>.</p>
-            <p>2. Watch the glowing buttons carefully.</p>
-            <p>3. Repeat the pattern in the same order.</p>
-            <p>4. Each round adds one more step.</p>
-            <p>5. Wrong pattern = lose the game and one life.</p>
-            <p>6. Reach round {targetRound} to win this checkpoint.</p>
+            <p>{t.simonStep1}</p>
+            <p>{t.simonStep2}</p>
+            <p>{t.simonStep3}</p>
+            <p>{t.simonStep4}</p>
+            <p>{t.simonStep5}</p>
+            <p>{translate(t.simonStep6, { round: targetRound })}</p>
           </div>
 
-          <Button onClick={() => setShowHowToPlay(false)}>Got it</Button>
+          <Button onClick={() => setShowHowToPlay(false)}>{t.simonGotIt}</Button>
         </div>
       </Popup>
 
@@ -589,23 +592,23 @@ export default function SimonGame() {
 
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!gameStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>
@@ -614,8 +617,8 @@ export default function SimonGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="You win"
-            message={`You completed the Simon game and earned ${earnedCoins} coins from the time left.`}
+            title={t.simonWinTitle}
+            message={translate(t.simonWinMessage, { coins: earnedCoins })}
           />
           <CheckpointShopPanel
             earnedCoins={earnedCoins}
@@ -624,7 +627,7 @@ export default function SimonGame() {
             checkpoint={checkpoint}
           />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -633,29 +636,29 @@ export default function SimonGame() {
         <div className="flex flex-col items-center gap-3 py-2">
           <span className="text-5xl">❌</span>
           <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-            Game over
+            {t.simonLoseTitle}
           </h3>
           <p className="text-sm text-center" style={{ color: 'var(--color-subtext)' }}>
             {loseState.needsLifePurchase
-              ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-              : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+              ? t.whackLoseNoLives
+              : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
           </p>
           <CheckpointShopPanel
             isOpen={showLose}
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>

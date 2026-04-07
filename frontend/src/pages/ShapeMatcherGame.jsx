@@ -24,6 +24,8 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
 
 const SHAPES = [
   { id: 'circle', label: 'Circle', glyph: '●', color: '#EF4444' },
@@ -56,6 +58,7 @@ function buildRound() {
 }
 
 export default function ShapeMatcherGame() {
+  const { t } = useLanguage();
   const { timeLimit, goal } = getMiniGameConfig('shapeMatcher', getSessionDifficulty());
 
   useBlockBack();
@@ -74,7 +77,7 @@ export default function ShapeMatcherGame() {
   const [round, setRound] = useState(1);
   const [target, setTarget] = useState(initialRound.target);
   const [options, setOptions] = useState(initialRound.options);
-  const [feedback, setFeedback] = useState('Press Start when you are ready to match shapes.');
+  const [feedback, setFeedback] = useState(t.shapeMatcherReadyInstruction);
   const [busy, setBusy] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
@@ -123,10 +126,10 @@ export default function ShapeMatcherGame() {
 
     if (shape.id === target.id) {
       setScore((value) => value + 1);
-      setFeedback(`Nice! You matched the ${target.label.toLowerCase()}.`);
+      setFeedback(translate(t.shapeMatcherNiceFeedback, { shape: target.label.toLowerCase() }));
     } else {
       setScore((value) => Math.max(0, value - 1));
-      setFeedback(`Not quite. You needed ${target.label.toLowerCase()}.`);
+      setFeedback(translate(t.shapeMatcherMissFeedback, { shape: target.label.toLowerCase() }));
     }
 
     advanceRound();
@@ -141,7 +144,7 @@ export default function ShapeMatcherGame() {
     setRound(1);
     setTarget(next.target);
     setOptions(next.options);
-    setFeedback('Press Start when you are ready to match shapes.');
+    setFeedback(t.shapeMatcherReadyInstruction);
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -227,14 +230,14 @@ export default function ShapeMatcherGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <CircleDot size={20} />
-            Shape Matcher
+            {t.shapeMatcherTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {hasStarted ? 'Match the target shape before time runs out.' : 'Press Start when you are ready to match shapes.'}
+            {hasStarted ? t.shapeMatcherRunningInstruction : t.shapeMatcherReadyInstruction}
           </p>
         </div>
 
@@ -242,7 +245,7 @@ export default function ShapeMatcherGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
-              Time left
+              {t.timeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -251,7 +254,7 @@ export default function ShapeMatcherGame() {
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#9333EA' }}>
-              Score
+              {t.shapeMatcherScore}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#7E22CE' }}>
               {score}/{goal}
@@ -260,7 +263,7 @@ export default function ShapeMatcherGame() {
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Round
+              {t.shapeMatcherRound}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {round}
@@ -270,7 +273,7 @@ export default function ShapeMatcherGame() {
 
         <Card className="text-center">
           <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--color-subtext)' }}>
-            Target shape
+            {t.shapeMatcherTargetShape}
           </p>
           <p
             className="mt-3 text-6xl font-black"
@@ -282,7 +285,7 @@ export default function ShapeMatcherGame() {
             {hasStarted ? target.glyph : '?'}
           </p>
           <p className="text-sm mt-2 font-bold" style={{ color: 'var(--color-text)' }}>
-            {hasStarted ? target.label : 'Hidden until Start'}
+            {hasStarted ? target.label : t.shapeMatcherHiddenUntilStart}
           </p>
         </Card>
 
@@ -308,7 +311,7 @@ export default function ShapeMatcherGame() {
             >
               <span className="block text-5xl leading-none">{hasStarted ? shape.glyph : '?'}</span>
               <span className="block mt-2 text-sm uppercase tracking-[0.14em]">
-                {hasStarted ? shape.label : 'Locked'}
+                {hasStarted ? shape.label : t.shapeMatcherLocked}
               </span>
             </button>
           ))}
@@ -322,11 +325,11 @@ export default function ShapeMatcherGame() {
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            Back
+            {t.back}
           </Button>
           {!hasStarted ? (
             <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              Start
+              {t.start}
             </Button>
           ) : (
             <div />
@@ -339,12 +342,12 @@ export default function ShapeMatcherGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="Shape master!"
-            message={`You reached ${score} points and earned ${earnedCoins} coins from the time left.`}
+            title={t.shapeMatcherWinTitle}
+            message={translate(t.shapeMatcherWinMessage, { score, coins: earnedCoins })}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -354,12 +357,12 @@ export default function ShapeMatcherGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Time is up
+              {t.whackLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
           <CheckpointShopPanel
@@ -367,17 +370,17 @@ export default function ShapeMatcherGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -388,22 +391,22 @@ export default function ShapeMatcherGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>

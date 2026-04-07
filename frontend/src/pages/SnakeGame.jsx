@@ -24,6 +24,8 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
 
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -32,6 +34,7 @@ function formatTime(seconds) {
 }
 
 export default function SnakeGame() {
+  const { t } = useLanguage();
   const { timeLimit, goal } = getMiniGameConfig('snake', getSessionDifficulty());
 
   useBlockBack();
@@ -49,7 +52,7 @@ export default function SnakeGame() {
     getInitialGameTime(timeLimit, 'snake', location.key)
   );
   const [score, setScore] = useState(0);
-  const [statusText, setStatusText] = useState('Tap the game area and use arrow keys to control the snake.');
+  const [statusText, setStatusText] = useState(t.snakeInitialStatus);
   const [iframeKey, setIframeKey] = useState(0);
   const [busy, setBusy] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -63,7 +66,7 @@ export default function SnakeGame() {
     if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
-      void handleLoss('Time is up');
+      void handleLoss(t.whackLoseTitle);
       return;
     }
 
@@ -72,7 +75,7 @@ export default function SnakeGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted, t.whackLoseTitle]);
 
   useEffect(() => {
     if (hasStarted && score >= goal) {
@@ -95,32 +98,39 @@ export default function SnakeGame() {
 
       if (data.event === 'reset') {
         setScore(data.score ?? 0);
-        setStatusText(hasStarted ? 'Press any arrow key inside the snake game to start.' : 'Press Start when you are ready to play snake.');
+        setStatusText(hasStarted ? t.snakeResetStatus : t.snakePressStartLoad);
         lossHandledRef.current = false;
         return;
       }
 
       if (data.event === 'start') {
-        setStatusText('Collect apples and avoid walls or your own tail.');
+        setStatusText(t.snakeStartStatus);
         return;
       }
 
       if (data.event === 'score') {
         setScore(data.score ?? 0);
-        setStatusText(`Great! Current snake score: ${data.score ?? 0}`);
+        setStatusText(translate(t.snakeCurrentScoreStatus, { score: data.score ?? 0 }));
         return;
       }
 
       if (data.event === 'gameover') {
         if (outcomeLockedRef.current) return;
-        setStatusText(data.message || 'Game over');
-        void handleLoss(data.message || 'Game over');
+        setStatusText(data.message || t.snakeLoseTitle);
+        void handleLoss(data.message || t.snakeLoseTitle);
       }
     };
 
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [hasStarted]);
+  }, [
+    hasStarted,
+    t.snakeResetStatus,
+    t.snakePressStartLoad,
+    t.snakeStartStatus,
+    t.snakeCurrentScoreStatus,
+    t.snakeLoseTitle,
+  ]);
 
   useEffect(() => {
     const focusTimer = setTimeout(() => {
@@ -157,7 +167,7 @@ export default function SnakeGame() {
     setHasStarted(false);
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
-    setStatusText('Tap the game area and use arrow keys to control the snake.');
+    setStatusText(t.snakeInitialStatus);
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -222,16 +232,16 @@ export default function SnakeGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <Gamepad2 size={20} />
-            Snake Game
+            {t.snakeTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
             {hasStarted
-              ? `Reach ${goal} apples before time runs out. Use arrow keys after tapping the game area.`
-              : `Press Start when you are ready to reach ${goal} apples.`}
+              ? translate(t.snakeTargetInstruction, { goal })
+              : translate(t.snakeStartInstruction, { goal })}
           </p>
         </div>
 
@@ -239,7 +249,7 @@ export default function SnakeGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
-              Time left
+              {t.timeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -249,7 +259,7 @@ export default function SnakeGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#C2410C' }}>
               <Trophy size={14} />
-              Score
+              {t.snakeScore}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {score}/{goal}
@@ -258,7 +268,7 @@ export default function SnakeGame() {
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#047857' }}>
-              Lives
+              {t.snakeLives}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#047857' }}>
               {currentLives === Infinity ? '∞' : currentLives}
@@ -268,7 +278,7 @@ export default function SnakeGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            {hasStarted ? statusText : 'Press Start to load the snake game.'}
+            {hasStarted ? statusText : t.snakePressStartLoad}
           </p>
         </Card>
 
@@ -284,21 +294,21 @@ export default function SnakeGame() {
             <iframe
               key={iframeKey}
               ref={iframeRef}
-              title="Snake Game"
+              title={t.snakeTitle}
               src="/snake-game/index.html"
               className="block w-full border-0"
               style={{ height: 460, backgroundColor: 'transparent' }}
             />
           ) : (
             <div className="flex h-[460px] items-center justify-center text-center px-6" style={{ color: 'var(--color-text)' }}>
-              Press Start to load the checkpoint game.
+              {t.snakeLoadPrompt}
             </div>
           )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            Back
+            {t.back}
           </Button>
           {!hasStarted ? (
             <Button
@@ -306,11 +316,11 @@ export default function SnakeGame() {
               onClick={() => {
                 setHasStarted(true);
                 setIframeKey((value) => value + 1);
-                setStatusText('Tap the game area and use arrow keys to control the snake.');
+                setStatusText(t.snakeInitialStatus);
               }}
               disabled={busy}
             >
-              Start
+              {t.start}
             </Button>
           ) : (
             <div />
@@ -322,12 +332,12 @@ export default function SnakeGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="Snake cleared!"
-            message={`You collected ${score} apples and earned ${earnedCoins} coins from the time left.`}
+            title={t.snakeWinTitle}
+            message={translate(t.snakeWinMessage, { score, coins: earnedCoins })}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -337,12 +347,12 @@ export default function SnakeGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Snake game over
+              {t.snakeLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
           <CheckpointShopPanel
@@ -350,17 +360,17 @@ export default function SnakeGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -371,22 +381,22 @@ export default function SnakeGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>

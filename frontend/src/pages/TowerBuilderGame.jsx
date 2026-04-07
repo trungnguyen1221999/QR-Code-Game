@@ -23,6 +23,9 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
+
 const CANVAS_ID = 'tower-original-canvas';
 
 function formatTime(seconds) {
@@ -77,6 +80,7 @@ function safelyTogglePause(game, shouldPause, pausedRef) {
 }
 
 export default function TowerBuilderGame() {
+  const { t } = useLanguage();
   const { timeLimit: GAME_TIME_LIMIT, goal: TARGET_FLOORS } = getMiniGameConfig('tower', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
@@ -247,7 +251,7 @@ export default function TowerBuilderGame() {
         game.start();
       });
     } catch (error) {
-      toast.error('Failed to load tower builder game');
+      toast.error(error.message);
     } finally {
       initializingRef.current = false;
     }
@@ -328,22 +332,22 @@ export default function TowerBuilderGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Tower builder
+            {t.towerTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
             {hasStarted
-              ? `Stack ${TARGET_FLOORS} floors with the original crane-drop tower game before time runs out.`
-              : `Press Start when you are ready to stack ${TARGET_FLOORS} floors.`}
+              ? translate(t.towerTargetInstruction, { floors: TARGET_FLOORS })
+              : translate(t.towerStartInstruction, { floors: TARGET_FLOORS })}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Card className="rounded-2xl p-3">
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
-              Time left
+              {t.timeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -352,7 +356,7 @@ export default function TowerBuilderGame() {
 
           <Card className="rounded-2xl p-3" >
             <p className="text-xs font-semibold" style={{ color: '#C2410C' }}>
-              Floors
+              {t.towerFloors}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {floors}/{TARGET_FLOORS}
@@ -380,16 +384,16 @@ export default function TowerBuilderGame() {
 
         <Card className="rounded-2xl p-4">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            How to win
+            {t.towerHowToWinTitle}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Tap the game area to release the hanging block. Build {TARGET_FLOORS} successful floors to clear checkpoint 1.
+            {translate(t.towerHowToWinDesc, { floors: TARGET_FLOORS })}
           </p>
         </Card>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            Back
+            {t.back}
           </Button>
           {!hasStarted ? (
             <Button
@@ -412,12 +416,12 @@ export default function TowerBuilderGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="Tower completed!"
-            message="You cleared the tower game!"
+            title={t.towerWinTitle}
+            message={t.towerWinMessage}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -427,12 +431,12 @@ export default function TowerBuilderGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Tower failed
+              {t.towerLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
           <CheckpointShopPanel
@@ -440,17 +444,17 @@ export default function TowerBuilderGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -461,22 +465,22 @@ export default function TowerBuilderGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>
