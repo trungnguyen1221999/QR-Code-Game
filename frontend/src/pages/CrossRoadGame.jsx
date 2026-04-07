@@ -385,6 +385,13 @@ export default function CrossRoadGame() {
                   }}
                 >
                   {!isRoad && (
+                    <img
+                      src="/grass.png"
+                      alt="Grass"
+                      className="absolute inset-0 h-full w-full rounded-xl object-cover"
+                    />
+                  )}
+                  {!isRoad && (
                     <div
                       className="absolute inset-0 rounded-xl opacity-40"
                       style={{
@@ -394,16 +401,11 @@ export default function CrossRoadGame() {
                     />
                   )}
                   {hasCar && (
-                    <div
-                      className="flex h-[72%] w-[86%] items-center justify-center rounded-lg text-[10px] font-black"
-                      style={{
-                        background: 'linear-gradient(160deg, #EF4444 0%, #B91C1C 100%)',
-                        color: 'white',
-                        boxShadow: '0 8px 14px rgba(127,29,29,0.26)',
-                      }}
-                    >
-                      {t.crossRoadRunnerCarLabel}
-                    </div>
+                    <img
+                      src="/trap.png"
+                      alt={t.crossRoadRunnerCarLabel}
+                      className="relative z-10 h-[72%] w-[86%] object-contain drop-shadow-[0_8px_14px_rgba(127,29,29,0.26)]"
+                    />
                   )}
                   {isPlayer && (
                     <div
