@@ -24,6 +24,10 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
+import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
+
 const TOTAL_QUESTIONS = 10;
 
 const QUESTION_BANK = [
@@ -78,37 +82,8 @@ function normalizeAnswer(value) {
 }
 
 export default function CombinedWordQuizGame() {
+  const { t } = useLanguage();
   const { timeLimit: QUIZ_TIME_LIMIT, goal: PASS_SCORE } = getMiniGameConfig('wordQuiz', getSessionDifficulty());
-  const COPY = {
-    checkpoint: 'Checkpoint',
-    title: 'Combined word quiz',
-    subtitle: `Solve picture-word combinations. Get at least ${PASS_SCORE} correct out of ${TOTAL_QUESTIONS} before time runs out.`,
-    timeLeft: 'Time left',
-    score: 'Score',
-    question: 'Question',
-    hint: 'Hint',
-    answerLabel: 'Your answer',
-    answerPlaceholder: 'Type the combined word',
-    howToWin: 'How to win',
-    howToWinText: `Combine the picture clues into one word. You need at least ${PASS_SCORE} correct answers to clear checkpoint 3.`,
-    back: 'Back',
-    submit: 'Submit answer',
-    correct: (answer) => `Correct! ${answer}`,
-    wrong: (answer) => `Wrong! Correct answer: ${answer}`,
-    winTitle: 'Quiz cleared!',
-    winText: (coins) => `You reached the pass grade and earned ${coins} coins.`,
-    loseTitle: 'Quiz over',
-    loseNoLife: 'No lives left. Buy an extra life now to keep your current checkpoint.',
-    loseHasLife: (lives) => `One life was removed. ${lives} lives left.`,
-    backTitle: 'Leave this game?',
-    backText: 'If you go back now, one life will be lost.',
-    backResetText: 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.',
-    confirm: 'Confirm',
-    cancel: 'Cancel',
-    continue: 'Continue',
-    exitGame: 'Exit game',
-    playAgain: 'Play again',
-  };
   useBlockBack();
   const navigate = useNavigate();
   const location = useLocation();
@@ -250,9 +225,15 @@ export default function CombinedWordQuizGame() {
 
     if (isCorrect) {
       setScore((value) => value + 1);
-      setFeedback({ type: 'good', text: COPY.correct(currentQuestion.answer) });
+      setFeedback({
+        type: 'good',
+        text: translate(t.combinedWordQuizCorrectFeedback, { answer: currentQuestion.answer }),
+      });
     } else {
-      setFeedback({ type: 'bad', text: COPY.wrong(currentQuestion.answer) });
+      setFeedback({
+        type: 'bad',
+        text: translate(t.combinedWordQuizWrongFeedback, { answer: currentQuestion.answer }),
+      });
     }
 
     setTimeout(() => {
@@ -291,19 +272,24 @@ export default function CombinedWordQuizGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            {COPY.checkpoint} {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            {COPY.title}
+            {t.combinedWordQuizTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {hasStarted ? COPY.subtitle : `Press Start when you are ready to begin ${COPY.title.toLowerCase()}.`}
+            {hasStarted
+              ? translate(t.combinedWordQuizRunningInstruction, {
+                  goal: PASS_SCORE,
+                  total: TOTAL_QUESTIONS,
+                })
+              : t.combinedWordQuizReadyInstruction}
           </p>
         </div>
 
         {!hasStarted && (
           <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            Start
+            {t.start}
           </Button>
         )}
 
@@ -311,7 +297,7 @@ export default function CombinedWordQuizGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
-              {COPY.timeLeft}
+              {t.combinedWordQuizTimeLeft}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -321,7 +307,7 @@ export default function CombinedWordQuizGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#C2410C' }}>
               <Target size={14} />
-              {COPY.score}
+              {t.combinedWordQuizScore}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#9A3412' }}>
               {score}/{PASS_SCORE}
@@ -333,7 +319,7 @@ export default function CombinedWordQuizGame() {
           <Card>
             {/* Question counter */}
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{COPY.question}</p>
+              <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{t.combinedWordQuizQuestion}</p>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ECFCCB', color: '#365314' }}>
                 {Math.min(currentIndex + 1, TOTAL_QUESTIONS)}/{TOTAL_QUESTIONS}
               </span>
@@ -348,10 +334,9 @@ export default function CombinedWordQuizGame() {
               ))}
             </div>
 
-
             <Input
-              label={COPY.answerLabel}
-              placeholder={COPY.answerPlaceholder}
+              label={t.combinedWordQuizAnswerLabel}
+              placeholder={t.combinedWordQuizAnswerPlaceholder}
               value={answer}
               onChange={(event) => setAnswer(event.target.value)}
             />
@@ -371,19 +356,19 @@ export default function CombinedWordQuizGame() {
 
         <Card>
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            {COPY.howToWin}
+            {t.combinedWordQuizHowToWinTitle}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            {COPY.howToWinText}
+            {translate(t.combinedWordQuizHowToWinDesc, { goal: PASS_SCORE })}
           </p>
         </Card>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            {COPY.back}
+            {t.back}
           </Button>
           <Button variant="green" onClick={handleSubmitAnswer} disabled={!hasStarted || !answer.trim() || showWin || showLose}>
-            {COPY.submit}
+            {t.combinedWordQuizSubmit}
           </Button>
         </div>
       </div>
@@ -392,12 +377,12 @@ export default function CombinedWordQuizGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title={COPY.winTitle}
-            message={COPY.winText(earnedCoins)}
+            title={t.combinedWordQuizWinTitle}
+            message={translate(t.combinedWordQuizWinMessage, { coins: earnedCoins })}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            {COPY.continue}
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -407,12 +392,12 @@ export default function CombinedWordQuizGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              {COPY.loseTitle}
+              {t.combinedWordQuizLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? COPY.loseNoLife
-                : COPY.loseHasLife(loseState.remainingLives ?? 0)}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
           <CheckpointShopPanel
@@ -420,17 +405,17 @@ export default function CombinedWordQuizGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : COPY.playAgain}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              {COPY.exitGame}
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -441,20 +426,20 @@ export default function CombinedWordQuizGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              {COPY.backTitle}
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
-                : backWillResetToStart ? COPY.backResetText : COPY.backText}
+                ? t.whackLeaveNotStarted
+                : backWillResetToStart ? t.whackLeaveLastLife : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              {COPY.confirm}
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              {COPY.cancel}
+              {t.cancel}
             </Button>
           </div>
         </div>

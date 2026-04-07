@@ -533,6 +533,170 @@ randomColorClickerDefaultFeedback: 'Get a point for each correct answer. Wrong a
 randomColorClickerWinTitle: 'Color master!',
 randomColorClickerWinMessage: 'You reached {score} points and earned {coins} coins from the time left.',
 randomColorClickerLoseTitle: 'Game over',
+
+// ───────── PUZZLE PLACEMENT GAME ─────────
+puzzlePlacementTitle: 'Piece Placement Puzzle',
+puzzlePlacementReadyInstruction: 'Press Start when you are ready to solve the puzzle.',
+puzzlePlacementRunningInstruction: 'Drag the pieces into the correct places.',
+
+puzzlePlacementPlaced: 'Placed',
+puzzlePlacementPiecesTitle: 'Puzzle Pieces',
+
+puzzlePlacementWrongSpot: 'That piece does not fit there',
+
+puzzlePlacementWinTitle: 'Puzzle completed!',
+puzzlePlacementWinMessage:
+  'All pieces are in the correct place. You earned {coins} coins from the time left.',
+
+puzzlePlacementLoseTitle: 'Game over',
+
+// ───────── MEMORY CARD GAME ─────────
+memoryMatchTitle: 'Memory Card Game',
+memoryMatchReadyInstruction: 'Press Start when you are ready to begin matching pairs.',
+memoryMatchRunningInstruction: 'Match every pair before the timer runs out.',
+
+memoryMatchHowToWinTitle: 'How to win',
+memoryMatchHowToWinDesc:
+  'Tap two cards to reveal them. Matching pairs stay open. Find all 6 pairs before time runs out.',
+
+memoryMatchWinTitle: 'You win!',
+memoryMatchWinMessage:
+  'All cards are matched. You earned {coins} coins from the time left.',
+
+  // ───────── MAZE GAME ─────────
+mazeRunnerTitle: 'Maze Game',
+mazeRunnerReadyInstruction: 'Press Start when you are ready to enter the maze.',
+mazeRunnerRunningInstruction: 'Move one cell at a time to reach the glowing exit.',
+
+mazeRunnerExitLabel: 'Exit',
+mazeRunnerExitFound: 'Found',
+mazeRunnerExitAhead: 'Ahead',
+mazeRunnerMoves: 'Moves',
+
+mazeRunnerReadyStatus: 'Press Start when you are ready to move.',
+mazeRunnerEasyStatus: 'No enemies in easy mode. Find the exit before the timer ends.',
+mazeRunnerEnemyStatus:
+  'Watch out for {count} wandering {enemyWord} while you search for the exit.',
+mazeRunnerEnemyWordSingular: 'enemy',
+mazeRunnerEnemyWordPlural: 'enemies',
+
+mazeRunnerCaughtStatus: 'A maze enemy caught you',
+mazeRunnerExitReachedStatus: 'Exit reached!',
+mazeRunnerKeepMovingStatus: 'Keep moving. The exit is glowing.',
+
+mazeRunnerControlsTitle: 'Move controls',
+
+mazeRunnerWinTitle: 'Maze escaped!',
+mazeRunnerWinMessage:
+  'You found the exit in {moves} moves and earned {coins} coins from the time left.',
+
+mazeRunnerLoseTitle: 'Maze run failed',
+
+// ───────── CROSS ROAD GAME ─────────
+crossRoadRunnerTitle: 'Cross Road',
+crossRoadRunnerReadyInstruction: 'Press Start when you are ready to cross the road.',
+crossRoadRunnerRunningInstruction:
+  'Cross alternating grass and road lanes, avoid cars, and reach the top row.',
+
+crossRoadRunnerTime: 'Time',
+crossRoadRunnerGoal: 'Goal',
+crossRoadRunnerSteps: 'Steps',
+
+crossRoadRunnerGoalReached: 'Reached',
+crossRoadRunnerGoalTopRow: 'Top row',
+
+crossRoadRunnerReadyStatus: 'Press Start when you are ready to move.',
+crossRoadRunnerIntroStatus: 'Cross grass and road bands to reach the top goal row.',
+crossRoadRunnerGoalReachedStatus: 'You reached the top goal row!',
+crossRoadRunnerSafeStatus: 'Safe zone. Take a breath and plan the next road.',
+crossRoadRunnerTrafficStatus: 'Traffic ahead. Move carefully through the road.',
+crossRoadRunnerHitStatus: 'A car hit you.',
+crossRoadRunnerTimeUpStatus: 'Time is up.',
+
+crossRoadRunnerControlsTitle: 'Move controls',
+
+crossRoadRunnerGoalLabel: 'GOAL',
+crossRoadRunnerSafeLabel: 'SAFE',
+crossRoadRunnerStartLabel: 'START',
+crossRoadRunnerPlayerLabel: 'U',
+crossRoadRunnerCarLabel: 'CAR',
+
+crossRoadRunnerWinTitle: 'Road crossed!',
+crossRoadRunnerWinMessage:
+  'You reached the top row in {steps} steps and earned {coins} coins from the time left.',
+
+crossRoadRunnerLoseTitle: 'Cross road failed',
+
+// ───────── COMBINED WORD QUIZ ─────────
+combinedWordQuizTitle: 'Combined Word Quiz',
+combinedWordQuizReadyInstruction:
+  'Press Start when you are ready to begin the word challenge.',
+combinedWordQuizRunningInstruction:
+  'Solve the picture-word combinations. Get at least {goal} correct out of {total} before time runs out.',
+
+combinedWordQuizCheckpointLabel: 'Checkpoint',
+combinedWordQuizTimeLeft: 'Time left',
+combinedWordQuizScore: 'Score',
+combinedWordQuizQuestion: 'Question',
+
+combinedWordQuizAnswerLabel: 'Your answer',
+combinedWordQuizAnswerPlaceholder: 'Type the combined word',
+
+combinedWordQuizHowToWinTitle: 'How to win',
+combinedWordQuizHowToWinDesc:
+  'Combine the picture clues into one word. You need at least {goal} correct answers to clear this checkpoint.',
+
+combinedWordQuizSubmit: 'Submit answer',
+
+combinedWordQuizCorrectFeedback: 'Correct! {answer}',
+combinedWordQuizWrongFeedback: 'Wrong! Correct answer: {answer}',
+
+combinedWordQuizWinTitle: 'Quiz cleared!',
+combinedWordQuizWinMessage:
+  'You reached the pass grade and earned {coins} coins.',
+
+combinedWordQuizLoseTitle: 'Quiz over',
+
+// ───────── CLICK-TO-SHOOT TARGETS GAME ─────────
+targetShooterTitle: 'Click-to-Shoot Targets',
+targetShooterReadyInstruction: 'Press Start when you are ready to shoot targets.',
+targetShooterRunningInstruction: 'Tap the moving target before the timer runs out.',
+
+targetShooterHitLabel: 'Hit',
+
+targetShooterModeTitle: 'Sharpshooter mode',
+targetShooterReadyStatus: 'Ready to start',
+targetShooterModeDesc:
+  'Goal: land {goal} clean hits. The target relocates every moment, so keep tracking it.',
+targetShooterReadyDesc: "Press Start when you're ready to land {goal} clean hits.",
+
+targetShooterWinTitle: 'Targets cleared!',
+targetShooterWinMessage:
+  'You landed {hits} hits and earned {coins} coins from the time left.',
+
+  // ───────── CLICK COUNTER GAME ─────────
+clickRushTitle: 'Click Counter Game',
+clickRushReadyInstruction: 'Press Start when you are ready to begin tapping.',
+clickRushRunningInstruction: 'Tap as fast as you can and reach the target before time runs out.',
+
+clickRushClicksLabel: 'Clicks',
+
+clickRushStatusTitleReady: 'Press Start to begin',
+clickRushStatusTitleRunning: 'Keep tapping the button',
+clickRushStatusDescReady: "Tap Start when you're ready to reach {goal} taps.",
+clickRushStatusDescRunning: 'Goal: reach {goal} taps in time.',
+
+clickRushTapButton: 'TAP!',
+
+clickRushHowToWinTitle: 'How to win',
+clickRushHowToWinDesc:
+  'Tap the big button as many times as possible. If you reach {goal} taps before the timer ends, you clear this checkpoint.',
+
+clickRushWinTitle: 'Target reached!',
+clickRushWinMessage:
+  'You hit {clicks} taps and earned {coins} coins from the time left.',
+
+
   },
 
   FI: {
@@ -1070,6 +1234,166 @@ randomColorClickerDefaultFeedback: 'Saat pisteen jokaisesta oikeasta vastauksest
 randomColorClickerWinTitle: 'Värimestari!',
 randomColorClickerWinMessage: 'Sait {score} pistettä ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
 
+// ───────── PALAPELIN PALOJEN ASETTELU ─────────
+puzzlePlacementTitle: 'Palojen asettelupalapeli',
+puzzlePlacementReadyInstruction: 'Paina Aloita, kun olet valmis ratkaisemaan palapelin.',
+puzzlePlacementRunningInstruction: 'Vedä palat oikeille paikoilleen.',
+
+puzzlePlacementPlaced: 'Asetettu',
+puzzlePlacementPiecesTitle: 'Palapelin palat',
+
+puzzlePlacementWrongSpot: 'Tuo pala ei kuulu siihen kohtaan',
+
+puzzlePlacementWinTitle: 'Palapeli valmis!',
+puzzlePlacementWinMessage:
+  'Kaikki palat ovat oikeilla paikoillaan. Ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+puzzlePlacementLoseTitle: 'Peli päättyi',
+
+// ───────── MUISTIKORTTIPELI ─────────
+memoryMatchTitle: 'Muistikorttipeli',
+memoryMatchReadyInstruction: 'Paina Aloita, kun olet valmis etsimään pareja.',
+memoryMatchRunningInstruction: 'Löydä kaikki parit ennen kuin aika loppuu.',
+
+memoryMatchHowToWinTitle: 'Kuinka voitat',
+memoryMatchHowToWinDesc:
+  'Napauta kahta korttia paljastaaksesi ne. Yhteensopivat parit jäävät näkyviin. Löydä kaikki 6 paria ennen ajan loppumista.',
+
+memoryMatchWinTitle: 'Voitit!',
+memoryMatchWinMessage:
+  'Kaikki kortit on yhdistetty pareiksi. Ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+// ───────── LABYRINTTIPELI ─────────
+mazeRunnerTitle: 'Labyrinttipeli',
+mazeRunnerReadyInstruction: 'Paina Aloita, kun olet valmis astumaan labyrinttiin.',
+mazeRunnerRunningInstruction: 'Liiku yksi ruutu kerrallaan kohti hohtavaa uloskäyntiä.',
+
+mazeRunnerExitLabel: 'Uloskäynti',
+mazeRunnerExitFound: 'Löytyi',
+mazeRunnerExitAhead: 'Edessä',
+mazeRunnerMoves: 'Siirrot',
+
+mazeRunnerReadyStatus: 'Paina Aloita, kun olet valmis liikkumaan.',
+mazeRunnerEasyStatus: 'Helpolla tasolla ei ole vihollisia. Löydä uloskäynti ennen ajan loppumista.',
+mazeRunnerEnemyStatus:
+  'Varo {count} harhailevaa {enemyWord}, kun etsit uloskäyntiä.',
+mazeRunnerEnemyWordSingular: 'vihollista',
+mazeRunnerEnemyWordPlural: 'vihollista',
+
+mazeRunnerCaughtStatus: 'Labyrintin vihollinen sai sinut kiinni',
+mazeRunnerExitReachedStatus: 'Uloskäynti saavutettu!',
+mazeRunnerKeepMovingStatus: 'Jatka liikkumista. Uloskäynti hohtaa edessäpäin.',
+
+mazeRunnerControlsTitle: 'Liikkumisohjaimet',
+
+mazeRunnerWinTitle: 'Pääsit ulos labyrintista!',
+mazeRunnerWinMessage:
+  'Löysit uloskäynnin {moves} siirrossa ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+mazeRunnerLoseTitle: 'Labyrinttijuoksu epäonnistui',
+
+// ───────── CROSS ROAD -PELI ─────────
+crossRoadRunnerTitle: 'Tienylitys',
+crossRoadRunnerReadyInstruction: 'Paina Aloita, kun olet valmis ylittämään tien.',
+crossRoadRunnerRunningInstruction:
+  'Ylitä vuorottelevat nurmi- ja ajokaistat, vältä autot ja saavuta ylin rivi.',
+
+crossRoadRunnerTime: 'Aika',
+crossRoadRunnerGoal: 'Tavoite',
+crossRoadRunnerSteps: 'Askeleet',
+
+crossRoadRunnerGoalReached: 'Saavutettu',
+crossRoadRunnerGoalTopRow: 'Ylin rivi',
+
+crossRoadRunnerReadyStatus: 'Paina Aloita, kun olet valmis liikkumaan.',
+crossRoadRunnerIntroStatus: 'Ylitä nurmi- ja tiekaistat päästäksesi ylimmälle tavoiteriville.',
+crossRoadRunnerGoalReachedStatus: 'Saavutit ylimmän tavoiterivin!',
+crossRoadRunnerSafeStatus: 'Turva-alue. Hengähdä hetki ja suunnittele seuraava tieosuus.',
+crossRoadRunnerTrafficStatus: 'Liikennettä edessä. Etene varovasti tien yli.',
+crossRoadRunnerHitStatus: 'Auto osui sinuun.',
+crossRoadRunnerTimeUpStatus: 'Aika loppui.',
+
+crossRoadRunnerControlsTitle: 'Liikkumisohjaimet',
+
+crossRoadRunnerGoalLabel: 'MAALI',
+crossRoadRunnerSafeLabel: 'TURVA',
+crossRoadRunnerStartLabel: 'ALKU',
+crossRoadRunnerPlayerLabel: 'P',
+crossRoadRunnerCarLabel: 'AUTO',
+
+crossRoadRunnerWinTitle: 'Tie ylitetty!',
+crossRoadRunnerWinMessage:
+  'Saavutit ylimmän rivin {steps} askeleessa ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+crossRoadRunnerLoseTitle: 'Tienylitys epäonnistui',
+
+// ───────── YHDISTELMÄSANAVISA ─────────
+combinedWordQuizTitle: 'Yhdistelmäsanavisa',
+combinedWordQuizReadyInstruction:
+  'Paina Aloita, kun olet valmis aloittamaan sanahaasteen.',
+combinedWordQuizRunningInstruction:
+  'Ratkaise kuvista muodostuvat yhdistelmäsanat. Saat vähintään {goal} oikein {total}:stä ennen ajan loppumista.',
+
+combinedWordQuizCheckpointLabel: 'Tarkistuspiste',
+combinedWordQuizTimeLeft: 'Aikaa jäljellä',
+combinedWordQuizScore: 'Pisteet',
+combinedWordQuizQuestion: 'Kysymys',
+
+combinedWordQuizAnswerLabel: 'Vastauksesi',
+combinedWordQuizAnswerPlaceholder: 'Kirjoita yhdistelmäsana',
+
+combinedWordQuizHowToWinTitle: 'Kuinka voitat',
+combinedWordQuizHowToWinDesc:
+  'Yhdistä kuvavihjeet yhdeksi sanaksi. Tarvitset vähintään {goal} oikeaa vastausta läpäistäksesi tämän tarkistuspisteen.',
+
+combinedWordQuizSubmit: 'Lähetä vastaus',
+
+combinedWordQuizCorrectFeedback: 'Oikein! {answer}',
+combinedWordQuizWrongFeedback: 'Väärin! Oikea vastaus: {answer}',
+
+combinedWordQuizWinTitle: 'Visa läpäisty!',
+combinedWordQuizWinMessage:
+  'Saavutit läpipääsyrajan ja ansaitsit {coins} kolikkoa.',
+
+combinedWordQuizLoseTitle: 'Visa päättyi',
+
+// ───────── KLIKKAAMALLA AMMUTTAVAT MAALIT ─────────
+targetShooterTitle: 'Klikkaa ja ammu maaleja',
+targetShooterReadyInstruction: 'Paina Aloita, kun olet valmis ampumaan maaleja.',
+targetShooterRunningInstruction: 'Napauta liikkuvaa maalia ennen ajan loppumista.',
+
+targetShooterHitLabel: 'Osumat',
+
+targetShooterModeTitle: 'Tarkka-ampujatila',
+targetShooterReadyStatus: 'Valmis aloittamaan',
+targetShooterModeDesc:
+  'Tavoite: kerää {goal} puhdasta osumaa. Maali vaihtaa paikkaa jatkuvasti, joten pysy sen perässä.',
+targetShooterReadyDesc: 'Paina Aloita, kun olet valmis keräämään {goal} puhdasta osumaa.',
+
+targetShooterWinTitle: 'Maalit suoritettu!',
+targetShooterWinMessage:
+  'Sait {hits} osumaa ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
+
+  // ───────── NAPUTUSLASKURIPELI ─────────
+clickRushTitle: 'Naputuslaskuripeli',
+clickRushReadyInstruction: 'Paina Aloita, kun olet valmis aloittamaan naputtamisen.',
+clickRushRunningInstruction: 'Naputa niin nopeasti kuin pystyt ja saavuta tavoite ennen ajan loppumista.',
+
+clickRushClicksLabel: 'Napautukset',
+
+clickRushStatusTitleReady: 'Paina Aloita aloittaaksesi',
+clickRushStatusTitleRunning: 'Jatka naputtamista',
+clickRushStatusDescReady: 'Paina Aloita, kun olet valmis saavuttamaan {goal} napautusta.',
+clickRushStatusDescRunning: 'Tavoite: saavuta {goal} napautusta ajoissa.',
+
+clickRushTapButton: 'NAPUTA!',
+
+clickRushHowToWinTitle: 'Kuinka voitat',
+clickRushHowToWinDesc:
+  'Naputa suurta painiketta mahdollisimman monta kertaa. Jos saavutat {goal} napautusta ennen ajan loppumista, läpäiset tämän tarkistuspisteen.',
+
+clickRushWinTitle: 'Tavoite saavutettu!',
+clickRushWinMessage:
+  'Sait {clicks} napautusta ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
   },
 };
 

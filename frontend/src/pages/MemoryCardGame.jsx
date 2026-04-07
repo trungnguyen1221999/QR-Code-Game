@@ -24,7 +24,11 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
+
 const CARD_EMOJIS = ['🐼', '🦊', '🐸', '🐵', '🐧', '🐯'];
+
 function shuffleCards() {
   return [...CARD_EMOJIS, ...CARD_EMOJIS]
     .sort(() => Math.random() - 0.5)
@@ -42,6 +46,7 @@ function formatTime(seconds) {
 }
 
 export default function MemoryCardGame() {
+  const { t } = useLanguage();
   const { timeLimit: MEMORY_TIME_LIMIT } = getMiniGameConfig('memory', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
@@ -218,13 +223,13 @@ export default function MemoryCardGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
-            Memory card game
+            {t.memoryMatchTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {hasStarted ? 'Match every pair before the 2-minute timer ends.' : 'Press Start when you are ready to begin matching pairs.'}
+            {hasStarted ? t.memoryMatchRunningInstruction : t.memoryMatchReadyInstruction}
           </p>
         </div>
 
@@ -232,7 +237,7 @@ export default function MemoryCardGame() {
            <div className='flex justify-between items-center' > 
               <p className="text font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
                 <Clock size={16} />
-                Time left
+                {t.timeLeft}
               </p>
               <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
                 {formatTime(timeLeft)}
@@ -272,20 +277,20 @@ export default function MemoryCardGame() {
 
         <Card>
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            How to win
+            {t.memoryMatchHowToWinTitle}
           </p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
-            Tap two cards to reveal them. If they match, they stay open. Match all 6 pairs before time runs out.
+            {t.memoryMatchHowToWinDesc}
           </p>
         </Card>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-            Back
+            {t.back}
           </Button>
           {!hasStarted ? (
             <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              Start
+              {t.start}
             </Button>
           ) : (
             <div />
@@ -297,12 +302,12 @@ export default function MemoryCardGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="You win!"
-            message={`All cards are matched. You earned ${earnedCoins} coins from the time left.`}
+            title={t.memoryMatchWinTitle}
+            message={translate(t.memoryMatchWinMessage, { coins: earnedCoins })}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleBackToGame} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -312,12 +317,12 @@ export default function MemoryCardGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Time is up
+              {t.whackLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
           <CheckpointShopPanel
@@ -325,7 +330,7 @@ export default function MemoryCardGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
@@ -336,10 +341,10 @@ export default function MemoryCardGame() {
               onClick={handleLosePrimaryAction}
               disabled={busy}
             >
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -350,22 +355,22 @@ export default function MemoryCardGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>

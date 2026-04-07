@@ -24,6 +24,8 @@ import {
   registerCheckpointLifeLoss,
 } from '../utils/checkpointLoseFlow';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
 
 const DIRECTIONS = {
   up: { row: -1, col: 0 },
@@ -90,6 +92,7 @@ function hasCollision(player, lanes) {
 }
 
 export default function CrossRoadGame() {
+  const { t } = useLanguage();
   const difficulty = getSessionDifficulty();
   const { timeLimit, cols, moveInterval } = getMiniGameConfig('crossRoad', difficulty);
   const lanePattern = getLanePattern(difficulty);
@@ -110,7 +113,7 @@ export default function CrossRoadGame() {
   const [player, setPlayer] = useState(initialPlayer);
   const [lanes, setLanes] = useState(() => buildLanes(rows, cols, lanePattern));
   const [steps, setSteps] = useState(0);
-  const [statusText, setStatusText] = useState('Cross grass and road bands to reach the top goal row.');
+  const [statusText, setStatusText] = useState(t.crossRoadRunnerIntroStatus);
   const [busy, setBusy] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
   const [showWin, setShowWin] = useState(false);
@@ -131,7 +134,7 @@ export default function CrossRoadGame() {
     if (!hasStarted || showWin || showLose || showBackConfirm) return;
 
     if (timeLeft <= 0) {
-      void handleLoss('Time is up.');
+      void handleLoss(t.crossRoadRunnerTimeUpStatus);
       return;
     }
 
@@ -140,7 +143,7 @@ export default function CrossRoadGame() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted]);
+  }, [showBackConfirm, showLose, showWin, timeLeft, hasStarted, t.crossRoadRunnerTimeUpStatus]);
 
   useEffect(() => {
     if (!hasStarted || showWin || showLose || showBackConfirm || busy) return undefined;
@@ -155,7 +158,7 @@ export default function CrossRoadGame() {
         }));
 
         if (hasCollision(playerRef.current, nextLanes)) {
-          void handleLoss('A car hit you.');
+          void handleLoss(t.crossRoadRunnerHitStatus);
         }
 
         return nextLanes;
@@ -163,7 +166,7 @@ export default function CrossRoadGame() {
     }, moveInterval);
 
     return () => clearInterval(interval);
-  }, [busy, cols, moveInterval, showBackConfirm, showLose, showWin, hasStarted]);
+  }, [busy, cols, moveInterval, showBackConfirm, showLose, showWin, hasStarted, t.crossRoadRunnerHitStatus]);
 
   const registerLifeLoss = async () => {
     try {
@@ -204,7 +207,7 @@ export default function CrossRoadGame() {
     setSteps((value) => value + 1);
 
     if (nextPlayer.row === 0) {
-      setStatusText('You reached the top goal row!');
+      setStatusText(t.crossRoadRunnerGoalReachedStatus);
       setFlash('good');
       window.setTimeout(() => setFlash(null), 240);
       outcomeLockedRef.current = true;
@@ -213,15 +216,15 @@ export default function CrossRoadGame() {
     }
 
     if (hasCollision(nextPlayer, lanes)) {
-      void handleLoss('A car hit you.');
+      void handleLoss(t.crossRoadRunnerHitStatus);
       return;
     }
 
     const bandType = getBandType(nextPlayer.row, rows, lanePattern);
     setStatusText(
       bandType === 'safe'
-        ? 'Safe zone. Take a breath and plan the next road.'
-        : 'Traffic ahead. Move carefully through the road.'
+        ? t.crossRoadRunnerSafeStatus
+        : t.crossRoadRunnerTrafficStatus
     );
   };
 
@@ -234,7 +237,7 @@ export default function CrossRoadGame() {
     playerRef.current = resetPlayer;
     setLanes(buildLanes(rows, cols, lanePattern));
     setSteps(0);
-    setStatusText('Cross grass and road bands to reach the top goal row.');
+    setStatusText(t.crossRoadRunnerIntroStatus);
     setBusy(false);
     setShowWin(false);
     setShowLose(false);
@@ -299,20 +302,20 @@ export default function CrossRoadGame() {
       <div className="pt-5 pb-6 flex flex-col gap-4">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text)' }}>
             <Goal size={20} />
-            Cross Road
+            {t.crossRoadRunnerTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {hasStarted ? 'Cross alternating grass and road lanes, avoid cars, and reach the top row.' : 'Press Start when you are ready to cross the road.'}
+            {hasStarted ? t.crossRoadRunnerRunningInstruction : t.crossRoadRunnerReadyInstruction}
           </p>
         </div>
 
         {!hasStarted && (
           <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            Start
+            {t.start}
           </Button>
         )}
 
@@ -320,7 +323,7 @@ export default function CrossRoadGame() {
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={14} />
-              Time
+              {t.crossRoadRunnerTime}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -329,16 +332,16 @@ export default function CrossRoadGame() {
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#047857' }}>
-              Goal
+              {t.crossRoadRunnerGoal}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#047857' }}>
-              {player.row === 0 ? 'Reached' : 'Top row'}
+              {player.row === 0 ? t.crossRoadRunnerGoalReached : t.crossRoadRunnerGoalTopRow}
             </p>
           </Card>
 
           <Card>
             <p className="text-xs font-semibold" style={{ color: '#9333EA' }}>
-              Steps
+              {t.crossRoadRunnerSteps}
             </p>
             <p className="text-lg font-bold mt-1" style={{ color: '#7E22CE' }}>
               {steps}
@@ -348,7 +351,7 @@ export default function CrossRoadGame() {
 
         <Card className="text-center">
           <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-            {hasStarted ? statusText : 'Press Start when you are ready to move.'}
+            {hasStarted ? statusText : t.crossRoadRunnerReadyStatus}
           </p>
         </Card>
 
@@ -370,7 +373,6 @@ export default function CrossRoadGame() {
               const lane = lanes.find((entry) => entry.row === row);
               const bandType = lane?.bandType ?? getBandType(row, rows, lanePattern);
               const isRoad = bandType === 'road';
-              const isSafeZone = bandType === 'safe' || bandType === 'start' || bandType === 'goal';
               const hasCar = lane?.cars.includes(col);
               const isPlayer = player.row === row && player.col === col;
 
@@ -406,7 +408,7 @@ export default function CrossRoadGame() {
                         boxShadow: '0 8px 14px rgba(127,29,29,0.26)',
                       }}
                     >
-                      CAR
+                      {t.crossRoadRunnerCarLabel}
                     </div>
                   )}
                   {isPlayer && (
@@ -419,22 +421,22 @@ export default function CrossRoadGame() {
                         boxShadow: '0 8px 14px rgba(37,99,235,0.24)',
                       }}
                     >
-                      U
+                      {t.crossRoadRunnerPlayerLabel}
                     </div>
                   )}
                   {bandType === 'goal' && !hasCar && !isPlayer && (
                     <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#052E16' }}>
-                      GOAL
+                      {t.crossRoadRunnerGoalLabel}
                     </span>
                   )}
                   {bandType === 'safe' && !hasCar && !isPlayer && (
                     <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#052E16' }}>
-                      SAFE
+                      {t.crossRoadRunnerSafeLabel}
                     </span>
                   )}
                   {bandType === 'start' && !hasCar && !isPlayer && (
                     <span className="text-[10px] font-black tracking-[0.18em]" style={{ color: '#14532D' }}>
-                      START
+                      {t.crossRoadRunnerStartLabel}
                     </span>
                   )}
                 </div>
@@ -445,7 +447,7 @@ export default function CrossRoadGame() {
 
         <Card>
           <p className="text-sm font-bold text-center mb-3" style={{ color: 'var(--color-text)' }}>
-            Move controls
+            {t.crossRoadRunnerControlsTitle}
           </p>
           <div className="flex flex-col items-center gap-2">
             <button
@@ -486,7 +488,7 @@ export default function CrossRoadGame() {
         </Card>
 
         <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
-          Back
+          {t.back}
         </Button>
       </div>
 
@@ -494,12 +496,12 @@ export default function CrossRoadGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="Road crossed!"
-            message={`You reached the top row in ${steps} steps and earned ${earnedCoins} coins from the time left.`}
+            title={t.crossRoadRunnerWinTitle}
+            message={translate(t.crossRoadRunnerWinMessage, { steps, coins: earnedCoins })}
           />
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -509,12 +511,12 @@ export default function CrossRoadGame() {
           <span className="text-5xl">⏰</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Cross road failed
+              {t.crossRoadRunnerLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
           <CheckpointShopPanel
@@ -522,17 +524,17 @@ export default function CrossRoadGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
           />
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
@@ -543,22 +545,22 @@ export default function CrossRoadGame() {
           <span className="text-5xl">!</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>

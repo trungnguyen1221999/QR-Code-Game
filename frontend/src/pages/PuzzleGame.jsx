@@ -24,6 +24,8 @@ import {
 } from '../utils/checkpointLoseFlow';
 import Card from '../components/ui/Card';
 import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGame';
+import { useLanguage } from '../context/LanguageContext';
+import { translate } from '../translations';
 
 const GRID_SIZE = 3;
 const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
@@ -82,6 +84,7 @@ function getDistance(a, b) {
 }
 
 export default function PuzzlePlacementGame() {
+  const { t } = useLanguage();
   const { timeLimit: PUZZLE_TIME_LIMIT } = getMiniGameConfig('puzzle', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
@@ -186,7 +189,7 @@ export default function PuzzlePlacementGame() {
 
     if (piece.correctIndex !== slotIndex) {
       setShakeSlotIndex(slotIndex);
-      toast.error('That piece does not fit there');
+      toast.error(t.puzzlePlacementWrongSpot);
       return false;
     }
 
@@ -356,17 +359,17 @@ export default function PuzzlePlacementGame() {
       <div className="pt-4 pb-4 flex flex-col gap-3">
         <div>
           <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-primary)' }}>
-            Checkpoint {checkpoint}
+            {translate(t.checkpointLabel, { checkpoint })}
           </p>
           <h2
             className="text-lg font-bold flex items-center gap-2"
             style={{ color: 'var(--color-text)' }}
           >
             <Puzzle size={18} />
-            Piece Placement Puzzle
+            {t.puzzlePlacementTitle}
           </h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            {hasStarted ? 'Drag the pieces into the correct places.' : 'Press Start when you are ready to solve the puzzle.'}
+            {hasStarted ? t.puzzlePlacementRunningInstruction : t.puzzlePlacementReadyInstruction}
           </p>
         </div>
 
@@ -374,7 +377,7 @@ export default function PuzzlePlacementGame() {
           <Card>
             <p className="text-[11px] font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
               <Clock size={12} />
-              Time left
+              {t.timeLeft}
             </p>
             <p className="text-base font-bold mt-1" style={{ color: '#1D4ED8' }}>
               {formatTime(timeLeft)}
@@ -383,7 +386,7 @@ export default function PuzzlePlacementGame() {
 
           <Card>
             <p className="text-[11px] font-semibold" style={{ color: '#C2410C' }}>
-              Placed
+              {t.puzzlePlacementPlaced}
             </p>
             <p className="text-base font-bold mt-1" style={{ color: '#9A3412' }}>
               {completedCount}/{TOTAL_PIECES}
@@ -438,7 +441,7 @@ export default function PuzzlePlacementGame() {
 
         <Card>
           <p className="text-sm font-bold mb-2" style={{ color: 'var(--color-text)' }}>
-            Puzzle Pieces
+            {t.puzzlePlacementPiecesTitle}
           </p>
 
           <div
@@ -486,11 +489,11 @@ export default function PuzzlePlacementGame() {
             onClick={() => setShowBackConfirm(true)}
             disabled={busy || showWin || showLose}
           >
-            Back
+            {t.back}
           </Button>
           {!hasStarted ? (
             <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              Start
+              {t.start}
             </Button>
           ) : (
             <div />
@@ -519,14 +522,14 @@ export default function PuzzlePlacementGame() {
         <div className="flex flex-col items-center gap-4 text-center">
           <CheckpointWinReward
             checkpoint={checkpoint}
-            title="Puzzle completed!"
-            message={`All pieces are in the correct place. You earned ${earnedCoins} coins from the time left.`}
+            title={t.puzzlePlacementWinTitle}
+            message={translate(t.puzzlePlacementWinMessage, { coins: earnedCoins })}
           />
 
           <CheckpointShopPanel earnedCoins={earnedCoins} grantCoins={showWin} isOpen={showWin} checkpoint={checkpoint} />
 
           <Button variant="green" onClick={handleWinContinue} disabled={busy}>
-            Continue
+            {t.continue}
           </Button>
         </div>
       </Popup>
@@ -537,23 +540,23 @@ export default function PuzzlePlacementGame() {
 
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Leave this game?
+              {t.whackLeaveTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {!hasStarted
-                ? 'You have not started this checkpoint yet. Leave without losing a life?'
+                ? t.whackLeaveNotStarted
                 : backWillResetToStart
-                ? 'If you go back now, one life will be lost and you will need to start again from checkpoint 1.'
-                : 'If you go back now, one life will be lost.'}
+                ? t.whackLeaveLastLife
+                : t.whackLeaveNormal}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleBackExit} disabled={busy}>
-              Confirm
+              {t.confirm}
             </Button>
             <Button variant="green" onClick={() => setShowBackConfirm(false)} disabled={busy}>
-              Cancel
+              {t.cancel}
             </Button>
           </div>
         </div>
@@ -565,12 +568,12 @@ export default function PuzzlePlacementGame() {
 
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Time is up
+              {t.whackLoseTitle}
             </h3>
             <p className="text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
               {loseState.needsLifePurchase
-                ? 'No lives left. Buy an extra life now to keep your current checkpoint.'
-                : `One life was removed. ${loseState.remainingLives ?? 0} lives left.`}
+                ? t.whackLoseNoLives
+                : translate(t.whackLoseWithLives, { lives: loseState.remainingLives ?? 0 })}
             </p>
           </div>
 
@@ -579,7 +582,7 @@ export default function PuzzlePlacementGame() {
             checkpoint={checkpoint}
             warningMessage={
               loseState.needsLifePurchase
-                ? 'If you will not buy life from store now, you need to start again from checkpoint 1.'
+                ? t.whackLoseWarning
                 : ''
             }
             onPurchase={handleLoseShopPurchase}
@@ -587,10 +590,10 @@ export default function PuzzlePlacementGame() {
 
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button variant="red" onClick={handleLosePrimaryAction} disabled={busy}>
-              {loseState.needsLifePurchase ? 'Checkpoint 1' : 'Play again'}
+              {loseState.needsLifePurchase ? t.whackCheckpointReset : t.whackPlayAgain}
             </Button>
             <Button variant="green" onClick={handleLoseExit} disabled={busy}>
-              Exit game
+              {t.whackExitGame}
             </Button>
           </div>
         </div>
