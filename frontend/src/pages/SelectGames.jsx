@@ -134,7 +134,7 @@ export const AVAILABLE_GAMES = [
 
 const MAX_GAMES = AVAILABLE_GAMES.length;
 
-function SortableChip({ id, idx, onRemove, t }) {
+function SortableChip({ id, idx, onRemove, onDownload, t }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
 
@@ -159,11 +159,16 @@ function SortableChip({ id, idx, onRemove, t }) {
       {idx + 1}. {game?.emoji} {t[game?.labelKey] ?? game?.labelKey}
       <button
         onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove(id);
-        }}
-        className="ml-0.5 opacity-60"
+        onClick={(e) => { e.stopPropagation(); onDownload(id, idx); }}
+        className="ml-1 opacity-60 hover:opacity-100"
+        title="Download QR"
+      >
+        <Download size={10} />
+      </button>
+      <button
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => { e.stopPropagation(); onRemove(id); }}
+        className="opacity-60 hover:opacity-100"
       >
         <X size={11} />
       </button>
@@ -245,6 +250,18 @@ export default function SelectGames() {
     ctx.font = '16px sans-serif';
     ctx.fillText(t[game?.labelKey] ?? '', canvas.width / 2, QR_SIZE + PADDING + 54);
     return { canvas, game, checkpoint };
+  };
+
+  const handleDownloadSingle = async (gameId, idx) => {
+    try {
+      const { canvas, game, checkpoint } = await buildQRCanvas(gameId, idx);
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `checkpoint-${checkpoint}-${game?.id ?? idx + 1}.png`;
+      a.click();
+    } catch {
+      // silently ignore
+    }
   };
 
   const handleDownloadAllQR = async () => {
@@ -432,7 +449,7 @@ export default function SelectGames() {
                 <SortableContext items={selected} strategy={rectSortingStrategy}>
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {selected.map((id, idx) => (
-                      <SortableChip key={id} id={id} idx={idx} onRemove={remove} t={t} />
+                      <SortableChip key={id} id={id} idx={idx} onRemove={remove} onDownload={handleDownloadSingle} t={t} />
                     ))}
                   </div>
                 </SortableContext>
