@@ -143,7 +143,7 @@ function SortableChip({ id, idx, onRemove, onDownload, t }) {
   return (
     <div
       ref={setNodeRef}
-      className="flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1 cursor-grab active:cursor-grabbing touch-none"
+      className="flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-1 cursor-grab active:cursor-grabbing touch-none max-w-40"
       style={{
         transform: CSS.Transform.toString(transform),
         transition,
@@ -156,11 +156,12 @@ function SortableChip({ id, idx, onRemove, onDownload, t }) {
       {...attributes}
       {...listeners}
     >
-      {idx + 1}. {game?.emoji} {t[game?.labelKey] ?? game?.labelKey}
+      <span className="shrink-0">{idx + 1}. {game?.emoji}</span>
+      <span className="truncate">{t[game?.labelKey] ?? game?.labelKey}</span>
       <button
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onDownload(id, idx); }}
-        className="ml-1 opacity-60 hover:opacity-100"
+        className="shrink-0 ml-0.5 opacity-60 hover:opacity-100"
         title="Download QR"
       >
         <Download size={10} />
@@ -168,7 +169,7 @@ function SortableChip({ id, idx, onRemove, onDownload, t }) {
       <button
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => { e.stopPropagation(); onRemove(id); }}
-        className="opacity-60 hover:opacity-100"
+        className="shrink-0 opacity-60 hover:opacity-100"
       >
         <X size={11} />
       </button>
@@ -434,9 +435,9 @@ export default function SelectGames() {
                 )}
               </p>
               {showChips ? (
-                <ChevronDown size={16} style={{ color: 'var(--color-subtext)' }} />
+                <ChevronDown size={32} style={{ color: 'var(--color-subtext)' }} />
               ) : (
-                <ChevronUp size={16} style={{ color: 'var(--color-subtext)' }} />
+                <ChevronUp size={32} style={{ color: 'var(--color-subtext)' }} />
               )}
             </button>
 
