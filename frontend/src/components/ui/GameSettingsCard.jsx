@@ -7,7 +7,7 @@ import { AVAILABLE_GAMES } from '../../pages/SelectGames';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 import { translate } from '../../translations/index';
 
-async function buildQRCanvas(route, idx) {
+async function buildQRCanvas(route, idx, t) {
   const checkpoint = idx + 1;
   const game = AVAILABLE_GAMES.find((g) => g.route === route);
   const QR_SIZE = 300;
@@ -31,13 +31,14 @@ async function buildQRCanvas(route, idx) {
   ctx.fillText(`Checkpoint ${checkpoint}`, canvas.width / 2, QR_SIZE + PADDING + 30);
   ctx.fillStyle = '#555555';
   ctx.font = '16px sans-serif';
-  ctx.fillText(game?.label ?? route, canvas.width / 2, QR_SIZE + PADDING + 54);
+  ctx.fillText((t && game?.labelKey ? t[game.labelKey] : null) ?? game?.labelKey ?? route, canvas.width / 2, QR_SIZE + PADDING + 54);
   return { canvas, game, checkpoint };
 }
 
 export default function GameSettingsCard({ session }) {
   const { t } = useLanguage();
   const [downloading, setDownloading] = useState(false);
+  const [downloadingIdx, setDownloadingIdx] = useState(null);
 
   const DIFFICULTY_LABEL = {
     easy: t.difficultyEasyLabel,
@@ -50,13 +51,28 @@ export default function GameSettingsCard({ session }) {
     random: t.modeRandomLabel,
   };
 
+  const handleDownloadSingle = async (route, i) => {
+    setDownloadingIdx(i);
+    try {
+      const { canvas, game, checkpoint } = await buildQRCanvas(route, i, t);
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = `checkpoint-${checkpoint}-${game?.id ?? i + 1}.png`;
+      a.click();
+    } catch {
+      toast.error(t.failedToGenerateQrCodes);
+    } finally {
+      setDownloadingIdx(null);
+    }
+  };
+
   const handleDownloadAllQR = async () => {
     const gameOrder = session?.gameOrder;
     if (!gameOrder?.length) return;
     setDownloading(true);
     try {
       for (let i = 0; i < gameOrder.length; i++) {
-        const { canvas, game, checkpoint } = await buildQRCanvas(gameOrder[i], i);
+        const { canvas, game, checkpoint } = await buildQRCanvas(gameOrder[i], i, t);
         const a = document.createElement('a');
         a.href = canvas.toDataURL('image/png');
         a.download = `checkpoint-${checkpoint}-${game?.id ?? i + 1}.png`;
@@ -107,9 +123,18 @@ export default function GameSettingsCard({ session }) {
             const game = AVAILABLE_GAMES.find((g) => g.route === route);
             return (
               <div key={i} className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-subtext)' }}>
-                <span className="font-bold w-4" style={{ color: 'var(--color-primary)' }}>{i + 1}.</span>
-                <span>{game?.emoji ?? '🎮'}</span>
-                <span>{game?.label ?? route}</span>
+                <span className="font-bold w-4 shrink-0" style={{ color: 'var(--color-primary)' }}>{i + 1}.</span>
+                <span className="shrink-0">{game?.emoji ?? '🎮'}</span>
+                <span className="flex-1 truncate">{t[game?.labelKey] ?? game?.labelKey ?? route}</span>
+                <button
+                  onClick={() => handleDownloadSingle(route, i)}
+                  disabled={downloadingIdx === i}
+                  className="shrink-0 flex items-center justify-center rounded-lg px-2 py-1 disabled:opacity-50"
+                  style={{ backgroundColor: '#EFF6FF', color: '#1D4ED8' }}
+                  title={`Download QR #${i + 1}`}
+                >
+                  {downloadingIdx === i ? '…' : <Download size={11} />}
+                </button>
               </div>
             );
           })}
