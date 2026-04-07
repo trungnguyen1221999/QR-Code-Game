@@ -38,7 +38,6 @@ import NotFound from './pages/NotFound';
 import IntroPage from './pages/IntroPage';
 import FinalWinPage from './pages/FinalWinPage';
 import FinalIntroPage from './pages/FinalIntroPage';
-import BackgroundMusic from './components/BackgroundMusic';
 import FloatingMenu from './components/FloatingMenu';
 import { LanguageProvider } from './context/LanguageContext';
 

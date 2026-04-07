@@ -5,7 +5,7 @@ const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(
-    () => localStorage.getItem('language') || 'EN'
+    () => localStorage.getItem('language') || 'FI'
   );
 
   // Persist language in localStorage
@@ -17,7 +17,7 @@ export function LanguageProvider({ children }) {
     return {
       language,
       setLanguage,
-      t: translations[language] || translations.EN,
+      t: translations[language] || translations.FI,
     };
   }, [language]);
 
