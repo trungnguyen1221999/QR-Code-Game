@@ -314,6 +314,7 @@ usesProgress: 'Uses: {current} / {max}',
 allCheckpointsCleared: 'All checkpoints cleared! Get ready for the final challenge.',
 continue: 'Continue',
 secretItemReward: 'You got secret {item} item.',
+twoPreciousItemsReward: 'You got two precious items "Hammer" and "Hat".',
 
 
 // ───────── CHECKPOINT SHOP ─────────
@@ -1034,6 +1035,7 @@ usesProgress: 'Käyttökerrat: {current} / {max}',
 allCheckpointsCleared: 'Kaikki tarkistuspisteet suoritettu! Valmistaudu viimeiseen haasteeseen.',
 continue: 'Jatka',
 secretItemReward: 'Sait salaisen {item} esineen.',
+twoPreciousItemsReward: 'Sait kaksi arvokasta esinettä "Hammer" ja "Hat".',
 
 
 // ───────── CHECKPOINT SHOP ─────────
