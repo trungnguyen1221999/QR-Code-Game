@@ -143,7 +143,7 @@ export default function LandingPage({ onLogout }) {
         <Card>
           <div className="flex items-center gap-3 mb-3">
             <User size={22} style={{ color: 'var(--color-primary)' }} />
-            <h2 className="text-lg" style={{ color: 'var(--color-text)' }}>{t.hostGame}</h2>
+            <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>{t.forHost}</h2>
           </div>
           <p className="text-sm mb-5" style={{ color: 'var(--color-subtext)', lineHeight: '1.6' }}>
             {t.hostGameDesc}

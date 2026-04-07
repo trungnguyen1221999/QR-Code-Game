@@ -2,121 +2,91 @@ import { useEffect, useState } from 'react';
 import BackgroundMusic from './BackgroundMusic';
 import { useLanguage } from '../context/LanguageContext';
 
+const LANG_OPTIONS = [
+  { code: 'FI', label: 'Suomi' },
+  { code: 'EN', label: 'English' },
+];
+
 export default function FloatingMenu() {
   const [open, setOpen] = useState(false);
-  const { language, setLanguage } = useLanguage();
+  const [muted, setMuted] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
 
-  const handleLanguageChange = (lang) => {
-    setLanguage(lang);
+  const handleLanguageChange = (code) => {
+    setLanguage(code);
     setOpen(false);
   };
 
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setOpen(false);
-      }
-    };
-
+    const handleKeyDown = (e) => { if (e.key === 'Escape') setOpen(false); };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return (
     <>
-      {/* Keep music component mounted all the time */}
-      <BackgroundMusic visible={open} />
+      <BackgroundMusic muted={muted} onToggle={setMuted} />
 
       {open && (
         <div
+          className="fixed inset-0 z-9997 bg-black/25"
           onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0, 0, 0, 0.35)',
-            zIndex: 9997,
-          }}
         />
       )}
 
-      <div
-        style={{
-          position: 'fixed',
-          right: 20,
-          bottom: 20,
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-end',
-          gap: 10,
-        }}
-      >
-        {open && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              background: 'rgba(255, 255, 255, 0.92)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              padding: '10px',
-              borderRadius: '18px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
-              minWidth: '140px',
-            }}
-          >
-            <button
-              onClick={() => handleLanguageChange('FI')}
-              style={menuButtonStyle(language === 'FI')}
-            >
-              FI
-            </button>
+      <div className="fixed right-5 bottom-5 z-9999 flex flex-col items-end gap-2.5">
 
-            <button
-              onClick={() => handleLanguageChange('EN')}
-              style={menuButtonStyle(language === 'EN')}
-            >
-              EN
-            </button>
+        {open && (
+          <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-3.5 flex flex-col gap-3 w-44">
+
+            {/* Music */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-bold text-gray-700" style={{ fontFamily: 'Nunito, sans-serif' }}>
+                🎵 {t.musicLabel}
+              </span>
+              <button
+                onClick={() => setMuted(v => !v)}
+                className={`text-xs font-bold px-3 py-1 rounded-full border-none cursor-pointer ${muted ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}
+                style={{ fontFamily: 'Nunito, sans-serif' }}
+              >
+                {muted ? 'OFF' : 'ON'}
+              </button>
+            </div>
+
+            <div className="h-px bg-gray-200" />
+
+            {/* Language */}
+            <div className="flex flex-col gap-2">
+              <p className="text-xs font-bold uppercase tracking-wide text-gray-400" style={{ fontFamily: 'Nunito, sans-serif' }}>
+                {t.languageLabel}
+              </p>
+              <div className="flex gap-1.5">
+                {LANG_OPTIONS.map(({ code, label }) => (
+                  <button
+                    key={code}
+                    onClick={() => handleLanguageChange(code)}
+                    className={`flex-1 py-2 rounded-xl border-none text-sm font-bold cursor-pointer transition-all ${language === code ? 'text-white' : 'bg-gray-100 text-gray-700'}`}
+                    style={{
+                      backgroundColor: language === code ? 'var(--color-primary)' : undefined,
+                      fontFamily: 'Nunito, sans-serif',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
         <button
-          onClick={() => setOpen((prev) => !prev)}
-          title="Open menu"
-          aria-label="Open floating menu"
-          style={{
-            border: 'none',
-            borderRadius: '999px',
-            padding: '10px 16px',
-            backgroundColor: 'var(--color-primary)',
-            color: 'white',
-            fontSize: 16,
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-            fontFamily: 'Nunito, sans-serif',
-          }}
+          onClick={() => setOpen(v => !v)}
+          className="rounded-full px-4 py-2.5 text-white text-lg font-bold border-none cursor-pointer shadow-md"
+          style={{ backgroundColor: 'var(--color-primary)', fontFamily: 'Nunito, sans-serif' }}
         >
           {open ? '✕' : '⚙️'}
         </button>
       </div>
     </>
   );
-}
-
-function menuButtonStyle(active) {
-  return {
-    width: '100%',
-    border: 'none',
-    borderRadius: '12px',
-    padding: '10px 12px',
-    background: active ? 'var(--color-primary)' : '#F3F4F6',
-    color: active ? '#FFFFFF' : '#111827',
-    fontWeight: 700,
-    cursor: 'pointer',
-    textAlign: 'left',
-    fontFamily: 'Nunito, sans-serif',
-  };
 }
