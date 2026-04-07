@@ -3,19 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { rankPlayers } from '../components/LeaderboardList';
 import PodiumLeaderboard from '../components/PodiumLeaderboard';
 import { sessionAPI } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
-function formatDuration(startedAt, endedAt) {
-  if (!startedAt) return '—';
+function formatDuration(startedAt, endedAt, t) {
+  if (!startedAt) return t.durationUnavailable;
   const ms = new Date(endedAt || Date.now()) - new Date(startedAt);
   const totalMin = Math.floor(ms / 60000);
   const h = Math.floor(totalMin / 60);
   const m = totalMin % 60;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m} min`;
+  if (h > 0) return translate(t.durationHoursMinutes, { hours: h, minutes: m });
+  return translate(t.durationMinutes, { minutes: m });
 }
 
 export default function GameOver() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const session  = JSON.parse(localStorage.getItem('session') || 'null');
   const player   = JSON.parse(localStorage.getItem('player')  || 'null');
   const sessionId = session?.id || session?._id;
@@ -41,7 +44,7 @@ export default function GameOver() {
   const me       = ranked.find(p => (p.username || p.name) === myName);
   const myRank   = me?.rank ?? '—';
   const total    = ranked.length;
-  const duration = formatDuration(sessionData?.startedAt, sessionData?.endedAt);
+  const duration = formatDuration(sessionData?.startedAt, sessionData?.endedAt, t);
 
   return (
     <div className="min-h-screen flex justify-center relative" style={{
@@ -56,28 +59,30 @@ export default function GameOver() {
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 pt-8 pb-5 px-5">
           <span className="text-6xl">🏆</span>
-          <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>Game is ended.</h2>
+          <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>{t.gameIsEnded}</h2>
           {myRank !== '—' && (
-            <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You are in #{myRank} place</p>
+            <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
+              {translate(t.youAreInPlace, { rank: myRank })}
+            </p>
           )}
         </div>
 
         {/* Rank card */}
         <div className="mx-5 rounded-2xl p-5 mb-5" style={{ backgroundColor: '#FEF3E2' }}>
-          <p className="text-xs text-center mb-1" style={{ color: 'var(--color-subtext)' }}>Your rank</p>
+          <p className="text-xs text-center mb-1" style={{ color: 'var(--color-subtext)' }}>{t.yourRank}</p>
           <p className="text-4xl font-bold text-center mb-4" style={{ color: 'var(--color-primary)' }}>
             #{myRank}
           </p>
           <div className="flex justify-around">
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Total players</p>
+              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.totalPlayers}</p>
               <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
                 {loading ? '…' : total}
               </p>
             </div>
             <div className="w-px" style={{ backgroundColor: '#E8C99A' }} />
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Game duration</p>
+              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.gameDuration}</p>
               <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>
                 {loading ? '…' : duration}
               </p>
@@ -87,7 +92,7 @@ export default function GameOver() {
 
         {/* Leaderboard */}
         <div className="px-5">
-          <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>Final leaderboard</p>
+          <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>{t.finalLeaderboardLower}</p>
           <PodiumLeaderboard players={players} highlightName={myName} />
         </div>
 
@@ -101,7 +106,7 @@ export default function GameOver() {
             onClick={() => navigate('/')}
             className="w-full py-4 rounded-2xl text-white font-bold text-base cursor-pointer"
             style={{ backgroundColor: 'var(--color-primary)' }}>
-            Done
+            {t.done}
           </button>
         </div>
       </div>

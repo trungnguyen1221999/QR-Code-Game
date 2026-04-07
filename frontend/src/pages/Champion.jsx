@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { rankPlayers } from '../components/LeaderboardList';
 import { sessionAPI } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 const STAR_COLORS = { 1: '#FBBF24', 2: '#6366F1', 3: '#EF4444' };
 
@@ -12,6 +14,7 @@ function RankBadge({ rank }) {
 
 export default function Champion() {
   const navigate  = useNavigate();
+  const { t } = useLanguage();
   const session   = JSON.parse(localStorage.getItem('session') || 'null');
   const player    = JSON.parse(localStorage.getItem('player')  || 'null');
   const sessionId = session?.id || session?._id;
@@ -43,33 +46,35 @@ export default function Champion() {
         {/* Top section */}
         <div className="flex flex-col items-center gap-2 pt-8 pb-5 px-5">
           <span className="text-6xl">{myRank === 1 ? '🥇' : myRank === 2 ? '🥈' : myRank === 3 ? '🥉' : '🎉'}</span>
-          <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>Game completed</h2>
-          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>You finished in #{myRank} place</p>
+          <h2 className="text-xl font-bold mt-1" style={{ color: 'var(--color-text)' }}>{t.gameCompleted}</h2>
+          <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
+            {translate(t.youFinishedInPlace, { rank: myRank })}
+          </p>
           <p className="text-2xl font-bold text-center mt-1" style={{ color: 'var(--color-primary)' }}>
-            🎉 Congratulations
+            {t.congratulations}
           </p>
           <p className="text-2xl font-bold text-center" style={{ color: 'var(--color-primary)' }}>
-            Champion! 🎉
+            {t.champion}
           </p>
           <p className="text-sm font-bold mt-1" style={{ color: 'var(--color-text)' }}>
-            You dominated the competition!
+            {t.youDominatedCompetition}
           </p>
         </div>
 
         {/* Rank card */}
         <div className="mx-5 rounded-2xl p-5 mb-5" style={{ backgroundColor: '#FEF3E2' }}>
-          <p className="text-xs text-center mb-1" style={{ color: 'var(--color-subtext)' }}>Your rank</p>
+          <p className="text-xs text-center mb-1" style={{ color: 'var(--color-subtext)' }}>{t.yourRank}</p>
           <p className="text-4xl font-bold text-center mb-4" style={{ color: 'var(--color-primary)' }}>
             #{myRank}
           </p>
           <div className="flex justify-around">
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Total players</p>
+              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.totalPlayers}</p>
               <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{totalCount || '—'}</p>
             </div>
             <div className="w-px" style={{ backgroundColor: '#E8C99A' }} />
             <div className="text-center">
-              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>Your score</p>
+              <p className="text-xs" style={{ color: 'var(--color-subtext)' }}>{t.yourScore}</p>
               <p className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{me?.score ?? '—'}</p>
             </div>
           </div>
@@ -77,15 +82,15 @@ export default function Champion() {
 
         {/* Final leaderboard */}
         <div className="px-5">
-          <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>Final leaderboard</p>
+          <p className="text-base font-bold mb-3" style={{ color: 'var(--color-text)' }}>{t.finalLeaderboardLower}</p>
           {ranked.length === 0 ? (
-            <p className="text-center text-sm py-6" style={{ color: 'var(--color-subtext)' }}>Loading...</p>
+            <p className="text-center text-sm py-6" style={{ color: 'var(--color-subtext)' }}>{t.leaderboardLoading}</p>
           ) : (
             <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#4AADE8' }}>
               <div className="flex items-center px-4 py-2.5 gap-2">
-                <span className="w-10 text-xs font-bold text-white">Rank</span>
-                <span className="flex-1 text-xs font-bold text-white">Name</span>
-                <span className="text-xs font-bold text-white">Score</span>
+                <span className="w-10 text-xs font-bold text-white">{t.rank}</span>
+                <span className="flex-1 text-xs font-bold text-white">{t.name}</span>
+                <span className="text-xs font-bold text-white">{t.score}</span>
               </div>
               <div className="flex flex-col gap-1 px-2 pb-3">
                 {ranked.map((p) => {
@@ -120,7 +125,7 @@ export default function Champion() {
             onClick={() => navigate('/')}
             className="w-full py-4 rounded-2xl text-white font-bold text-base cursor-pointer"
             style={{ backgroundColor: 'var(--color-primary)' }}>
-            Done
+            {t.done}
           </button>
         </div>
       </div>

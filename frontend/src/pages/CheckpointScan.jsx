@@ -4,6 +4,8 @@ import { getPlayerProgress } from '../utils/checkpointShop';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 const DEFAULT_GAME_ORDER = [
   '/tower-builder',
@@ -30,6 +32,7 @@ function getCheckpointRoute(checkpoint) {
 export default function CheckpointScan() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const checkpointNum = parseInt(id, 10);
 
   const [status, setStatus] = useState('checking'); // checking | ok | done | wrong | noSession
@@ -96,7 +99,7 @@ export default function CheckpointScan() {
     return (
       <PageLayout>
         <div className="pt-20 flex flex-col items-center gap-4">
-          <p className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>Loading...</p>
+          <p className="text-lg font-bold" style={{ color: 'var(--color-primary)' }}>{t.loading}</p>
         </div>
       </PageLayout>
     );
@@ -109,13 +112,13 @@ export default function CheckpointScan() {
           <Card className="rounded-2xl p-5 flex flex-col items-center gap-3 text-center">
             <span className="text-5xl">🔒</span>
             <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Not in a game
+              {t.notInGame}
             </h2>
             <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
-              You need to join a game first before scanning checkpoints.
+              {t.joinGameBeforeScanning}
             </p>
             <Button variant="green" onClick={() => navigate('/join')}>
-              Join a game
+              {t.joinAGame}
             </Button>
           </Card>
         </div>
@@ -130,15 +133,18 @@ export default function CheckpointScan() {
           <Card className="rounded-2xl p-5 flex flex-col items-center gap-3 text-center">
             <span className="text-5xl">✅</span>
             <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Already completed!
+              {t.alreadyCompleted}
             </h2>
             <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
               {gameMode === 'random'
-                ? `You already completed Checkpoint ${checkpointNum}. Find another QR code to scan.`
-                : `You already passed Checkpoint ${checkpointNum}. Please move to Checkpoint ${current}.`}
+                ? translate(t.alreadyCompletedRandom, { checkpoint: checkpointNum })
+                : translate(t.alreadyCompletedOrdered, {
+                    checkpoint: checkpointNum,
+                    current,
+                  })}
             </p>
             <Button variant="green" onClick={() => navigate('/game')}>
-              Back to game
+              {t.backToGame}
             </Button>
           </Card>
         </div>
@@ -153,14 +159,16 @@ export default function CheckpointScan() {
           <Card className="rounded-2xl p-5 flex flex-col items-center gap-3 text-center">
             <span className="text-5xl">⚠️</span>
             <h2 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
-              Wrong checkpoint!
+              {t.wrongCheckpoint}
             </h2>
             <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>
-              This is Checkpoint {checkpointNum}, but you need{' '}
-              <strong>Checkpoint {current}</strong>. Find the right QR code and scan it.
+              {translate(t.wrongCheckpointMessage, {
+                checkpoint: checkpointNum,
+                current,
+              })}
             </p>
             <Button variant="green" onClick={() => navigate('/game')}>
-              Back to game
+              {t.backToGame}
             </Button>
           </Card>
         </div>

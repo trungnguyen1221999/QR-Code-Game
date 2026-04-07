@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import { uploadAPI } from '../utils/api';
+import { useLanguage } from '../context/LanguageContext.jsx';
+import { translate } from '../translations/index';
 
 const DEFAULT_AVATARS = [
   '/avatar/avatar1.png',
@@ -16,6 +18,7 @@ const DEFAULT_AVATARS = [
 export default function AvatarSelect() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   const current = location.state?.current || DEFAULT_AVATARS[0];
 
   const [selected, setSelected] = useState(current);
@@ -35,7 +38,7 @@ export default function AvatarSelect() {
       setCustomAvatars(prev => [...prev, data.url]);
       setSelected(data.url);
     } catch (err) {
-      toast.error('Upload failed: ' + err.message);
+      toast.error(translate(t.uploadFailed, { message: err.message }));
     } finally {
       setUploading(false);
     }
@@ -50,9 +53,9 @@ export default function AvatarSelect() {
       <div className="pt-4 pb-8 flex flex-col gap-6">
 
         <div>
-          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Choose your avatar</h2>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>{t.chooseYourAvatar}</h2>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
-            Pick one or upload your own
+            {t.pickOrUploadAvatar}
           </p>
         </div>
 
@@ -60,7 +63,7 @@ export default function AvatarSelect() {
         <div className="flex justify-center">
           <img
             src={selected}
-            alt="Selected avatar"
+            alt={t.selectedAvatarAlt}
             className="rounded-full object-cover"
             style={{ width: 100, height: 100, border: '4px solid var(--color-primary)' }}
           />
@@ -86,7 +89,7 @@ export default function AvatarSelect() {
                     boxShadow: isSelected ? '0 0 0 2px var(--color-primary)' : 'none',
                   }}
                 >
-                  <img src={src} alt="avatar" className="w-full h-full object-cover" />
+                  <img src={src} alt={t.avatarAlt} className="w-full h-full object-cover" />
                 </div>
                 {isSelected && (
                   <span className="text-xs font-bold" style={{ color: 'var(--color-primary)' }}>✓</span>
@@ -118,7 +121,7 @@ export default function AvatarSelect() {
               }
             </div>
             <span className="text-xs" style={{ color: 'var(--color-subtext)' }}>
-              {uploading ? 'Uploading...' : 'Upload'}
+              {uploading ? t.uploading : t.upload}
             </span>
           </button>
         </div>
@@ -132,7 +135,7 @@ export default function AvatarSelect() {
         />
 
         <Button type="button" onClick={handleSelect}>
-          Select
+          {t.select}
         </Button>
 
       </div>

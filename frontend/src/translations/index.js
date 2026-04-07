@@ -255,6 +255,50 @@ yourScore: 'Your score',
 finalLeaderboardLower: 'Final leaderboard',
 liveLeaderboardTitle: 'Leaderboard',
 
+// AvatarSelect
+chooseYourAvatar: 'Choose your avatar',
+pickOrUploadAvatar: 'Pick one or upload your own',
+selectedAvatarAlt: 'Selected avatar',
+avatarAlt: 'avatar',
+uploading: 'Uploading...',
+upload: 'Upload',
+select: 'Select',
+uploadFailed: 'Upload failed: {message}',
+
+// Champion / shared result pages
+youDominatedCompetition: 'You dominated the competition!',
+
+// CheckpointScan
+notInGame: 'Not in a game',
+joinGameBeforeScanning: 'You need to join a game first before scanning checkpoints.',
+joinAGame: 'Join a game',
+alreadyCompleted: 'Already completed!',
+alreadyCompletedRandom: 'You already completed Checkpoint {checkpoint}. Find another QR code to scan.',
+alreadyCompletedOrdered: 'You already passed Checkpoint {checkpoint}. Please move to Checkpoint {current}.',
+backToGame: 'Back to game',
+wrongCheckpoint: 'Wrong checkpoint!',
+wrongCheckpointMessage: 'This is Checkpoint {checkpoint}, but you need Checkpoint {current}. Find the right QR code and scan it.',
+
+// GameOver
+gameIsEnded: 'Game is ended.',
+youAreInPlace: 'You are in #{rank} place',
+gameDuration: 'Game duration',
+durationHoursMinutes: '{hours}h {minutes}m',
+durationMinutes: '{minutes} min',
+durationUnavailable: '—',
+
+// FinalShop
+shopSellerAlt: 'Shop seller',
+spendCoinsForFinalGame: 'Spend your coins on power-ups for the final game!',
+yourCoins: 'Your coins',
+extraLife: 'Extra Life',
+extraLifeDesc: 'Start with one more life.',
+livesProgress: 'Lives: {current} / {max}',
+buy: 'Buy',
+bridgeBuddy: 'Bridge Buddy',
+bridgeBuddyDesc: 'Close misses are forgiven — each use saves 1 fall.',
+usesProgress: 'Uses: {current} / {max}',
+
   },
 
   FI: {
@@ -513,6 +557,53 @@ yourScore: 'Pisteesi',
 
 finalLeaderboardLower: 'Lopullinen tulostaulukko',
 liveLeaderboardTitle: 'Tulostaulukko',
+
+// AvatarSelect
+
+chooseYourAvatar: 'Valitse avatarisi',
+pickOrUploadAvatar: 'Valitse yksi tai lataa oma',
+selectedAvatarAlt: 'Valittu avatar',
+avatarAlt: 'avatar',
+uploading: 'Ladataan...',
+upload: 'Lataa',
+select: 'Valitse',
+uploadFailed: 'Lataus epäonnistui: {message}',
+
+// Champion / shared result pages
+youDominatedCompetition: 'Hallitset kilpailua täydellisesti!',
+
+// CheckpointScan
+notInGame: 'Et ole pelissä',
+joinGameBeforeScanning: 'Sinun täytyy liittyä peliin ennen tarkistuspisteiden skannaamista.',
+joinAGame: 'Liity peliin',
+alreadyCompleted: 'Jo suoritettu!',
+alreadyCompletedRandom: 'Olet jo suorittanut tarkistuspisteen {checkpoint}. Etsi toinen QR-koodi skannattavaksi.',
+alreadyCompletedOrdered: 'Olet jo ohittanut tarkistuspisteen {checkpoint}. Siirry tarkistuspisteeseen {current}.',
+backToGame: 'Takaisin peliin',
+wrongCheckpoint: 'Väärä tarkistuspiste!',
+wrongCheckpointMessage: 'Tämä on tarkistuspiste {checkpoint}, mutta tarvitset tarkistuspisteen {current}. Etsi oikea QR-koodi ja skannaa se.',
+
+// GameOver
+
+gameIsEnded: 'Peli on päättynyt.',
+youAreInPlace: 'Olet sijalla #{rank}',
+gameDuration: 'Pelin kesto',
+durationHoursMinutes: '{hours} h {minutes} min',
+durationMinutes: '{minutes} min',
+durationUnavailable: '—',
+
+// FinalShop
+
+shopSellerAlt: 'Kaupan myyjä',
+spendCoinsForFinalGame: 'Käytä kolikkosi loppupelin tehosteisiin!',
+yourCoins: 'Kolikkosi',
+extraLife: 'Lisäelämä',
+extraLifeDesc: 'Aloita yhdellä lisäelämällä.',
+livesProgress: 'Elämät: {current} / {max}',
+buy: 'Osta',
+bridgeBuddy: 'Siltakaveri',
+bridgeBuddyDesc: 'Läheltä piti -tilanteet annetaan anteeksi — jokainen käyttö pelastaa yhdeltä putoamiselta.',
+usesProgress: 'Käyttökerrat: {current} / {max}',
   },
 };
 
