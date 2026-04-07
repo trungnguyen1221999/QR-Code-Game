@@ -49,11 +49,11 @@ export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue â†
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col"
-      style={{ backgroundColor: 'var(--color-bg)', overflow: 'hidden' }}
+      style={{ backgroundColor: 'var(--color-bg)', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
       onClick={skipOrNext}
     >
       {/* Image â€” fixed height */}
-      <div className="relative" style={{ flexShrink: 0, height: '52vh', overflow: 'hidden', backgroundColor: '#000' }}>
+      <div className="relative" style={{ flexShrink: 0, overflow: 'hidden', backgroundColor: '#000' }}>
         {leaving !== null && (
           <img src={scenes[leaving].img} alt="" style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
@@ -64,7 +64,7 @@ export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue â†
           key={current}
           src={scene.img}
           alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', animation: 'storyImgIn 0.5s ease forwards' }}
+          style={{ width: '100%', height: 'auto', display: 'block', animation: 'storyImgIn 0.5s ease forwards' }}
         />
         <style>{`@keyframes storyImgIn { from { opacity:0 } to { opacity:1 } }`}</style>
 
@@ -83,18 +83,15 @@ export default function StoryModal({ scenes, onDone, lastBtnLabel = 'Continue â†
       {/* Text + buttons â€” always visible */}
       <div
         style={{
-          flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+          flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12,
           padding: '16px 20px 24px',
           opacity: textVisible ? 1 : 0, transition: 'opacity 0.4s ease',
-          overflow: 'hidden',
         }}
       >
-        <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 8 }}>
-          <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--color-text)', margin: 0 }}>
-            {displayed}
-            {!textDone && <span style={{ opacity: 0.5 }}>|</span>}
-          </p>
-        </div>
+        <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--color-text)', margin: 0 }}>
+          {displayed}
+          {!textDone && <span style={{ opacity: 0.5 }}>|</span>}
+        </p>
 
         <div style={{ display: 'flex', gap: 10, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
           {current > 0 && (
