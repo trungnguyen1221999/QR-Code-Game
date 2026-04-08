@@ -112,8 +112,10 @@ export default function ClickCounterGame() {
   const [showBackConfirm, setShowBackConfirm] = useState(false);
   const [loseState, setLoseState] = useState(INITIAL_LOSE_STATE);
   const [pressed, setPressed] = useState(false);
+  const [isHatching, setIsHatching] = useState(false);
   const lossHandledRef = useRef(false);
   const outcomeLockedRef = useRef(false);
+  const hatchTimeoutRef = useRef(null);
   const earnedCoins = Math.max(0, timeLeft * 2);
   const eggStage = getEggStage(clicks, TARGET_CLICKS);
   const isHatched = clicks >= TARGET_CLICKS;
@@ -136,12 +138,23 @@ export default function ClickCounterGame() {
   useEffect(() => {
     if (hasStarted && clicks >= TARGET_CLICKS) {
       outcomeLockedRef.current = true;
-      setShowWin(true);
+      setIsHatching(true);
+      hatchTimeoutRef.current = window.setTimeout(() => {
+        setShowWin(true);
+        setIsHatching(false);
+        hatchTimeoutRef.current = null;
+      }, 1200);
     }
   }, [clicks, TARGET_CLICKS, hasStarted]);
 
+  useEffect(() => () => {
+    if (hatchTimeoutRef.current) {
+      window.clearTimeout(hatchTimeoutRef.current);
+    }
+  }, []);
+
   const handleTap = () => {
-    if (!hasStarted || busy || showWin || showLose) return;
+    if (!hasStarted || busy || showWin || showLose || isHatching) return;
 
     setClicks((value) => value + 1);
     setPressed(true);
@@ -159,7 +172,12 @@ export default function ClickCounterGame() {
     setShowBackConfirm(false);
     setLoseState(INITIAL_LOSE_STATE);
     setPressed(false);
+    setIsHatching(false);
     lossHandledRef.current = false;
+    if (hatchTimeoutRef.current) {
+      window.clearTimeout(hatchTimeoutRef.current);
+      hatchTimeoutRef.current = null;
+    }
   };
 
   const handleLoseShopPurchase = (result) => applyLosePurchase(result, setLoseState);
@@ -454,7 +472,9 @@ export default function ClickCounterGame() {
               </p>
               <p className="mt-1 text-xs font-semibold leading-5" style={{ color: '#7C2D12' }}>
                 {isHatched
-                  ? 'The chicken has hatched. Your final tap opened the egg.'
+                  ? isHatching
+                    ? 'The chicken is hatching...'
+                    : 'The chicken has hatched. Your final tap opened the egg.'
                   : 'Keep tapping the egg to wake its next evolution.'}
               </p>
             </div>
