@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -453,19 +454,21 @@ export default function ShapeMatcherDropGame() {
               </span>
             </button>
           </div>
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title="Shape Matcher"
+            description="Press Start when you are ready to catch matching shapes."
+            startLabel="Start"
+            disabled={busy}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             Back
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              Start
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -368,19 +369,21 @@ export default function ClickToShootTargetsGame() {
               boxShadow: '0 16px 24px rgba(15,23,42,0.2)',
             }}
           />
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.targetShooterTitle}
+            description={t.targetShooterReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

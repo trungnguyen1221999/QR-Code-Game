@@ -8,6 +8,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -299,6 +300,7 @@ export default function ClickCounterGame() {
           </p>
         </Card>
 
+        <div className="relative">
         <button
           type="button"
           onClick={handleTap}
@@ -480,6 +482,15 @@ export default function ClickCounterGame() {
             </div>
           </div>
         </button>
+        <GameStartOverlay
+          show={!hasStarted}
+          onStart={() => setHasStarted(true)}
+          title={t.clickRushTitle}
+          description={t.clickRushReadyInstruction}
+          startLabel={t.start}
+          disabled={busy}
+        />
+        </div>
 
         <Card>
           <p className="text-sm font-bold">{t.clickRushHowToWinTitle}</p>
@@ -492,13 +503,7 @@ export default function ClickCounterGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

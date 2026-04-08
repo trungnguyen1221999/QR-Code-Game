@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useBlockBack from '../hooks/useBlockBack';
 import toast from 'react-hot-toast';
-import { Clock, Play, Volume2 } from 'lucide-react';
+import { Clock, Volume2 } from 'lucide-react';
 import PageLayout from '../components/ui/PageLayout';
 import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   addCoinsToProgress,
@@ -469,7 +470,7 @@ export default function SimonGame() {
             transition: 'background-color 0.25s ease',
           }}
         >
-          <div className="grid grid-cols-2 gap-3">
+          <div className="relative grid grid-cols-2 gap-3">
            {COLORS.map((color) => {
   const isActive = activeButton === color.id;
 
@@ -520,14 +521,19 @@ export default function SimonGame() {
     </button>
   );
 })}
+            <GameStartOverlay
+              show={!gameStarted}
+              onStart={startGame}
+              title={t.simonTitle}
+              description={t.simonStartReady}
+              startLabel={t.start}
+              disabled={isPlayingSequence || busy}
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Button onClick={startGame} disabled={gameStarted || isPlayingSequence || busy}>
-            <Play size={16} />
-            {t.start}
-          </Button>
+          <div />
 
           {backEnabled ? (
             <Button

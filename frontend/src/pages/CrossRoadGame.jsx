@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -350,7 +351,7 @@ export default function CrossRoadGame() {
         </Card>
 
         <div
-          className="grid gap-1 rounded-[30px] border p-3"
+          className="relative grid gap-1 rounded-[30px] border p-3"
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
             background: flash === 'bad'
@@ -439,6 +440,14 @@ export default function CrossRoadGame() {
               );
             })
           )}
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.crossRoadRunnerTitle}
+            description={t.crossRoadRunnerReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <Card>
@@ -487,13 +496,7 @@ export default function CrossRoadGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

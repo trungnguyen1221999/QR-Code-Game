@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -270,6 +271,7 @@ export default function RandomColorClickerGame() {
           </Card>
         </div>
 
+        <div className="relative">
         <Card className="text-center">
           <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--color-subtext)' }}>
             {t.randomColorClickerTrickyMode}
@@ -284,6 +286,15 @@ export default function RandomColorClickerGame() {
             {t.randomColorClickerIgnoreWord}
           </p>
         </Card>
+        <GameStartOverlay
+          show={!hasStarted}
+          onStart={() => setHasStarted(true)}
+          title={t.randomColorClickerTitle}
+          description={t.randomColorClickerReadyInstruction}
+          startLabel={t.start}
+          disabled={busy}
+        />
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           {COLOR_OPTIONS.map((color) => (
@@ -316,13 +327,7 @@ export default function RandomColorClickerGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

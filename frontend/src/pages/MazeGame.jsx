@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -460,7 +461,7 @@ export default function MazeGame() {
         </Card>
 
         <div
-          className="grid gap-0 overflow-hidden rounded-[28px] border p-2"
+          className="relative grid gap-0 overflow-hidden rounded-[28px] border p-2"
           style={{
             gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
             background: 'linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%)',
@@ -510,6 +511,14 @@ export default function MazeGame() {
               </div>
             );
           })}
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.mazeRunnerTitle}
+            description={t.mazeRunnerReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <Card>
@@ -564,13 +573,7 @@ export default function MazeGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -602,6 +603,15 @@ export default function WhackAMoleGame() {
               />
             </div>
           )}
+
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.whackTitle}
+            description={translate(t.whackStartInstruction, { goal: WINNING_SCORE })}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         {feedback && (
@@ -629,13 +639,7 @@ export default function WhackAMoleGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              Start
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 
