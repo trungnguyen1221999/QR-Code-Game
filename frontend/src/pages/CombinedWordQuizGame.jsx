@@ -32,36 +32,36 @@ import { translate } from '../translations';
 const TOTAL_QUESTIONS = 10;
 
 const QUESTION_BANK = [
-  { id: 'aurinkolasit', pictures: ['☀️', '🕶️'], answer: 'aurinkolasit', hint: 'Jotain, jota kaytat aurinkoisena paivana' },
-  { id: 'meritahti', pictures: ['⭐', '🐟'], answer: 'meritahti', hint: 'Merielain, jolla on viisi sakaraa' },
-  { id: 'lumimies', pictures: ['❄️', '👨'], answer: 'lumimies', hint: 'Rakennetaan talvella' },
-  { id: 'palomies', pictures: ['🔥', '👨'], answer: 'palomies', hint: 'Tulee auttamaan tulipaloissa' },
-  { id: 'kirjatoukka', pictures: ['📚', '🪱'], answer: 'kirjatoukka', hint: 'Henkilo, joka rakastaa lukemista' },
-  { id: 'sateenkaari', pictures: ['🌧️', '🏹'], answer: 'sateenkaari', hint: 'Varikas ilmio sateen jalkeen' },
-  { id: 'kuppikakku', pictures: ['☕', '🍰'], answer: 'kuppikakku', hint: 'Pieni makea jalkiruoka' },
-  { id: 'jalkapallo', pictures: ['🦶', '⚽'], answer: 'jalkapallo', hint: 'Pallolla pelattava urheilulaji' },
-  { id: 'merihevonen', pictures: ['🌊', '🐴'], answer: 'merihevonen', hint: 'Pieni merielain' },
-  { id: 'postilaatikko', pictures: ['✉️', '📦'], answer: 'postilaatikko', hint: 'Kirjeet tulevat tanne' },
-  { id: 'auringonkukka', pictures: ['☀️', '🌼'], answer: 'auringonkukka', hint: 'Korkea keltainen kukka' },
-  { id: 'hammasharja', pictures: ['🦷', '🪥'], answer: 'hammasharja', hint: 'Kaytetaan joka aamu ja ilta' },
-  { id: 'kasilaukku', pictures: ['✋', '👝'], answer: 'kasilaukku', hint: 'Kannat sita mukanasi' },
-  { id: 'sadetakki', pictures: ['🌧️', '🧥'], answer: 'sadetakki', hint: 'Pidat sita sateella' },
-  { id: 'koripallo', pictures: ['🧺', '🏀'], answer: 'koripallo', hint: 'Urheilulaji, jossa on koreja' },
-  { id: 'makuuhuone', pictures: ['🛏️', '🏠'], answer: 'makuuhuone', hint: 'Huone, jossa nukut' },
-  { id: 'muistikirja', pictures: ['📝', '📚'], answer: 'muistikirja', hint: 'Kaytetaan muistiinpanoihin' },
-  { id: 'pannukakku', pictures: ['🍳', '🍰'], answer: 'pannukakku', hint: 'Littea aamiaisherkku' },
-  { id: 'koirankoppi', pictures: ['🐶', '🏠'], answer: 'koirankoppi', hint: 'Pieni koti lemmikille' },
-  { id: 'postimies', pictures: ['✉️', '👨'], answer: 'postimies', hint: 'Tuo kirjeet kotiisi' },
-  { id: 'teekannu', pictures: ['🫖', '🍲'], answer: 'teekannu', hint: 'Silla kaadetaan kuumaa teeta' },
-  { id: 'korvakoru', pictures: ['👂', '💍'], answer: 'korvakoru', hint: 'Koru, jota pidetaan korvassa' },
-  { id: 'nappaimisto', pictures: ['🔑', '📋'], answer: 'nappaimisto', hint: 'Silla kirjoitetaan' },
-  { id: 'koiranruoka', pictures: ['🐶', '🍖'], answer: 'koiranruoka', hint: 'Anna tämä koirallesi, kun se on nälkäinen.' },
-  { id: 'auringonnousu', pictures: ['☀️', '⬆️'], answer: 'auringonnousu', hint: 'Uuden paivan alku' },
-  { id: 'vesimeloni', pictures: ['💧', '🍈'], answer: 'vesimeloni', hint: 'Iso mehukas kesahedelma' },
-  { id: 'kirjahylly', pictures: ['📚', '🧳'], answer: 'kirjahylly', hint: 'Huonekalu kirjojen sailytykseen' },
-  { id: 'voileipa', pictures: ['🧈', '🥪'], answer: 'voileipa', hint: 'Ateria leipapalojen valissa' },
-  { id: 'mansikkahillo', pictures: ['🍓', '🫙'], answer: 'mansikkahillo', hint: 'Makea hillo, joka on tehty mansikoista' },
-  { id: 'omenamehu', pictures: ['🍎', '🧃'], answer: 'omenamehu', hint: 'Makea mehu, joka on tehty omenoista' },
+  { id: 'aurinkolasit', pictures: ['☀️', '🕶️'], answerFi: 'aurinkolasit', answerEn: 'sunglasses' },
+  { id: 'meritahti', pictures: ['⭐', '🐟'], answerFi: 'meritahti', answerEn: 'starfish' },
+  { id: 'lumimies', pictures: ['❄️', '👨'], answerFi: 'lumimies', answerEn: 'snowman' },
+  { id: 'palomies', pictures: ['🔥', '👨'], answerFi: 'palomies', answerEn: 'fireman' },
+  { id: 'kirjatoukka', pictures: ['📚', '🪱'], answerFi: 'kirjatoukka', answerEn: 'bookworm' },
+  { id: 'sateenkaari', pictures: ['🌧️', '🏹'], answerFi: 'sateenkaari', answerEn: 'rainbow' },
+  { id: 'kuppikakku', pictures: ['☕', '🍰'], answerFi: 'kuppikakku', answerEn: 'cupcake' },
+  { id: 'jalkapallo', pictures: ['🦶', '⚽'], answerFi: 'jalkapallo', answerEn: 'football' },
+  { id: 'merihevonen', pictures: ['🌊', '🐴'], answerFi: 'merihevonen', answerEn: 'seahorse' },
+  { id: 'postilaatikko', pictures: ['✉️', '📦'], answerFi: 'postilaatikko', answerEn: 'mailbox' },
+  { id: 'auringonkukka', pictures: ['☀️', '🌼'], answerFi: 'auringonkukka', answerEn: 'sunflower' },
+  { id: 'hammasharja', pictures: ['🦷', '🪥'], answerFi: 'hammasharja', answerEn: 'toothbrush' },
+  { id: 'kasilaukku', pictures: ['✋', '👝'], answerFi: 'kasilaukku', answerEn: 'handbag' },
+  { id: 'sadetakki', pictures: ['🌧️', '🧥'], answerFi: 'sadetakki', answerEn: 'raincoat' },
+  { id: 'koripallo', pictures: ['🧺', '🏀'], answerFi: 'koripallo', answerEn: 'basketball' },
+  { id: 'makuuhuone', pictures: ['🛏️', '🏠'], answerFi: 'makuuhuone', answerEn: 'bedroom' },
+  { id: 'muistikirja', pictures: ['📝', '📚'], answerFi: 'muistikirja', answerEn: 'notebook' },
+  { id: 'pannukakku', pictures: ['🍳', '🍰'], answerFi: 'pannukakku', answerEn: 'pancake' },
+  { id: 'koirankoppi', pictures: ['🐶', '🏠'], answerFi: 'koirankoppi', answerEn: 'doghouse' },
+  { id: 'postimies', pictures: ['✉️', '👨'], answerFi: 'postimies', answerEn: 'postman' },
+  { id: 'teekannu', pictures: ['🫖', '🍲'], answerFi: 'teekannu', answerEn: 'teapot' },
+  { id: 'korvakoru', pictures: ['👂', '💍'], answerFi: 'korvakoru', answerEn: 'earring' },
+  { id: 'nappaimisto', pictures: ['🔑', '📋'], answerFi: 'nappaimisto', answerEn: 'keyboard' },
+  { id: 'koiranruoka', pictures: ['🐶', '🍖'], answerFi: 'koiranruoka', answerEn: 'dogfood' },
+  { id: 'auringonnousu', pictures: ['☀️', '⬆️'], answerFi: 'auringonnousu', answerEn: 'sunrise' },
+  { id: 'vesimeloni', pictures: ['💧', '🍈'], answerFi: 'vesimeloni', answerEn: 'watermelon' },
+  { id: 'kirjahylly', pictures: ['📚', '🧳'], answerFi: 'kirjahylly', answerEn: 'bookshelf' },
+  { id: 'voileipa', pictures: ['🧈', '🥪'], answerFi: 'voileipa', answerEn: 'sandwich' },
+  { id: 'mansikkahillo', pictures: ['🍓', '🫙'], answerFi: 'mansikkahillo', answerEn: 'strawberry jam' },
+  { id: 'omenamehu', pictures: ['🍎', '🧃'], answerFi: 'omenamehu', answerEn: 'apple juice' },
 ];
 
 function shuffle(items) {
@@ -83,7 +83,7 @@ function normalizeAnswer(value) {
 }
 
 export default function CombinedWordQuizGame() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { timeLimit: QUIZ_TIME_LIMIT, goal: PASS_SCORE } = getMiniGameConfig('wordQuiz', getSessionDifficulty());
   useBlockBack();
   const navigate = useNavigate();
@@ -220,7 +220,13 @@ export default function CombinedWordQuizGame() {
     if (!currentQuestion || !answer.trim()) return;
     if (submittedIds.includes(currentQuestion.id)) return;
 
-    const isCorrect = normalizeAnswer(answer) === normalizeAnswer(currentQuestion.answer);
+    const acceptedAnswers = language === 'FI'
+      ? [currentQuestion.answerEn, currentQuestion.answerFi]
+      : [currentQuestion.answerFi, currentQuestion.answerEn];
+    const expectedAnswer = language === 'FI' ? currentQuestion.answerEn : currentQuestion.answerFi;
+    const isCorrect = acceptedAnswers.some(
+      (candidate) => normalizeAnswer(answer) === normalizeAnswer(candidate)
+    );
 
     setSubmittedIds((value) => [...value, currentQuestion.id]);
 
@@ -228,12 +234,12 @@ export default function CombinedWordQuizGame() {
       setScore((value) => value + 1);
       setFeedback({
         type: 'good',
-        text: translate(t.combinedWordQuizCorrectFeedback, { answer: currentQuestion.answer }),
+        text: translate(t.combinedWordQuizCorrectFeedback, { answer: expectedAnswer }),
       });
     } else {
       setFeedback({
         type: 'bad',
-        text: translate(t.combinedWordQuizWrongFeedback, { answer: currentQuestion.answer }),
+        text: translate(t.combinedWordQuizWrongFeedback, { answer: expectedAnswer }),
       });
     }
 
@@ -394,7 +400,7 @@ export default function CombinedWordQuizGame() {
 
       <Popup open={showLose} onClose={() => {}} showClose={false}>
         <div className="flex flex-col items-center gap-4 text-center">
-          <span className="text-5xl">⏰</span>
+          <span className="text-5xl">â°</span>
           <div>
             <h3 className="text-lg font-bold" style={{ color: 'var(--color-text)' }}>
               {t.combinedWordQuizLoseTitle}
