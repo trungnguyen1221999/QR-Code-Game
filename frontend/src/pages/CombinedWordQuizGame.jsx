@@ -220,10 +220,8 @@ export default function CombinedWordQuizGame() {
     if (!currentQuestion || !answer.trim()) return;
     if (submittedIds.includes(currentQuestion.id)) return;
 
-    const acceptedAnswers = language === 'FI'
-      ? [currentQuestion.answerEn, currentQuestion.answerFi]
-      : [currentQuestion.answerFi, currentQuestion.answerEn];
-    const expectedAnswer = language === 'FI' ? currentQuestion.answerEn : currentQuestion.answerFi;
+    const acceptedAnswers = [currentQuestion.answerFi, currentQuestion.answerEn];
+    const expectedAnswer = language === 'FI' ? currentQuestion.answerFi : currentQuestion.answerEn;
     const isCorrect = acceptedAnswers.some(
       (candidate) => normalizeAnswer(answer) === normalizeAnswer(candidate)
     );
