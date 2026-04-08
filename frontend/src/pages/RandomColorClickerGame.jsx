@@ -250,7 +250,6 @@ export default function RandomColorClickerGame() {
             <Palette size={20} />
             {t.randomColorClickerTitle}
           </h2>
-          <p>{t.colorRed} / {t.colorBlue} / {t.colorGreen} / {t.colorYellow}</p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
             {hasStarted ? instructionText : t.randomColorClickerReadyInstruction}
           </p>
