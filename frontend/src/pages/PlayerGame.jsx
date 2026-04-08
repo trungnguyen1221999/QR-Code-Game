@@ -239,6 +239,12 @@ export default function PlayerGame() {
           sessionId ? sessionAPI.getById(sessionId) : Promise.resolve(null),
         ]);
 
+        if (playerSessionData?.finishedAt) {
+          localStorage.setItem('gameCompleted', 'true');
+          navigate('/live-leaderboard', { replace: true });
+          return;
+        }
+
         if (!shouldSkipProgressRefresh && playerSessionData && !initialProgress.hasSavedProgress) {
           const completedCount = playerSessionData.currentCheckpointIndex ?? 0;
           setCompleted(completedCount);
