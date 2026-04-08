@@ -522,6 +522,12 @@ shapeMatcherWinTitle: 'Shape master!',
 shapeMatcherWinMessage: 'You reached {score} points and earned {coins} coins from the time left.',
 
 // ───────── RANDOM COLOR CLICKER GAME ─────────
+
+colorRed: 'RED',
+colorBlue: 'BLUE',
+colorGreen: 'GREEN',
+colorYellow: 'YELLOW',
+
 randomColorClickerTitle: 'Random Color Clicker',
 randomColorClickerReadyInstruction: 'Press Start when you are ready for the color challenge.',
 randomColorClickerRunningInstruction: 'Tap the button matching the text color, not the word.',
@@ -1241,6 +1247,12 @@ shapeMatcherWinTitle: 'Muotomestari!',
 shapeMatcherWinMessage: 'Sait {score} pistettä ja ansaitsit {coins} kolikkoa jäljellä olevasta ajasta.',
 
 // ───────── RANDOM COLOR CLICKER GAME ─────────
+
+colorRed: 'PUNAINEN',
+colorBlue: 'SININEN',
+colorGreen: 'VIHREÄ',
+colorYellow: 'KELTAINEN',
+
 randomColorClickerTitle: 'Satunnainen väriklikkaus',
 randomColorClickerReadyInstruction: 'Paina Aloita, kun olet valmis värihaasteeseen.',
 randomColorClickerRunningInstruction: 'Napauta painiketta, joka vastaa tekstin väriä, ei sanaa.',

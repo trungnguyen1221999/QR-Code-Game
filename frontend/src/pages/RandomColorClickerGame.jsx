@@ -28,30 +28,22 @@ import { getMiniGameConfig, getSessionDifficulty } from '../utils/constantMiniGa
 import { useLanguage } from '../context/LanguageContext';
 import { translate } from '../translations';
 
-const COLOR_OPTIONS = [
-  { id: 'red', label: 'RED', value: '#EF4444' },
-  { id: 'blue', label: 'BLUE', value: '#3B82F6' },
-  { id: 'green', label: 'GREEN', value: '#22C55E' },
-  { id: 'yellow', label: 'YELLOW', value: '#EAB308' },
-];
-
 function formatTime(seconds) {
   const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
   const secs = (seconds % 60).toString().padStart(2, '0');
   return `${mins}:${secs}`;
 }
 
-function pickPrompt() {
-  const word = COLOR_OPTIONS[Math.floor(Math.random() * COLOR_OPTIONS.length)];
+function pickPrompt(colorOptions) {
+  const word = colorOptions[Math.floor(Math.random() * colorOptions.length)];
 
-  let color = COLOR_OPTIONS[Math.floor(Math.random() * COLOR_OPTIONS.length)];
+  let color = colorOptions[Math.floor(Math.random() * colorOptions.length)];
   while (color.id === word.id) {
-    color = COLOR_OPTIONS[Math.floor(Math.random() * COLOR_OPTIONS.length)];
+    color = colorOptions[Math.floor(Math.random() * colorOptions.length)];
   }
 
   return {
     wordId: word.id,
-    wordLabel: word.label,
     colorId: color.id,
     colorValue: color.value,
   };
@@ -69,12 +61,30 @@ export default function RandomColorClickerGame() {
   const playerSession = JSON.parse(localStorage.getItem('playerSession') || 'null');
   const playerSessionId = playerSession?._id || playerSession?.id;
 
+  const colorOptions = useMemo(
+    () => [
+      { id: 'red', label: t.colorRed, value: '#EF4444' },
+      { id: 'blue', label: t.colorBlue, value: '#3B82F6' },
+      { id: 'green', label: t.colorGreen, value: '#22C55E' },
+      { id: 'yellow', label: t.colorYellow, value: '#EAB308' },
+    ],
+    [
+      t.colorRed,
+      t.colorBlue,
+      t.colorGreen,
+      t.colorYellow,
+    ]
+  );
+
+  const getColorLabel = (id) =>
+    colorOptions.find((color) => color.id === id)?.label || id.toUpperCase();
+
   const [timeLeft, setTimeLeft] = useState(() =>
     getInitialGameTime(timeLimit, 'random-color-clicker', location.key)
   );
   const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
-  const [prompt, setPrompt] = useState(() => pickPrompt());
+  const [prompt, setPrompt] = useState(() => pickPrompt(colorOptions));
   const [feedback, setFeedback] = useState('');
   const [busy, setBusy] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -86,6 +96,10 @@ export default function RandomColorClickerGame() {
   const lossHandledRef = useRef(false);
   const outcomeLockedRef = useRef(false);
   const earnedCoins = Math.max(0, timeLeft * 2);
+
+  useEffect(() => {
+    setPrompt(pickPrompt(colorOptions));
+  }, [colorOptions]);
 
   useEffect(() => {
     if (!hasStarted || showWin || showLose || showBackConfirm) return;
@@ -128,13 +142,13 @@ export default function RandomColorClickerGame() {
       setScore((value) => Math.max(0, value - 1));
       setFeedback(
         translate(t.randomColorClickerWrong, {
-          color: prompt.colorId.toUpperCase(),
+          color: getColorLabel(prompt.colorId),
         })
       );
     }
 
     setRound((value) => value + 1);
-    setPrompt(pickPrompt());
+    setPrompt(pickPrompt(colorOptions));
   };
 
   const handleRetry = () => {
@@ -143,7 +157,7 @@ export default function RandomColorClickerGame() {
     setTimeLeft(getReplayGameTime(timeLimit));
     setScore(0);
     setRound(1);
-    setPrompt(pickPrompt());
+    setPrompt(pickPrompt(colorOptions));
     setFeedback('');
     setBusy(false);
     setShowWin(false);
@@ -236,6 +250,7 @@ export default function RandomColorClickerGame() {
             <Palette size={20} />
             {t.randomColorClickerTitle}
           </h2>
+          <p>{t.colorRed} / {t.colorBlue} / {t.colorGreen} / {t.colorYellow}</p>
           <p className="text-xs mt-1" style={{ color: 'var(--color-subtext)' }}>
             {hasStarted ? instructionText : t.randomColorClickerReadyInstruction}
           </p>
@@ -272,32 +287,32 @@ export default function RandomColorClickerGame() {
         </div>
 
         <div className="relative">
-        <Card className="text-center">
-          <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--color-subtext)' }}>
-            {t.randomColorClickerTrickyMode}
-          </p>
-          <p
-            className="mt-3 text-5xl font-black tracking-[0.08em]"
-            style={{ color: prompt.colorValue, textShadow: '0 10px 24px rgba(0,0,0,0.12)' }}
-          >
-            {prompt.wordLabel}
-          </p>
-          <p className="text-xs mt-3" style={{ color: 'var(--color-subtext)' }}>
-            {t.randomColorClickerIgnoreWord}
-          </p>
-        </Card>
-        <GameStartOverlay
-          show={!hasStarted}
-          onStart={() => setHasStarted(true)}
-          title={t.randomColorClickerTitle}
-          description={t.randomColorClickerReadyInstruction}
-          startLabel={t.start}
-          disabled={busy}
-        />
+          <Card className="text-center">
+            <p className="text-xs uppercase tracking-[0.25em]" style={{ color: 'var(--color-subtext)' }}>
+              {t.randomColorClickerTrickyMode}
+            </p>
+            <p
+              className="mt-3 text-5xl font-black tracking-[0.08em]"
+              style={{ color: prompt.colorValue, textShadow: '0 10px 24px rgba(0,0,0,0.12)' }}
+            >
+              {getColorLabel(prompt.wordId)}
+            </p>
+            <p className="text-xs mt-3" style={{ color: 'var(--color-subtext)' }}>
+              {t.randomColorClickerIgnoreWord}
+            </p>
+          </Card>
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.randomColorClickerTitle}
+            description={t.randomColorClickerReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {COLOR_OPTIONS.map((color) => (
+          {colorOptions.map((color) => (
             <button
               key={color.id}
               type="button"
@@ -407,3 +422,4 @@ export default function RandomColorClickerGame() {
     </PageLayout>
   );
 }
+
