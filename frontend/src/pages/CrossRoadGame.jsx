@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -350,7 +351,7 @@ export default function CrossRoadGame() {
         </Card>
 
         <div
-          className="grid gap-1 rounded-[30px] border p-3"
+          className="relative grid gap-1 rounded-[30px] border p-3"
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
             background: flash === 'bad'
@@ -385,6 +386,13 @@ export default function CrossRoadGame() {
                   }}
                 >
                   {!isRoad && (
+                    <img
+                      src="/grass.png"
+                      alt="Grass"
+                      className="absolute inset-0 h-full w-full rounded-xl object-cover"
+                    />
+                  )}
+                  {!isRoad && (
                     <div
                       className="absolute inset-0 rounded-xl opacity-40"
                       style={{
@@ -394,16 +402,11 @@ export default function CrossRoadGame() {
                     />
                   )}
                   {hasCar && (
-                    <div
-                      className="flex h-[72%] w-[86%] items-center justify-center rounded-lg text-[10px] font-black"
-                      style={{
-                        background: 'linear-gradient(160deg, #EF4444 0%, #B91C1C 100%)',
-                        color: 'white',
-                        boxShadow: '0 8px 14px rgba(127,29,29,0.26)',
-                      }}
-                    >
-                      {t.crossRoadRunnerCarLabel}
-                    </div>
+                    <img
+                      src="/trap.png"
+                      alt={t.crossRoadRunnerCarLabel}
+                      className="relative z-10 h-[72%] w-[86%] object-contain drop-shadow-[0_8px_14px_rgba(127,29,29,0.26)]"
+                    />
                   )}
                   {isPlayer && (
                     <div
@@ -437,6 +440,14 @@ export default function CrossRoadGame() {
               );
             })
           )}
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.crossRoadRunnerTitle}
+            description={t.crossRoadRunnerReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <Card>
@@ -485,13 +496,7 @@ export default function CrossRoadGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -247,7 +248,7 @@ export default function MemoryCardGame() {
 
          
 
-        <div className="rounded-2xl">
+        <div className="relative rounded-2xl">
           <div className="grid grid-cols-3 gap-3">
             {cards.map((card) => {
               const isOpen = card.matched || flippedIds.includes(card.id);
@@ -273,6 +274,14 @@ export default function MemoryCardGame() {
               );
             })}
           </div>
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.memoryMatchTitle}
+            description={t.memoryMatchReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <Card>
@@ -288,13 +297,7 @@ export default function MemoryCardGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

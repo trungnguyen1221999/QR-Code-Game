@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Card from '../components/ui/Card';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -283,7 +284,7 @@ export default function SnakeGame() {
         </Card>
 
         <div
-          className="overflow-hidden rounded-[28px] border"
+          className="relative overflow-hidden rounded-[28px] border"
           style={{
             background: 'linear-gradient(180deg, #fecaca 0%, #fb7185 100%)',
             borderColor: 'rgba(190,24,93,0.18)',
@@ -304,27 +305,25 @@ export default function SnakeGame() {
               {t.snakeLoadPrompt}
             </div>
           )}
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => {
+              setHasStarted(true);
+              setIframeKey((value) => value + 1);
+              setStatusText(t.snakeInitialStatus);
+            }}
+            title={t.snakeTitle}
+            description={t.snakeLoadPrompt}
+            startLabel={t.start}
+            disabled={busy}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button
-              variant="green"
-              onClick={() => {
-                setHasStarted(true);
-                setIframeKey((value) => value + 1);
-                setStatusText(t.snakeInitialStatus);
-              }}
-              disabled={busy}
-            >
-              {t.start}
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

@@ -1,7 +1,6 @@
 import { getCheckpointSecretReward } from '../../utils/checkpointRewards';
 import { isFinalCheckpointClear } from '../../utils/finalCheckpointFlow';
 import { useLanguage } from '../../context/LanguageContext.jsx';
-import { translate } from '../../translations/index';
 
 export default function CheckpointWinReward({ checkpoint, title, message }) {
   const { t } = useLanguage();
@@ -37,15 +36,6 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
           60% { opacity: 0.15; }
           100% { transform: translateX(160%) skewX(-18deg); opacity: 0; }
         }
-
-        @keyframes checkpoint-reward-text-glow {
-          0%, 100% {
-            text-shadow: 0 0 0 rgba(250, 204, 21, 0.1), 0 0 0 rgba(249, 115, 22, 0.1);
-          }
-          50% {
-            text-shadow: 0 0 10px rgba(250, 204, 21, 0.55), 0 0 18px rgba(249, 115, 22, 0.35);
-          }
-        }
       `}</style>
 
       <div
@@ -80,15 +70,6 @@ export default function CheckpointWinReward({ checkpoint, title, message }) {
         </h3>
         <p className="text-xs sm:text-sm mt-1" style={{ color: 'var(--color-subtext)' }}>
           {message}
-        </p>
-        <p
-          className="mt-2 sm:mt-3 text-sm sm:text-base font-extrabold tracking-[0.01em]"
-          style={{
-            color: '#B45309',
-            animation: 'checkpoint-reward-text-glow 2.2s ease-in-out infinite',
-          }}
-        >
-          {translate(t.secretItemReward, { item: reward.name })}
         </p>
       </div>
     </>

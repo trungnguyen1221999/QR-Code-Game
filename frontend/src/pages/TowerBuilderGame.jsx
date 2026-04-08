@@ -7,6 +7,7 @@ import Button from '../components/ui/Button';
 import Popup from '../components/ui/Popup';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   applyLossToStoredProgress,
@@ -365,7 +366,7 @@ export default function TowerBuilderGame() {
         </div>
 
         <div
-          className="rounded-3xl  flex flex-col items-center"
+          className="relative rounded-3xl flex flex-col items-center"
         >
           <canvas
             key={canvasDomId}
@@ -379,6 +380,17 @@ export default function TowerBuilderGame() {
               backgroundColor: '#E5E7EB',
               opacity: hasStarted ? 1 : 0.45,
             }}
+          />
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => {
+              setHasStarted(true);
+              setCanvasVersion((v) => v + 1);
+            }}
+            title={t.towerTitle ?? 'Tower Builder'}
+            description={translate(t.towerStartInstruction, { floors: TARGET_FLOORS })}
+            startLabel={t.start}
+            disabled={busy}
           />
         </div>
 
@@ -395,20 +407,7 @@ export default function TowerBuilderGame() {
           <Button variant="red" onClick={() => setShowBackConfirm(true)} disabled={busy || showWin || showLose}>
             {t.back}
           </Button>
-          {!hasStarted ? (
-            <Button
-              variant="green"
-              onClick={() => {
-                setHasStarted(true);
-                setCanvasVersion((v) => v + 1);
-              }}
-              disabled={busy}
-            >
-              Start
-            </Button>
-          ) : (
-            <div />
-          )}
+          <div />
         </div>
       </div>
 

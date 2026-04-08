@@ -9,6 +9,7 @@ import Popup from '../components/ui/Popup';
 import Input from '../components/ui/Input';
 import CheckpointShopPanel from '../components/ui/CheckpointShopPanel';
 import CheckpointWinReward from '../components/ui/CheckpointWinReward';
+import GameStartOverlay from '../components/ui/GameStartOverlay';
 import { playerAPI } from '../utils/api';
 import {
   clearUnusedExtraLife,
@@ -287,12 +288,6 @@ export default function CombinedWordQuizGame() {
           </p>
         </div>
 
-        {!hasStarted && (
-          <Button variant="green" onClick={() => setHasStarted(true)} disabled={busy}>
-            {t.start}
-          </Button>
-        )}
-
         <div className="grid grid-cols-2 gap-3">
           <Card>
             <p className="text-xs font-semibold flex items-center gap-1" style={{ color: '#2563EB' }}>
@@ -316,6 +311,7 @@ export default function CombinedWordQuizGame() {
         </div>
 
         {currentQuestion && (
+          <div className="relative">
           <Card>
             {/* Question counter */}
             <div className="flex items-center justify-between mb-4">
@@ -341,6 +337,15 @@ export default function CombinedWordQuizGame() {
               onChange={(event) => setAnswer(event.target.value)}
             />
           </Card>
+          <GameStartOverlay
+            show={!hasStarted}
+            onStart={() => setHasStarted(true)}
+            title={t.combinedWordQuizTitle}
+            description={t.combinedWordQuizReadyInstruction}
+            startLabel={t.start}
+            disabled={busy}
+          />
+          </div>
         )}
 
         {feedback && (
