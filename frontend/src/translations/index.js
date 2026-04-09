@@ -181,6 +181,23 @@ hard: 'Hard',
 hardDesc: 'Start with 3 lives 🔥 — if all lives are lost, restart from checkpoint 1. Mini-games are stricter and time moves faster. For the bravest capybaras only!',
 nextSelectGames: 'Next: Select Games',
 
+// HostGuide
+hostGuideTitle: 'Host Guide',
+hostGuideQuickTitle: 'Quick Guide',
+hostGuideDetailBtn: 'Download Detailed Guide',
+hostGuideStep1Title: 'Fill in Game Settings',
+hostGuideStep1Desc: 'Enter the game name, set the total time (15–120 min), choose difficulty and scan mode.',
+hostGuideStep2Title: 'Select Games',
+hostGuideStep2Desc: 'Choose from 13 mini-games. Drag chips to reorder — players follow that order.',
+hostGuideStep3Title: 'Download QR Codes',
+hostGuideStep3Desc: 'Tap "Download QR Codes" to get all at once, or use the ⬇ button on each game to download one by one.',
+hostGuideStep4Title: 'Place QR Codes at Checkpoints',
+hostGuideStep4Desc: 'Print each QR code and stick it at a physical location. Players will go there and scan it.',
+hostGuideStep5Title: 'Share the 6-Digit Code',
+hostGuideStep5Desc: 'After starting, share the session code with players so they can join on their phones.',
+hostGuideStep6Title: 'Start the Game',
+hostGuideStep6Desc: 'Go to the dashboard and press Start. Monitor live progress and end the session when done.',
+
 // HostDashboard
 waitingRoomTitle: 'Waiting Room',
 waitingForPlayersToJoin: 'Waiting for players to join...',
@@ -904,6 +921,23 @@ normalDesc: 'Aloita 5 elämällä 💛 — jos kaikki elämät menetetään, alo
 hard: 'Vaikea',
 hardDesc: 'Aloita 3 elämällä 🔥 — jos kaikki elämät menetetään, aloitetaan tarkistuspisteestä 1. Minipelit ovat tiukempia ja aika kuluu nopeammin. Vain rohkeimmille kapybaroille!',
 nextSelectGames: 'Seuraava: Valitse pelit',
+
+// HostGuide
+hostGuideTitle: 'Ohjeet hostille',
+hostGuideQuickTitle: 'Pikaohjeet',
+hostGuideDetailBtn: 'Lataa yksityiskohtainen ohje',
+hostGuideStep1Title: 'Täytä peliasetukset',
+hostGuideStep1Desc: 'Kirjoita pelin nimi, aseta kokonaisaika (15–120 min), valitse vaikeustaso ja skannausmuoto.',
+hostGuideStep2Title: 'Valitse pelit',
+hostGuideStep2Desc: 'Valitse 13 minipelistä. Vedä pelejä järjestääksesi ne — pelaajat seuraavat tätä järjestystä.',
+hostGuideStep3Title: 'Lataa QR-koodit',
+hostGuideStep3Desc: 'Paina "Lataa QR-koodit" saadaksesi kaikki kerralla, tai paina ⬇-painiketta yksittäisen pelin kohdalla.',
+hostGuideStep4Title: 'Aseta QR-koodit tarkistuspisteille',
+hostGuideStep4Desc: 'Tulosta jokainen QR-koodi ja kiinnitä se fyysiseen paikkaan. Pelaajat menevät sinne ja skannaavat sen.',
+hostGuideStep5Title: 'Jaa 6-numeroinen koodi',
+hostGuideStep5Desc: 'Aloituksen jälkeen jaa pelikoodi pelaajille, jotta he voivat liittyä puhelimillaan.',
+hostGuideStep6Title: 'Aloita peli',
+hostGuideStep6Desc: 'Siirry kojelautaan ja paina Aloita. Seuraa edistymistä reaaliajassa ja lopeta istunto, kun olet valmis.',
 
 // HostDashboard
 waitingRoomTitle: 'Odotushuone',

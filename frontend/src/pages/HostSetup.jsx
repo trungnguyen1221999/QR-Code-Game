@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gamepad2, Clock, LogOut } from 'lucide-react';
+import { Gamepad2, Clock, LogOut, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PageLayout from '../components/ui/PageLayout';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
+import HostGuideModal from '../components/ui/HostGuideModal';
 import { useLanguage } from '../context/LanguageContext.jsx';
 import { translate } from '../translations/index';
 
@@ -17,6 +18,7 @@ export default function HostSetup({ onLogout }) {
   const [time, setTime] = useState(30);
   const [difficulty, setDifficulty] = useState('easy');
   const [gameMode, setGameMode] = useState('ordered');
+  const [showGuide, setShowGuide] = useState(false);
 
   const handleLogout = () => {
     onLogout?.();
@@ -42,6 +44,7 @@ export default function HostSetup({ onLogout }) {
 
   return (
     <PageLayout back="/">
+      {showGuide && <HostGuideModal onClose={() => setShowGuide(false)} />}
       <div className="pt-4 pb-8">
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -54,15 +57,26 @@ export default function HostSetup({ onLogout }) {
                   {translate(t.helloUser, { name: host?.name || host?.username || '' })}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
-              >
-                <LogOut size={13} />
-                {t.logout}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowGuide(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+                >
+                  <BookOpen size={13} />
+                  Guide
+                </button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                  style={{ backgroundColor: '#FEE2E2', color: 'var(--color-red)' }}
+                >
+                  <LogOut size={13} />
+                  {t.logout}
+                </button>
+              </div>
             </div>
 
             {/* Title */}
