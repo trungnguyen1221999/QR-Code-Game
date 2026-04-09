@@ -97,7 +97,7 @@ export default function LandingPage({ onLogout }) {
       <div className="flex flex-col items-center gap-2 pt-2 pb-6">
         <img src="/brown-bear.gif" alt={t.landingMascotAlt} style={{ height: '150px', objectFit: 'contain' }} />
         <h1 className="text-4xl font-bold text-center" style={{ color: 'var(--color-primary)' }}>{t.landingTitle}</h1>
-        <p className="text-sm">{t.landingSubtitle}</p>
+        <p className="text-sm" style={{ color: 'var(--color-subtext)' }}>{t.landingSubtitle}</p>
       </div>
 
       <div className="flex flex-col gap-5">
