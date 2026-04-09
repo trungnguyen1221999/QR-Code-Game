@@ -36,8 +36,7 @@ function buildDetailedHTML(t, lang) {
   </style>
 </head>
 <body>
-  <h1>🐾 ${t.hostGuideTitle}</h1>
-  <p class="subtitle">${isFI ? 'Capybara Quest — Hostaajan täydellinen opas' : 'Capybara Quest — Complete Host Manual'}</p>
+  <h1>${t.hostGuideTitle}</h1>
 
   <h2>${isFI ? '⚙️ Osa 1: Sovelluksen käyttö' : '⚙️ Part 1: Using the App'}</h2>
 
@@ -69,13 +68,6 @@ function buildDetailedHTML(t, lang) {
     <div class="step-desc">${isFI ? 'Anna jokaiselle pelaajalle tai ryhmälle kartta, johon on merkitty tarkistuspisteiden sijainnit. Pelaajat käyttävät tätä navigoidakseen alueella.' : 'Give each player or team a printed map showing where the checkpoints are located. Players use this to navigate around the venue.'}</div>
   </div></div>
 
-  <div class="tip">
-    <div class="tip-title">${isFI ? '💡 Vinkki' : '💡 Tip'}</div>
-    <div class="tip-text">${isFI
-      ? 'Testaa jokainen QR-koodi puhelimellasi ennen pelin alkua. Varmista, että koodit ovat oikeassa järjestyksessä (Checkpoint 1, 2, 3...) ja että kaikki sijainnit ovat helposti löydettävissä. Ordered-tilassa pelaajien on skannattava pisteet järjestyksessä — Random-tilassa missä tahansa järjestyksessä.'
-      : 'Test each QR code with your phone before the game starts. Make sure the codes are in the right order (Checkpoint 1, 2, 3...) and that all locations are easy to find. In Ordered mode players must scan in sequence — in Random mode they can scan in any order.'
-    }</div>
-  </div>
 </body>
 </html>`;
 }
