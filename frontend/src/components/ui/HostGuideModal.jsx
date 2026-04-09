@@ -1,4 +1,5 @@
 import { X, Download } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { useLanguage } from '../../context/LanguageContext.jsx';
 
 const STEPS = [
@@ -10,78 +11,58 @@ const STEPS = [
   { emoji: '🚀', titleKey: 'hostGuideStep6Title', descKey: 'hostGuideStep6Desc' },
 ];
 
-function buildDetailedHTML(t, lang) {
-  const isFI = lang === 'FI';
-  return `<!DOCTYPE html>
-<html lang="${isFI ? 'fi' : 'en'}">
-<head>
-  <meta charset="UTF-8" />
-  <title>${t.hostGuideTitle}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; color: #1a1a1a; background: #fff; padding: 40px; max-width: 720px; margin: 0 auto; }
-    h1 { font-size: 26px; color: #d97706; margin-bottom: 4px; }
-    .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
-    h2 { font-size: 16px; color: #374151; margin: 28px 0 12px; border-bottom: 2px solid #fde68a; padding-bottom: 6px; }
-    .step { display: flex; gap: 14px; margin-bottom: 18px; padding: 14px 16px; border-radius: 10px; background: #fffbeb; border: 1px solid #fde68a; }
-    .step-num { font-size: 22px; line-height: 1; flex-shrink: 0; }
-    .step-title { font-size: 14px; font-weight: 700; color: #92400e; margin-bottom: 4px; }
-    .step-desc { font-size: 13px; color: #4b5563; line-height: 1.6; }
-    .physical { background: #f0fdf4; border-color: #bbf7d0; }
-    .physical .step-title { color: #166534; }
-    .tip { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 14px 16px; margin-top: 28px; }
-    .tip-title { font-size: 13px; font-weight: 700; color: #1d4ed8; margin-bottom: 6px; }
-    .tip-text { font-size: 13px; color: #374151; line-height: 1.6; }
-    @media print { body { padding: 20px; } }
-  </style>
-</head>
-<body>
-  <h1>${t.hostGuideTitle}</h1>
-
-  <h2>${isFI ? '⚙️ Osa 1: Sovelluksen käyttö' : '⚙️ Part 1: Using the App'}</h2>
-
-  <div class="step"><div class="step-num">📝</div><div><div class="step-title">1. ${t.hostGuideStep1Title}</div><div class="step-desc">${t.hostGuideStep1Desc}</div></div></div>
-  <div class="step"><div class="step-num">🎮</div><div><div class="step-title">2. ${t.hostGuideStep2Title}</div><div class="step-desc">${t.hostGuideStep2Desc}</div></div></div>
-  <div class="step"><div class="step-num">⬇️</div><div><div class="step-title">3. ${t.hostGuideStep3Title}</div><div class="step-desc">${t.hostGuideStep3Desc}</div></div></div>
-  <div class="step"><div class="step-num">📤</div><div><div class="step-title">4. ${t.hostGuideStep5Title}</div><div class="step-desc">${t.hostGuideStep5Desc}</div></div></div>
-  <div class="step"><div class="step-num">🚀</div><div><div class="step-title">5. ${t.hostGuideStep6Title}</div><div class="step-desc">${t.hostGuideStep6Desc}</div></div></div>
-
-  <h2>${isFI ? '📍 Osa 2: Fyysinen asennus' : '📍 Part 2: Physical Setup'}</h2>
-
-  <div class="step physical"><div class="step-num">🖨️</div><div>
-    <div class="step-title">${isFI ? 'Tulosta QR-koodit' : 'Print the QR Codes'}</div>
-    <div class="step-desc">${isFI ? 'Lataa kaikki QR-koodit sovelluksesta. Tulosta jokainen koodi A4- tai A5-paperille. Suosittelemme laminointia sään kestävyyden vuoksi ulkokäytössä.' : 'Download all QR codes from the app. Print each code on A4 or A5 paper. We recommend laminating them for weather resistance if used outdoors.'}</div>
-  </div></div>
-
-  <div class="step physical"><div class="step-num">🗺️</div><div>
-    <div class="step-title">${isFI ? 'Valitse fyysiset sijainnit' : 'Choose Physical Locations'}</div>
-    <div class="step-desc">${isFI ? 'Valitse selkeästi erottuvia paikkoja alueella — esim. puu, penkki, opaste tai rakennus. Varmista, että paikat ovat turvallisia ja kaikkien osallistujien saavutettavissa.' : 'Choose clearly distinct spots around the area — e.g. a tree, bench, sign, or building. Make sure locations are safe and reachable by all participants.'}</div>
-  </div></div>
-
-  <div class="step physical"><div class="step-num">📌</div><div>
-    <div class="step-title">${isFI ? 'Kiinnitä QR-koodit' : 'Attach the QR Codes'}</div>
-    <div class="step-desc">${isFI ? 'Kiinnitä jokainen QR-koodi vastaavaan tarkistuspisteeseen käyttäen teippiä tai tarroja. Sijoita ne silmien korkeudelle ja varmista, että ne ovat helposti skannattavissa puhelimella.' : 'Stick each QR code at the corresponding checkpoint using tape or adhesive. Place them at eye level and make sure they are easily scannable with a phone camera.'}</div>
-  </div></div>
-
-  <div class="step physical"><div class="step-num">🗺️</div><div>
-    <div class="step-title">${isFI ? 'Jaa kartta pelaajille' : 'Hand Out the Map to Players'}</div>
-    <div class="step-desc">${isFI ? 'Anna jokaiselle pelaajalle tai ryhmälle kartta, johon on merkitty tarkistuspisteiden sijainnit. Pelaajat käyttävät tätä navigoidakseen alueella.' : 'Give each player or team a printed map showing where the checkpoints are located. Players use this to navigate around the venue.'}</div>
-  </div></div>
-
-</body>
-</html>`;
-}
 
 export default function HostGuideModal({ onClose }) {
   const { t, language } = useLanguage();
 
   const handleDownloadDetail = () => {
-    const html = buildDetailedHTML(t, language);
-    const win = window.open('', '_blank');
-    if (!win) return;
-    win.document.write(html);
-    win.document.close();
-    setTimeout(() => win.print(), 600);
+    const isFI = language === 'FI';
+    const steps = isFI ? [
+      ['Pelin asetukset', 'Anna pelille nimi, aseta kesto (15-120 min), valitse vaikeustaso ja skannausmuoto.'],
+      ['Valitse pelit', 'Valitse haluamasi pelit 13 saatavilla olevasta minipelista - sinun ei tarvitse valita kaikkia. Veda pelejä järjestykseen.'],
+      ['Skannausmuoto', 'Järjestetty: pelaajien on skannattava pisteet järjestyksessa (1->2->3->...). Satunnainen: pelaajat voivat skannata missä tahansa järjestyksessa.'],
+      ['Vaikeustaso', 'Helppo: rajattomat elamat. Normaali: 5 elamaa. Vaikea: 3 elamaa. Jos elamat loppuvat, pelaaja aloittaa alusta pisteesta 1.'],
+      ['Lataa QR-koodit', 'Lataa kaikki QR-koodit kerralla tai yksi kerrallaan. Tulosta ne ja kiinnita ne fyysisiin paikkoihin tarkistuspisteiksi.'],
+      ['Jaa kartta ja koodi', 'Anna pelaajille kartta, jossa näkyy tarkistuspisteiden sijainnit. Jaa 6-numeroinen pelikoodi pelaajille.'],
+      ['Aloita ja seuraa', 'Siirry kojelautaan ja paina Aloita. Seuraa reaaliajassa missä pisteessä kukin pelaaja on ja heidän sijoitustaan.'],
+    ] : [
+      ['Game Settings', 'Enter a game name, set the duration (15-120 min), choose a difficulty level and scan mode.'],
+      ['Select Games', 'Choose any number of games from the 13 available — you do not have to use all of them. Drag to reorder.'],
+      ['Scan Mode', 'Ordered: players must scan checkpoints in sequence (1->2->3->...). Random: players can scan in any order.'],
+      ['Difficulty', 'Easy: unlimited lives. Normal: 5 lives. Hard: 3 lives. If all lives are lost, the player restarts from checkpoint 1.'],
+      ['Download QR Codes', 'Download all QR codes at once or one by one. Print and place them at physical checkpoint locations.'],
+      ['Share Map & Code', 'Give players a map showing checkpoint locations. Share the 6-digit game code so players can join.'],
+      ['Start & Monitor', 'Go to the dashboard and press Start. Track in real time which checkpoint each player is at and their ranking.'],
+    ];
+
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 18;
+    const contentW = pageW - margin * 2;
+    let y = 20;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(217, 119, 6);
+    doc.text(t.hostGuideTitle, margin, y);
+    y += 12;
+
+    steps.forEach(([title, desc], i) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(30, 30, 30);
+      doc.text(`${i + 1}.  ${title}`, margin, y);
+      y += 6;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.setTextColor(90, 90, 90);
+      const lines = doc.splitTextToSize(desc, contentW - 6);
+      doc.text(lines, margin + 6, y);
+      y += lines.length * 5 + 5;
+    });
+
+    doc.save(`${t.hostGuideTitle}.pdf`);
   };
 
   return (
