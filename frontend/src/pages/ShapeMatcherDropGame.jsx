@@ -450,7 +450,7 @@ export default function ShapeMatcherDropGame() {
             >
               <RotateCw size={20} />
               <span className="text-sm font-bold uppercase tracking-[0.16em]">
-                {hasStarted ? 'Tap / Drag to Rotate' : 'Locked Until Start'}
+                {hasStarted ? 'Tap to Match' : 'Locked Until Start'}
               </span>
             </button>
           </div>
