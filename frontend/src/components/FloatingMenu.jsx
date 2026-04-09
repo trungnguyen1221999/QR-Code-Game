@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import BackgroundMusic from './BackgroundMusic';
+import HostGuideModal from './ui/HostGuideModal';
 import { useLanguage } from '../context/LanguageContext';
 
 const LANG_OPTIONS = [
@@ -10,7 +12,10 @@ const LANG_OPTIONS = [
 export default function FloatingMenu() {
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { pathname } = useLocation();
+  const isHostSetup = pathname === '/host-setup';
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
@@ -73,8 +78,25 @@ export default function FloatingMenu() {
                 </button>
               ))}
             </div>
+
+            {isHostSetup && (
+              <>
+                <div className="h-px bg-gray-100 mx-3" />
+                <div className="p-2">
+                  <button
+                    onClick={() => { setShowGuide(true); setOpen(false); }}
+                    className="w-full py-2 rounded-xl text-xs font-bold border-none cursor-pointer"
+                    style={{ backgroundColor: '#FEF3C7', color: '#92400E', fontFamily: 'Nunito, sans-serif' }}
+                  >
+                    📖 {t.hostGuideTitle}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
+
+        {showGuide && <HostGuideModal onClose={() => setShowGuide(false)} />}
 
         {/* Trigger */}
         <button
