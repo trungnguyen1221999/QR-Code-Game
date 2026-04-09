@@ -92,32 +92,39 @@ export default function HostGuideModal({ onClose }) {
     >
       <div
         className="w-full rounded-t-2xl flex flex-col"
-        style={{ backgroundColor: 'var(--color-bg)', maxHeight: '85vh', maxWidth: 480 }}
+        style={{ backgroundColor: 'var(--color-bg)', maxHeight: '92vh', maxWidth: 480 }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Handle bar */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full" style={{ backgroundColor: '#D1D5DB' }} />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-3" style={{ borderBottom: '1px solid var(--color-info-bg)' }}>
-          <p className="font-bold text-base" style={{ color: 'var(--color-text)' }}>
+        <div className="flex items-center justify-between px-4 pt-2 pb-3">
+          <p className="font-bold text-sm" style={{ color: 'var(--color-text)' }}>
             📖 {t.hostGuideTitle}
           </p>
-          <button onClick={onClose} className="p-1 rounded-full" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-            <X size={16} style={{ color: 'var(--color-subtext)' }} />
+          <button onClick={onClose} className="p-1.5 rounded-full" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+            <X size={14} style={{ color: 'var(--color-subtext)' }} />
           </button>
         </div>
 
         {/* Scrollable steps */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
-          <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-subtext)' }}>
-            {t.hostGuideQuickTitle}
-          </p>
+        <div className="flex-1 overflow-y-auto px-4 pb-3 flex flex-col gap-2">
           {STEPS.map((step, i) => (
-            <div key={i} className="flex items-start gap-3 rounded-xl p-3" style={{ backgroundColor: 'var(--color-info-bg)' }}>
-              <span className="text-lg leading-none shrink-0 mt-0.5">{step.emoji}</span>
-              <div>
-                <p className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>
-                  {i + 1}. {t[step.titleKey]}
+            <div key={i} className="flex items-start gap-3 rounded-xl px-3 py-2.5" style={{ backgroundColor: 'var(--color-info-bg)' }}>
+              <div
+                className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white mt-0.5"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+              >
+                {i + 1}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold" style={{ color: 'var(--color-text)' }}>
+                  {step.emoji} {t[step.titleKey]}
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)', lineHeight: 1.6 }}>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-subtext)', lineHeight: 1.55 }}>
                   {t[step.descKey]}
                 </p>
               </div>
@@ -125,14 +132,14 @@ export default function HostGuideModal({ onClose }) {
           ))}
         </div>
 
-        {/* Download detailed guide */}
-        <div className="px-5 pb-6 pt-3" style={{ borderTop: '1px solid var(--color-info-bg)' }}>
+        {/* Download button */}
+        <div className="px-4 pb-6 pt-2">
           <button
             onClick={handleDownloadDetail}
             className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold"
             style={{ backgroundColor: '#1D4ED8', color: 'white' }}
           >
-            <Download size={15} />
+            <Download size={14} />
             {t.hostGuideDetailBtn}
           </button>
         </div>
