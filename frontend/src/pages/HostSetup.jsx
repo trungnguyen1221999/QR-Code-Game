@@ -99,7 +99,7 @@ export default function HostSetup({ onLogout }) {
               />
               <div className="flex justify-between text-xs" style={{ color: 'var(--color-subtext)' }}>
                 <span>{translate(t.minutesShortCount, { count: 15 })}</span>
-                <span>{translate(t.minutesShortCount, { count: 120 })}</span>
+                <span>{translate(t.minutesShortCount, { count: 600 })}</span>
               </div>
             </div>
 
