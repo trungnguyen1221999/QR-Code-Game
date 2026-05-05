@@ -92,7 +92,7 @@ export default function HostSetup({ onLogout }) {
                 type="range"
                 min={15}
                 max={600}
-                step={40}
+                step={15}
                 value={time}
                 onChange={e => setTime(Number(e.target.value))}
                 className="w-full accent-orange-600"
