@@ -91,7 +91,7 @@ export default function HostSetup({ onLogout }) {
               <input
                 type="range"
                 min={15}
-                max={120}
+                max={600}
                 step={5}
                 value={time}
                 onChange={e => setTime(Number(e.target.value))}
