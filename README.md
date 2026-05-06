@@ -3,7 +3,7 @@
 A real-time multiplayer QR code scavenger hunt game where players race through physical checkpoints, scan QR codes, complete mini-games, and compete on a live leaderboard.
 
 **Live:** https://capybara-quest.onrender.com
-**Guide:** [https://capybara-quest.onrender.com](https://drive.google.com/file/d/1jnM8sMZoFB7OUbskrlHYM3HoU4yR39j4/view?usp=drive_link)
+[Guide](https://drive.google.com/file/d/1jnM8sMZoFB7OUbskrlHYM3HoU4yR39j4/view?usp=drive_link)
 ---
 
 ## Team
